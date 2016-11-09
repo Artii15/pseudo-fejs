@@ -1,8 +1,10 @@
-package na.przypale.fitter
+package na.przypale.fitter.repositories.cassandra
 
 import com.datastax.driver.core.Session
+import na.przypale.fitter.User
+import na.przypale.fitter.repositories.UsersRepository
 
-class UsersRepository(val session: Session) {
+class CassandraUsersRepository(val session: Session) extends UsersRepository {
 
   def insert(user: User) = {
     val statement = session.prepare("INSERT INTO users(nick) VALUES(:nick)").bind().setString("nick", user.nick)
