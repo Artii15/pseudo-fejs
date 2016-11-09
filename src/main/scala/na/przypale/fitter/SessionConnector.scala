@@ -1,3 +1,5 @@
+package na.przypale.fitter
+
 import com.datastax.driver.core.{Cluster, Session}
 
 object SessionConnector {
