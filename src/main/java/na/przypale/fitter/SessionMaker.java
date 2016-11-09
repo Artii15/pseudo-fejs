@@ -10,9 +10,11 @@ public class SessionMaker {
         this.cluster = cluster;
     }
 
-    public void perform(Operations<Session> operations, String keyspace) {
-        Session session = cluster.connect(keyspace);
-        operations.execute(session);
-        session.close();
+    public Operations<Operations<Session>> make(String keyspace) {
+        return (operations) -> {
+            Session session = cluster.connect(keyspace);
+            operations.execute(session);
+            session.close();
+        };
     }
 }

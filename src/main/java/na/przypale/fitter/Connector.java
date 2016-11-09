@@ -16,7 +16,7 @@ public class Connector {
         this.contactPoint = contactPoint;
     }
 
-    public void perform(Operations<SessionMaker> operations) {
+    public void performClusterOperations(Operations<SessionMaker> operations) {
         Cluster cluster = Cluster.builder().addContactPoint(contactPoint).build();
         operations.execute(new SessionMaker(cluster));
         cluster.close();
