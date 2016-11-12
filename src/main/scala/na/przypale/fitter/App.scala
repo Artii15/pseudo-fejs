@@ -2,7 +2,6 @@ package na.przypale.fitter
 
 import com.datastax.driver.core.Session
 import na.przypale.fitter.interactions.CreatingUser
-import na.przypale.fitter.logic.CreatingAccount
 import na.przypale.fitter.menu.{Action, Menu}
 import na.przypale.fitter.repositories.cassandra.CassandraUsersRepository
 
