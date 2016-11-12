@@ -1,6 +1,7 @@
 package na.przypale.fitter
 
 import com.datastax.driver.core.Session
+import na.przypale.fitter.interactions.CreatingUser
 import na.przypale.fitter.logic.CreatingAccount
 import na.przypale.fitter.menu.{Action, Menu}
 import na.przypale.fitter.repositories.cassandra.CassandraUsersRepository
@@ -15,10 +16,7 @@ object App {
     val usersRepository = new CassandraUsersRepository(session)
 
     val menu = Menu(SortedMap(
-      1 -> Action("Create user", () => {
-        println("Enter user nick")
-        CreatingAccount.create(usersRepository)(CommandLineReader.readString())
-      }),
+      1 -> Action("Create user", CreatingUser.create),
       EXIT_ACTION_ID -> Action("Exit", () => {})
     ))
 
