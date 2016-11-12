@@ -1,4 +1,4 @@
-package na.przypale.fitter
+package na.przypale.fitter.logic
 
 import na.przypale.fitter.entities.User
 import na.przypale.fitter.repositories.UsersRepository

@@ -1,8 +1,6 @@
 package na.przypale.fitter.menu
 
-import scala.annotation.tailrec
 import scala.collection.SortedMap
-import scala.io.StdIn
 
 class Menu(val actions: SortedMap[Int, Action]) {
   def display(): Unit = {
@@ -13,17 +11,6 @@ class Menu(val actions: SortedMap[Int, Action]) {
   def execute(actionId: Int): Unit = {
     if(actions.contains(actionId)) {
       actions(actionId).operations()
-    }
-  }
-
-  @tailrec
-  final def read(): Int = {
-    try {
-      val selectedCommand = StdIn.readLine()
-      selectedCommand.toInt
-    }
-    catch {
-      case _: Throwable => read()
     }
   }
 }
