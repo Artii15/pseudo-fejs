@@ -1,9 +1,11 @@
 package na.przypale.fitter.menu
 
-class Menu(val actions: Vector[Action]) {
+import scala.collection.SortedMap
+
+class Menu(val actions: SortedMap[Int, Action]) {
   def display(): Unit = {
     println("Choose action:")
-    actions.foreach(action => println(s"${action.id} - ${action.label}"))
+    actions.foreach { case (id, action) => println(s"$id - ${action.label}") }
   }
 
   def execute(actionId: Int): Unit = {
