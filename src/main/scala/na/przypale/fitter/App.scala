@@ -16,7 +16,7 @@ object App {
     val usersRepository = new CassandraUsersRepository(session)
 
     val menu = Menu(SortedMap(
-      1 -> Action("Create user", CreatingUser.create),
+      1 -> Action("Create user", () => CreatingUser.create(usersRepository)),
       EXIT_ACTION_ID -> Action("Exit", () => {})
     ))
 
