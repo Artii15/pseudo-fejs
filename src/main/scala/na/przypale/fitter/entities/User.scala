@@ -1,3 +1,3 @@
 package na.przypale.fitter.entities
 
-class User(val nick: String)
+case class User(nick: String)
