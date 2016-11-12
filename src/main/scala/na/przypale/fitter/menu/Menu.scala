@@ -11,7 +11,9 @@ class Menu(val actions: SortedMap[Int, Action]) {
   }
 
   def execute(actionId: Int): Unit = {
-    actions(actionId).operations()
+    if(actions.contains(actionId)) {
+      actions(actionId).operations()
+    }
   }
 
   @tailrec

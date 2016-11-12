@@ -3,6 +3,7 @@ package na.przypale.fitter
 import com.datastax.driver.core.Session
 import na.przypale.fitter.menu.{Action, Menu}
 
+import scala.annotation.tailrec
 import scala.collection.SortedMap
 
 object App {
@@ -17,7 +18,15 @@ object App {
     interactWithUser(menu)
   }
 
-  def interactWithUser(menu: Menu): Unit = {
+  @tailrec
+  final def interactWithUser(menu: Menu): Unit = {
     menu.display()
+    menu.read() match {
+      case EXIT_ACTION_ID =>
+      case actionId => {
+        menu.execute(actionId)
+        interactWithUser(menu)
+      }
+    }
   }
 }
