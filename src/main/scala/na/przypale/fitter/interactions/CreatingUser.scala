@@ -7,7 +7,7 @@ import na.przypale.fitter.repositories.UsersRepository
 object CreatingUser {
   def create(usersRepository: UsersRepository): Unit = {
     print("Provide nick: ")
-    usersRepository.insert(User(CommandLineReader.readString()))
+    usersRepository.insertUnique(User(CommandLineReader.readString()))
     println("User successfully created")
   }
 }
