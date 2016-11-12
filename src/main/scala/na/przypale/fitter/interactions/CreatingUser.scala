@@ -14,7 +14,7 @@ object CreatingUser {
     }
     catch {
       case _: UserAlreadyExistsException => println("User with such nick already exists")
-      case _ => println("Unexpected error")
+      case _: Throwable => println("Unexpected error")
     }
   }
 }
