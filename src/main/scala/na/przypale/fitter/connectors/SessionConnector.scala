@@ -1,4 +1,4 @@
-package na.przypale.fitter
+package na.przypale.fitter.connectors
 
 import com.datastax.driver.core.{Cluster, Session}
 

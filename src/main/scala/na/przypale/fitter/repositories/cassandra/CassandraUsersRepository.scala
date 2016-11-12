@@ -1,7 +1,7 @@
 package na.przypale.fitter.repositories.cassandra
 
 import com.datastax.driver.core.Session
-import na.przypale.fitter.User
+import na.przypale.fitter.entities.User
 import na.przypale.fitter.repositories.UsersRepository
 
 class CassandraUsersRepository(val session: Session) extends UsersRepository {
