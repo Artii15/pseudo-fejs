@@ -12,3 +12,7 @@ class Menu(val actions: SortedMap[Int, Action]) {
     actions(actionId).operations()
   }
 }
+
+object Menu {
+  def apply(actions: SortedMap[Int, Action]) = new Menu(actions)
+}

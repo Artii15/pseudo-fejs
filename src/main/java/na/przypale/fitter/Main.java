@@ -3,7 +3,6 @@ package na.przypale.fitter;
 import com.datastax.driver.core.Session;
 import na.przypale.fitter.connectors.ClusterConnector;
 import na.przypale.fitter.connectors.SessionConnector;
-import na.przypale.fitter.menu.Creator;
 import scala.runtime.BoxedUnit;
 
 public class Main {
@@ -18,6 +17,6 @@ public class Main {
     }
 
     private static void startApp(Session session) {
-        Creator.mainMenu().display();
+        App.start(session);
     }
 }
