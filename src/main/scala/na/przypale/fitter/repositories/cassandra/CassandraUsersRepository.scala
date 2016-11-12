@@ -11,36 +11,27 @@ import scala.collection.JavaConverters
 
 class CassandraUsersRepository(val session: Session) extends UsersRepository {
 
-  private val insertUserStatement = session.prepare(
-    "INSERT INTO users(nick, creation_time) VALUES(:nick, :creationTime)")
   def insertUnique(user: User) = {
-    val creationTime = new Date()
-    val statement = insertUserStatement.bind()
-      .setString("nick", user.nick)
-      .setTimestamp("creationTime", creationTime)
-    session.execute(statement)
+    val userToInsert = UsersDTO(user.nick, new Date())
+    forceInsert(userToInsert)
 
-    if (getDTOsByNick(user.nick).minBy(_.creationTime).creationTime != creationTime) {
-      deleteByNickAndCreationTime(user.nick, creationTime)
+    if (getOldestByNick(userToInsert.nick).creationTime != userToInsert.creationTime) {
+      deleteByNickAndCreationTime(userToInsert)
       throw new UserAlreadyExistsException
     }
   }
 
-  private val deleteByNickAndCreationTimeStatement = session.prepare(
-    "DELETE FROM users WHERE nick = :nick AND creation_time = :creationTime")
-  private def deleteByNickAndCreationTime(nick: String, creationTime: Date): Unit = {
-    val query = deleteByNickAndCreationTimeStatement.bind()
-      .setString("nick", nick)
-      .setTimestamp("creationTime", creationTime)
-    session.execute(query)
+  private val insertUserStatement = session.prepare(
+    "INSERT INTO users(nick, creation_time) VALUES(:nick, :creationTime)")
+  private def forceInsert(user: UsersDTO) {
+    val statement = insertUserStatement.bind().setString("nick", user.nick)
+      .setTimestamp("creationTime", user.creationTime)
+    session.execute(statement)
   }
+
+  private def getOldestByNick(nick: String) = getDTOsByNick(nick).minBy(_.creationTime)
 
   private val getByNickStatement = session.prepare("SELECT nick, creation_time FROM users WHERE nick = :nick")
-  def getByNick(nick: String): User = {
-    val minUserDTO = getDTOsByNick(nick).minBy(_.creationTime)
-    User(minUserDTO.nick)
-  }
-
   private def getDTOsByNick(nick: String) = {
     val query = getByNickStatement.bind().setString("nick", nick)
     JavaConverters.collectionAsScalaIterable(session.execute(query).all()).map(row => {
@@ -48,4 +39,14 @@ class CassandraUsersRepository(val session: Session) extends UsersRepository {
     })
   }
 
+  private val deleteByNickAndCreationTimeStatement = session.prepare(
+    "DELETE FROM users WHERE nick = :nick AND creation_time = :creationTime")
+  private def deleteByNickAndCreationTime(user: UsersDTO): Unit = {
+    val query = deleteByNickAndCreationTimeStatement.bind()
+      .setString("nick", user.nick)
+      .setTimestamp("creationTime", user.creationTime)
+    session.execute(query)
+  }
+
+  def getByNick(nick: String): User = User(getOldestByNick(nick).nick)
 }
