@@ -9,27 +9,27 @@ import scala.annotation.tailrec
 import scala.collection.SortedMap
 
 object App {
-  private val EXIT_ACTION_ID = 2
 
   def start(session: Session): Unit = {
     val usersRepository = new CassandraUsersRepository(session)
-
-    val menu = Menu(SortedMap(
+    val actions = SortedMap(
       1 -> Action("Create user", () => CreatingUser.create(usersRepository)),
-      EXIT_ACTION_ID -> Action("Exit", () => {})
-    ))
+      2 -> Action("Create user", () => CreatingUser.create(usersRepository)))
 
-    interactWithUser(menu)
+    val exitActionId = actions.size + 1
+    val menu = Menu(actions + (exitActionId -> Action("Exit", () => {})))
+
+    interactWithUser(menu, exitActionId)
   }
 
   @tailrec
-  final def interactWithUser(menu: Menu): Unit = {
+  final def interactWithUser(menu: Menu, exitActionId: Int): Unit = {
     menu.display()
     CommandLineReader.readInt() match {
-      case EXIT_ACTION_ID =>
+      case `exitActionId` =>
       case actionId => {
         menu.execute(actionId)
-        interactWithUser(menu)
+        interactWithUser(menu, exitActionId)
       }
     }
   }
