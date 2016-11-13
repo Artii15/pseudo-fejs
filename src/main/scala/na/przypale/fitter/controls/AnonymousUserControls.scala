@@ -22,12 +22,8 @@ class AnonymousUserControls(usersRepository: UsersRepository,
   override protected def getMenu: Menu = menu
 
   override protected def handle(action: Action): Unit = action.id match {
-    case ActionIntId(CREATE_USER_ACTION_ID) =>
-      CreatingUser.create(usersRepository)
-      interact()
-    case ActionIntId(LOGIN_ACTION_ID) =>
-      startLoggedUserSession()
-      interact()
+    case ActionIntId(CREATE_USER_ACTION_ID) => CreatingUser.create(usersRepository)
+    case ActionIntId(LOGIN_ACTION_ID) => startLoggedUserSession()
     case ActionIntId(EXIT_ACTION_ID) =>
   }
 

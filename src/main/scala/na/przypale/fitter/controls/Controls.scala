@@ -11,10 +11,11 @@ abstract class Controls {
     val menu = getMenu
     menu.display()
     menu.read match {
-      case Some(action) =>
+      case Some(action) => {
         handle(action)
         if (!closesControls(action)) interact()
-      case _ => interact()
+      }
+      case None => interact()
     }
   }
 
