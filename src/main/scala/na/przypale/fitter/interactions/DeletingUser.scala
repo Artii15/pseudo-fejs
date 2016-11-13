@@ -14,8 +14,8 @@ object DeletingUser {
     usersRepository.getByNick(nick) match {
       case Some(userToDelete) if BCrypt.checkpw(password, userToDelete.password) =>
         usersRepository.delete(userToDelete)
+        println("User deleted")
       case _ => println("Invalid credentials")
     }
   }
-
 }
