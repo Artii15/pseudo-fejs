@@ -32,7 +32,8 @@ class CassandraUsersRepository(val session: Session) extends UsersRepository {
 
   private def getOldestByNick(nick: String) = getDTOsByNick(nick).minBy(_.creationTime)
 
-  private val getByNickStatement = session.prepare("SELECT nick, creation_time FROM users WHERE nick = :nick")
+  private val getByNickStatement = session.prepare(
+    "SELECT nick, password, creation_time FROM users WHERE nick = :nick")
   private def getDTOsByNick(nick: String) = {
     val query = getByNickStatement.bind().setString("nick", nick)
     JavaConverters.collectionAsScalaIterable(session.execute(query).all()).map(row => {
