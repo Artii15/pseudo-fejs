@@ -12,24 +12,24 @@ object App {
 
   def start(session: Session): Unit = {
     val usersRepository = new CassandraUsersRepository(session)
-    val actions = SortedMap(
+    val anonymousUserActions = SortedMap(
       1 -> Action("Create user", () => CreatingUser.create(usersRepository)),
       2 -> Action("Delete user", () => DeletingUser.delete(usersRepository)))
 
-    val exitActionId = actions.size + 1
-    val menu = Menu(actions + (exitActionId -> Action("Exit", () => {})))
+    val exitActionId = anonymousUserActions.size + 1
+    val anonymousUserMenu = Menu(anonymousUserActions + (exitActionId -> Action("Exit", () => {})))
 
-    interactWithUser(menu, exitActionId)
+    interactWithAnonymousUser(anonymousUserMenu, exitActionId)
   }
 
   @tailrec
-  final def interactWithUser(menu: Menu, exitActionId: Int): Unit = {
+  final def interactWithAnonymousUser(menu: Menu, exitActionId: Int): Unit = {
     menu.display()
     CommandLineReader.readInt() match {
       case `exitActionId` =>
       case actionId => {
         menu.execute(actionId)
-        interactWithUser(menu, exitActionId)
+        interactWithAnonymousUser(menu, exitActionId)
       }
     }
   }
