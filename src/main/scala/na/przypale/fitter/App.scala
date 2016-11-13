@@ -8,7 +8,7 @@ object App {
 
   def start(session: Session): Unit = {
     val usersRepository = CassandraUsersRepository(session)
-    val loggedUserControls = LoggedUserControls()
+    val loggedUserControls = LoggedUserControls(usersRepository)
     val anonymousUserControls = AnonymousUserControls(usersRepository, loggedUserControls)
     anonymousUserControls.interact()
   }

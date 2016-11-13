@@ -35,8 +35,8 @@ class AnonymousUserControls(usersRepository: UsersRepository, loggedUserControls
   }
 
   private def startLoggedUserSession(): Unit = LoggingIn.logIn(usersRepository) match {
-    case None =>
     case Some(user) => loggedUserControls.interact(user)
+    case _ =>
   }
 }
 
