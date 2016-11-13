@@ -20,7 +20,7 @@ class LoggedUserControls(val usersRepository: UsersRepository) {
     menu.display()
     menu.read match {
       case Some(action) => action.id match {
-        case ActionIntId(DELETE_ACTION_ID) =>
+        case ActionIntId(DELETE_ACTION_ID) => usersRepository.delete(user)
         case ActionIntId(LOGOUT_ACTION_ID) =>
       }
       case _ => interact(user)
