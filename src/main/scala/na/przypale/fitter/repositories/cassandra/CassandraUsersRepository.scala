@@ -5,7 +5,7 @@ import java.util.Date
 import com.datastax.driver.core.Session
 import na.przypale.fitter.entities.User
 import na.przypale.fitter.repositories.UsersRepository
-import na.przypale.fitter.repositories.exceptions.UserAlreadyExistsException
+import na.przypale.fitter.repositories.exceptions.{UserAlreadyExistsException, UserNotExistsException}
 
 import scala.collection.JavaConverters
 
@@ -15,9 +15,13 @@ class CassandraUsersRepository(val session: Session) extends UsersRepository {
     val userToInsert = UsersDTO(user.nick, user.password, new Date())
     forceInsert(userToInsert)
 
-    if (getOldestByNick(userToInsert.nick).creationTime != userToInsert.creationTime) {
-      deleteByNickAndCreationTime(userToInsert)
-      throw new UserAlreadyExistsException
+    getOldestByNick(userToInsert.nick) match {
+      case None => throw new UserNotExistsException
+      case Some(userDTO) if userDTO.creationTime != userToInsert.creationTime => {
+        deleteByNickAndCreationTime(userToInsert)
+        throw new UserAlreadyExistsException
+      }
+      case _ =>
     }
   }
 
@@ -30,7 +34,10 @@ class CassandraUsersRepository(val session: Session) extends UsersRepository {
     session.execute(statement)
   }
 
-  private def getOldestByNick(nick: String) = getDTOsByNick(nick).minBy(_.creationTime)
+  private def getOldestByNick(nick: String) = getDTOsByNick(nick) match {
+    case Nil => None
+    case users => Some(users.minBy(_.creationTime))
+  }
 
   private val getByNickStatement = session.prepare(
     "SELECT nick, password, creation_time FROM users WHERE nick = :nick")
@@ -50,9 +57,9 @@ class CassandraUsersRepository(val session: Session) extends UsersRepository {
     session.execute(query)
   }
 
-  override def getByNick(nick: String): User = {
-    val userDTO = getOldestByNick(nick)
-    User(userDTO.nick, userDTO.password)
+  override def getByNick(nick: String): Option[User] = getOldestByNick(nick) match {
+    case Some(userDTO) => Some(User(userDTO.nick, userDTO.password))
+    case _ => None
   }
 
   private val deleteByNickStatement = session.prepare("DELETE FROM users WHERE nick = : nick")

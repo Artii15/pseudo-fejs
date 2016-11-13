@@ -8,14 +8,14 @@ object DeletingUser {
   def delete(usersRepository: UsersRepository): Unit = {
     print("Nick: ")
     val nick = CommandLineReader.readString()
-
     print("Password: ")
     val password = CommandLineReader.readString()
 
-    val userToDelete = usersRepository.getByNick(nick)
-    if(BCrypt.checkpw(password, userToDelete.password))
-      usersRepository.delete(userToDelete)
-    else
-      println("Invalid credentials")
+    usersRepository.getByNick(nick) match {
+      case Some(userToDelete) if BCrypt.checkpw(password, userToDelete.password) =>
+        usersRepository.delete(userToDelete)
+      case _ => println("Invalid credentials")
+    }
   }
+
 }
