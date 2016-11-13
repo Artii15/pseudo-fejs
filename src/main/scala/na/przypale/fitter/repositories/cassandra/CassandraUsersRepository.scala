@@ -68,3 +68,7 @@ class CassandraUsersRepository(val session: Session) extends UsersRepository {
     session.execute(query)
   }
 }
+
+object CassandraUsersRepository {
+  def apply(session: Session): CassandraUsersRepository = new CassandraUsersRepository(session)
+}

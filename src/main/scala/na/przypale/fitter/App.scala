@@ -7,9 +7,9 @@ import na.przypale.fitter.repositories.cassandra.CassandraUsersRepository
 object App {
 
   def start(session: Session): Unit = {
-    val usersRepository = new CassandraUsersRepository(session)
-    val loggedUserControls = new LoggedUserControls()
-    val anonymousUserControls = AnonymousUserControls(usersRepository)
+    val usersRepository = CassandraUsersRepository(session)
+    val loggedUserControls = LoggedUserControls()
+    val anonymousUserControls = AnonymousUserControls(usersRepository, loggedUserControls)
     anonymousUserControls.interact()
   }
 }

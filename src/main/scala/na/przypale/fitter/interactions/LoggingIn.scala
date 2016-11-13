@@ -15,7 +15,7 @@ object LoggingIn {
     authenticate(usersRepository.getByNick(nick), password)
   }
 
-  def authenticate(user: Option[User], password: String) = user match {
+  private def authenticate(user: Option[User], password: String) = user match {
     case Some(storedUser) if BCrypt.checkpw(password, storedUser.password) => user
     case _ =>
       println("Invalid credentials")
