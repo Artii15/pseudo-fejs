@@ -1,7 +1,7 @@
 package na.przypale.fitter
 
 import com.datastax.driver.core.Session
-import na.przypale.fitter.interactions.CreatingUser
+import na.przypale.fitter.interactions.{CreatingUser, DeletingUser}
 import na.przypale.fitter.menu.{Action, Menu}
 import na.przypale.fitter.repositories.cassandra.CassandraUsersRepository
 
@@ -14,7 +14,7 @@ object App {
     val usersRepository = new CassandraUsersRepository(session)
     val actions = SortedMap(
       1 -> Action("Create user", () => CreatingUser.create(usersRepository)),
-      2 -> Action("Create user", () => CreatingUser.create(usersRepository)))
+      2 -> Action("Delete user", () => DeletingUser.delete(usersRepository)))
 
     val exitActionId = actions.size + 1
     val menu = Menu(actions + (exitActionId -> Action("Exit", () => {})))

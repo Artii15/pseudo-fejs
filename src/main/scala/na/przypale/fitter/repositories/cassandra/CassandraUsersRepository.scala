@@ -11,7 +11,7 @@ import scala.collection.JavaConverters
 
 class CassandraUsersRepository(val session: Session) extends UsersRepository {
 
-  def insertUnique(user: User) = {
+  override def insertUnique(user: User) = {
     val userToInsert = UsersDTO(user.nick, user.password, new Date())
     forceInsert(userToInsert)
 
@@ -50,8 +50,16 @@ class CassandraUsersRepository(val session: Session) extends UsersRepository {
     session.execute(query)
   }
 
-  def getByNick(nick: String): User = {
+  override def getByNick(nick: String): User = {
     val userDTO = getOldestByNick(nick)
     User(userDTO.nick, userDTO.password)
+  }
+
+  private val deleteByNickStatement = session.prepare("DELETE FROM users WHERE nick = : nick")
+  override def delete(user: User): Unit = {
+    val query = deleteByNickStatement.bind()
+      .setString("nick", user.nick)
+
+    session.execute(query)
   }
 }
