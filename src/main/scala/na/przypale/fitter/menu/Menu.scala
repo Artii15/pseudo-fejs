@@ -1,20 +1,16 @@
 package na.przypale.fitter.menu
 
-import scala.collection.SortedMap
+import na.przypale.fitter.CommandLineReader
 
-class Menu(val actions: SortedMap[Int, Action]) {
-  def display(): Unit = {
-    println("Choose action:")
-    actions.foreach { case (id, action) => println(s"$id - ${action.label}") }
-  }
+class Menu(val actions: Iterable[Action]) {
+  def display(): Unit = actions.foreach(action => println(action.label))
 
-  def execute(actionId: Int): Unit = {
-    if(actions.contains(actionId)) {
-      actions(actionId).operations()
-    }
+  def read: Option[Action] = {
+    val command = CommandLineReader.readString()
+    actions.find(action => action.id matches command)
   }
 }
 
 object Menu {
-  def apply(actions: SortedMap[Int, Action]) = new Menu(actions)
+  def apply(actions: Iterable[Action]) = new Menu(actions)
 }

@@ -1,3 +1,3 @@
 package na.przypale.fitter.menu
 
-case class Action(label: String, operations: () => Unit)
+case class Action(id: ActionId, label: String)
