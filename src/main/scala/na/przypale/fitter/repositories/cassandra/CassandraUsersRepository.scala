@@ -34,7 +34,7 @@ class CassandraUsersRepository(val session: Session) extends UsersRepository {
     session.execute(statement)
   }
 
-  private def getOldestByNick(nick: String) = getDTOsByNick(nick) match {
+  private def getOldestByNick(nick: String): Option[UsersDTO] = getDTOsByNick(nick) match {
     case Nil => None
     case users => Some(users.minBy(_.creationTime))
   }
@@ -57,10 +57,8 @@ class CassandraUsersRepository(val session: Session) extends UsersRepository {
     session.execute(query)
   }
 
-  override def getByNick(nick: String): Option[User] = getOldestByNick(nick) match {
-    case Some(userDTO) => Some(User(userDTO.nick, userDTO.password))
-    case _ => None
-  }
+  override def getByNick(nick: String): Option[User] =
+    getOldestByNick(nick).map(usersDTO => User(usersDTO.nick, usersDTO.password))
 
   private val deleteByNickStatement = session.prepare("DELETE FROM users WHERE nick = : nick")
   override def delete(user: User): Unit = {
