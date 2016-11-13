@@ -12,7 +12,7 @@ import scala.collection.JavaConverters
 class CassandraUsersRepository(val session: Session) extends UsersRepository {
 
   def insertUnique(user: User) = {
-    val userToInsert = UsersDTO(user.nick, new Date())
+    val userToInsert = UsersDTO(user.nick, user.password, new Date())
     forceInsert(userToInsert)
 
     if (getOldestByNick(userToInsert.nick).creationTime != userToInsert.creationTime) {
@@ -22,9 +22,10 @@ class CassandraUsersRepository(val session: Session) extends UsersRepository {
   }
 
   private val insertUserStatement = session.prepare(
-    "INSERT INTO users(nick, creation_time) VALUES(:nick, :creationTime)")
+    "INSERT INTO users(nick, password, creation_time) VALUES(:nick, :password, :creationTime)")
   private def forceInsert(user: UsersDTO) {
     val statement = insertUserStatement.bind().setString("nick", user.nick)
+      .setString("password", user.password)
       .setTimestamp("creationTime", user.creationTime)
     session.execute(statement)
   }
@@ -35,7 +36,7 @@ class CassandraUsersRepository(val session: Session) extends UsersRepository {
   private def getDTOsByNick(nick: String) = {
     val query = getByNickStatement.bind().setString("nick", nick)
     JavaConverters.collectionAsScalaIterable(session.execute(query).all()).map(row => {
-      UsersDTO(row.getString("nick"), row.getTimestamp("creation_time"))
+      UsersDTO(row.getString("nick"), row.getString("password"), row.getTimestamp("creation_time"))
     })
   }
 
@@ -48,5 +49,8 @@ class CassandraUsersRepository(val session: Session) extends UsersRepository {
     session.execute(query)
   }
 
-  def getByNick(nick: String): User = User(getOldestByNick(nick).nick)
+  def getByNick(nick: String): User = {
+    val userDTO = getOldestByNick(nick)
+    User(userDTO.nick, userDTO.password)
+  }
 }

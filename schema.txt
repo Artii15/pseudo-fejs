@@ -7,5 +7,7 @@ DROP TABLE Users;
 
 CREATE TABLE Users (
         nick varchar,
-        PRIMARY KEY (nick)
+        password varchar,
+        creation_time timestamp,
+        PRIMARY KEY (nick, creation_time)
         );
