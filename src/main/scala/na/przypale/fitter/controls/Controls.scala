@@ -18,7 +18,7 @@ abstract class Controls {
     }
   }
 
-  protected abstract def getMenu: Menu
-  protected abstract def handle(action: Action): Unit
-  protected abstract def closesControls(action: Action): Boolean
+  protected def getMenu: Menu
+  protected def handle(action: Action): Unit
+  protected def closesControls(action: Action): Boolean
 }
