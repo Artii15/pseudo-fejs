@@ -1,10 +1,12 @@
 package na.przypale.fitter.controls
 
+import na.przypale.fitter.entities.User
 import na.przypale.fitter.interactions.{CreatingUser, LoggingIn}
 import na.przypale.fitter.menu.{Action, ActionIntId, Menu}
 import na.przypale.fitter.repositories.UsersRepository
 
-class AnonymousUserControls(usersRepository: UsersRepository)
+class AnonymousUserControls(usersRepository: UsersRepository,
+                            loggedUserControlsFactory: (User => LoggedUserControls))
   extends Controls {
 
   private val CREATE_USER_ACTION_ID = 1
@@ -41,6 +43,7 @@ class AnonymousUserControls(usersRepository: UsersRepository)
 }
 
 object AnonymousUserControls {
-  def apply(usersRepository: UsersRepository): AnonymousUserControls =
-    new AnonymousUserControls(usersRepository)
+  def apply(usersRepository: UsersRepository,
+            loggedUserControlsFactory: (User => LoggedUserControls)): AnonymousUserControls =
+    new AnonymousUserControls(usersRepository, loggedUserControlsFactory)
 }

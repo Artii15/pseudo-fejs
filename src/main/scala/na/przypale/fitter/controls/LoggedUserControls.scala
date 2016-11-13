@@ -26,4 +26,8 @@ class LoggedUserControls(val user: User, val usersRepository: UsersRepository) e
 object LoggedUserControls {
   def apply(user: User, usersRepository: UsersRepository): LoggedUserControls =
     new LoggedUserControls(user, usersRepository)
+
+  def makeFactory(usersRepository: UsersRepository) = {
+    user: User => LoggedUserControls(user, usersRepository)
+  }
 }
