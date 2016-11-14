@@ -17,3 +17,7 @@ class CassandraPostsRepository(session: Session) extends PostsRepository {
     session.execute(query)
   }
 }
+
+object CassandraPostsRepository {
+  def apply(session: Session): CassandraPostsRepository = new CassandraPostsRepository(session)
+}

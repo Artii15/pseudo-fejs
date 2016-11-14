@@ -1,5 +1,16 @@
 package na.przypale.fitter.interactions
 
-object CreatingPost {
+import java.util.Date
 
+import na.przypale.fitter.CommandLineReader
+import na.przypale.fitter.entities.{Post, User}
+import na.przypale.fitter.repositories.PostsRepository
+
+object CreatingPost {
+  def create(user: User, postsRepository: PostsRepository): Unit = {
+    print("Content: ")
+    val content = CommandLineReader.readString()
+
+    postsRepository.create(Post(user.nick, new Date(), content))
+  }
 }
