@@ -3,11 +3,20 @@ WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 4 };
 
 USE Test;
 
-DROP TABLE Users;
+DROP TABLE IF EXISTS Users;
 
 CREATE TABLE Users (
-        nick varchar,
-        password varchar,
-        creation_time timestamp,
-        PRIMARY KEY (nick, creation_time)
-        );
+    nick varchar,
+    password varchar,
+    creation_time timestamp,
+    PRIMARY KEY (nick, creation_time)
+);
+
+DROP TABLE IF EXISTS Posts;
+
+CREATE TABLE Posts (
+    author varchar,
+    creation_time timestamp,
+    content text,
+    PRIMARY KEY((author_id, creation_time))
+);
