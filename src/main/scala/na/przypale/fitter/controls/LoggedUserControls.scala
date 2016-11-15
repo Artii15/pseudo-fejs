@@ -14,7 +14,7 @@ class LoggedUserControls(val user: User,
   private val SUBSCRIBE_ACTION_ID = 4
   private val LOGOUT_ACTION_ID = 5
 
-  val menu = Menu(List(
+  private val menu = Menu(List(
     Action(ActionIntId(DELETE_ACTION_ID), s"$DELETE_ACTION_ID - Delete account"),
     Action(ActionIntId(CREATE_POST_ACTION_ID), s"$CREATE_POST_ACTION_ID - Create post"),
     Action(ActionIntId(BROWSE_POSTS_ACTION_ID), s"$BROWSE_POSTS_ACTION_ID - Browse posts"),
@@ -31,9 +31,10 @@ class LoggedUserControls(val user: User,
     case ActionIntId(LOGOUT_ACTION_ID) =>
   }
 
+  private val actionsFinishingUserSession = Set(DELETE_ACTION_ID, LOGOUT_ACTION_ID)
   override protected def closesControls(action: Action): Boolean = action.id match {
-    case ActionIntId(id) => id != CREATE_POST_ACTION_ID && id != SUBSCRIBE_ACTION_ID
-    case _ => true
+    case ActionIntId(actionId) => actionsFinishingUserSession.contains(actionId)
+    case _ => false
   }
 }
 
