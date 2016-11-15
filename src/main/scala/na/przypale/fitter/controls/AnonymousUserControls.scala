@@ -23,11 +23,11 @@ class AnonymousUserControls(creatingUser: CreatingUser,
 
   override protected def handle(action: Action): Unit = action.id match {
     case ActionIntId(CREATE_USER_ACTION_ID) => creatingUser.create()
-    case ActionIntId(LOGIN_ACTION_ID) => startLoggedUserSession()
+    case ActionIntId(LOGIN_ACTION_ID) => startLoggedUserShell()
     case ActionIntId(EXIT_ACTION_ID) =>
   }
 
-  private def startLoggedUserSession(): Unit = loggingIn.logIn() match {
+  private def startLoggedUserShell(): Unit = loggingIn.logIn() match {
     case Some(user) => loggedUserControlsFactory(user).interact()
     case _ =>
   }

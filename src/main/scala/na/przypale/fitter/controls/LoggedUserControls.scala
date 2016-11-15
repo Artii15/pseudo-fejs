@@ -24,7 +24,7 @@ class LoggedUserControls(val user: User,
   override protected def getMenu: Menu = menu
 
   override protected def handle(action: Action): Unit = action.id match {
-    case ActionIntId(DELETE_ACTION_ID) => //TODO Create interaction for deleting users
+    case ActionIntId(DELETE_ACTION_ID) => deletingUser.delete(user)
     case ActionIntId(CREATE_POST_ACTION_ID) => creatingPost.create(user)
     case ActionIntId(SUBSCRIBE_ACTION_ID) =>
     case ActionIntId(LOGOUT_ACTION_ID) =>
