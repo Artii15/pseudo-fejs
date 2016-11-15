@@ -22,6 +22,6 @@ CREATE TABLE Posts (
 DROP TABLE IF EXISTS Subscriptions;
 CREATE TABLE Subscriptions (
     subscriber varchar,
-    subscribed_person varchar,
-    PRIMARY KEY((subscriber, subscribed_person))
+    users set<varchar>,
+    PRIMARY KEY(subscriber)
 );
