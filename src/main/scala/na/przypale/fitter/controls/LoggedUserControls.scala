@@ -9,11 +9,13 @@ class LoggedUserControls(val user: User, val usersRepository: UsersRepository,
                          val postsRepository: PostsRepository) extends Controls {
   private val DELETE_ACTION_ID = 1
   private val CREATE_POST_ACTION_ID = 2
-  private val LOGOUT_ACTION_ID = 3
+  private val BROWSE_POSTS_ACTION_ID = 3
+  private val LOGOUT_ACTION_ID = 4
 
   val menu = Menu(List(
     Action(ActionIntId(DELETE_ACTION_ID), s"$DELETE_ACTION_ID - Delete account"),
     Action(ActionIntId(CREATE_POST_ACTION_ID), s"$CREATE_POST_ACTION_ID - Create post"),
+    Action(ActionIntId(BROWSE_POSTS_ACTION_ID), s"$BROWSE_POSTS_ACTION_ID - Browse posts"),
     Action(ActionIntId(LOGOUT_ACTION_ID), s"$LOGOUT_ACTION_ID - Logout")
   ))
 
