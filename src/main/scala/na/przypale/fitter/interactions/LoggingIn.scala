@@ -5,8 +5,8 @@ import na.przypale.fitter.entities.User
 import na.przypale.fitter.repositories.UsersRepository
 import org.mindrot.jbcrypt.BCrypt
 
-object LoggingIn {
-  def logIn(usersRepository: UsersRepository): Option[User] = {
+class LoggingIn(usersRepository: UsersRepository) {
+  def logIn(): Option[User] = {
     print("Nick: ")
     val nick = CommandLineReader.readString()
     print("Password: ")

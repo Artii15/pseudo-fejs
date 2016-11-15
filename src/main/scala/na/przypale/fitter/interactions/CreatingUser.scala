@@ -6,8 +6,8 @@ import na.przypale.fitter.repositories.UsersRepository
 import na.przypale.fitter.repositories.exceptions.UserAlreadyExistsException
 import org.mindrot.jbcrypt.BCrypt
 
-object CreatingUser {
-  def create(usersRepository: UsersRepository): Unit = {
+class CreatingUser(usersRepository: UsersRepository) {
+  def create(): Unit = {
     try {
       print("Nick: ")
       val nick = CommandLineReader.readString()

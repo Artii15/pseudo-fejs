@@ -6,8 +6,8 @@ import na.przypale.fitter.CommandLineReader
 import na.przypale.fitter.entities.{Post, User}
 import na.przypale.fitter.repositories.PostsRepository
 
-object CreatingPost {
-  def create(user: User, postsRepository: PostsRepository): Unit = {
+class CreatingPost(postsRepository: PostsRepository) {
+  def create(user: User): Unit = {
     print("Content: ")
     val content = CommandLineReader.readString()
 

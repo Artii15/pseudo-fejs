@@ -3,9 +3,9 @@ package na.przypale.fitter.controls
 import na.przypale.fitter.entities.User
 import na.przypale.fitter.interactions.{CreatingUser, LoggingIn}
 import na.przypale.fitter.menu.{Action, ActionIntId, Menu}
-import na.przypale.fitter.repositories.UsersRepository
 
-class AnonymousUserControls(usersRepository: UsersRepository,
+class AnonymousUserControls(creatingUser: CreatingUser,
+                            loggingIn: LoggingIn,
                             loggedUserControlsFactory: (User => LoggedUserControls))
   extends Controls {
 
@@ -22,12 +22,12 @@ class AnonymousUserControls(usersRepository: UsersRepository,
   override protected def getMenu: Menu = menu
 
   override protected def handle(action: Action): Unit = action.id match {
-    case ActionIntId(CREATE_USER_ACTION_ID) => CreatingUser.create(usersRepository)
+    case ActionIntId(CREATE_USER_ACTION_ID) => creatingUser.create()
     case ActionIntId(LOGIN_ACTION_ID) => startLoggedUserSession()
     case ActionIntId(EXIT_ACTION_ID) =>
   }
 
-  private def startLoggedUserSession(): Unit = LoggingIn.logIn(usersRepository) match {
+  private def startLoggedUserSession(): Unit = loggingIn.logIn() match {
     case Some(user) => loggedUserControlsFactory(user).interact()
     case _ =>
   }
@@ -39,7 +39,8 @@ class AnonymousUserControls(usersRepository: UsersRepository,
 }
 
 object AnonymousUserControls {
-  def apply(usersRepository: UsersRepository,
+  def apply(creatingUser: CreatingUser,
+            loggingIn: LoggingIn,
             loggedUserControlsFactory: (User => LoggedUserControls)): AnonymousUserControls =
-    new AnonymousUserControls(usersRepository, loggedUserControlsFactory)
+    new AnonymousUserControls(creatingUser, loggingIn, loggedUserControlsFactory)
 }
