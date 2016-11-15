@@ -1,11 +1,12 @@
 package na.przypale.fitter.controls
 
 import na.przypale.fitter.entities.User
-import na.przypale.fitter.interactions.CreatingPost
+import na.przypale.fitter.interactions.{CreatingPost, DeletingUser}
 import na.przypale.fitter.menu.{Action, ActionIntId, Menu}
 
 class LoggedUserControls(val user: User,
-                         val creatingPost: CreatingPost) extends Controls {
+                         val creatingPost: CreatingPost,
+                         val deletingUser: DeletingUser) extends Controls {
   private val DELETE_ACTION_ID = 1
   private val CREATE_POST_ACTION_ID = 2
   private val BROWSE_POSTS_ACTION_ID = 3
@@ -36,10 +37,7 @@ class LoggedUserControls(val user: User,
 }
 
 object LoggedUserControls {
-  def apply(user: User, creatingPost: CreatingPost): LoggedUserControls =
-    new LoggedUserControls(user, creatingPost)
-
-  def makeFactory(creatingPost: CreatingPost) = {
-    user: User => LoggedUserControls(user, creatingPost)
+  def makeFactory(creatingPost: CreatingPost, deletingUser: DeletingUser) = {
+    user: User => new LoggedUserControls(user, creatingPost, deletingUser)
   }
 }

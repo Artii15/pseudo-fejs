@@ -37,10 +37,3 @@ class AnonymousUserControls(creatingUser: CreatingUser,
     case _ => false
   }
 }
-
-object AnonymousUserControls {
-  def apply(creatingUser: CreatingUser,
-            loggingIn: LoggingIn,
-            loggedUserControlsFactory: (User => LoggedUserControls)): AnonymousUserControls =
-    new AnonymousUserControls(creatingUser, loggingIn, loggedUserControlsFactory)
-}

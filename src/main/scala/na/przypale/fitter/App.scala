@@ -2,7 +2,7 @@ package na.przypale.fitter
 
 import com.datastax.driver.core.Session
 import na.przypale.fitter.controls.{AnonymousUserControls, LoggedUserControls}
-import na.przypale.fitter.interactions.{CreatingPost, CreatingUser, LoggingIn}
+import na.przypale.fitter.interactions.{CreatingPost, CreatingUser, DeletingUser, LoggingIn}
 import na.przypale.fitter.repositories.cassandra.{CassandraPostsRepository, CassandraUsersRepository}
 
 object App {
@@ -13,10 +13,11 @@ object App {
 
     val creatingUser = new CreatingUser(usersRepository)
     val loggingIn = new LoggingIn(usersRepository)
-    val loggedUserControlsFactory = LoggedUserControls.makeFactory(new CreatingPost(postsRepository))
+    val deletingUser = new DeletingUser(usersRepository)
+    val creatingPost = new CreatingPost(postsRepository)
 
-    val anonymousUserControls = AnonymousUserControls(creatingUser, loggingIn, loggedUserControlsFactory)
+    val loggedUserControlsFactory = LoggedUserControls.makeFactory(creatingPost, deletingUser)
 
-    anonymousUserControls.interact()
+    new AnonymousUserControls(creatingUser, loggingIn, loggedUserControlsFactory).interact()
   }
 }
