@@ -1,12 +1,13 @@
 package na.przypale.fitter.controls
 
 import na.przypale.fitter.entities.User
-import na.przypale.fitter.interactions.{CreatingPost, DeletingUser}
+import na.przypale.fitter.interactions.{CreatingPost, DeletingUser, SubscribingUser}
 import na.przypale.fitter.menu.{Action, ActionIntId, Menu}
 
 class LoggedUserControls(val user: User,
                          val creatingPost: CreatingPost,
-                         val deletingUser: DeletingUser) extends Controls {
+                         val deletingUser: DeletingUser,
+                         val subscribingUser: SubscribingUser) extends Controls {
   private val DELETE_ACTION_ID = 1
   private val CREATE_POST_ACTION_ID = 2
   private val BROWSE_POSTS_ACTION_ID = 3
@@ -26,18 +27,18 @@ class LoggedUserControls(val user: User,
   override protected def handle(action: Action): Unit = action.id match {
     case ActionIntId(DELETE_ACTION_ID) => deletingUser.delete(user)
     case ActionIntId(CREATE_POST_ACTION_ID) => creatingPost.create(user)
-    case ActionIntId(SUBSCRIBE_ACTION_ID) =>
+    case ActionIntId(SUBSCRIBE_ACTION_ID) => subscribingUser.createSubscription(user)
     case ActionIntId(LOGOUT_ACTION_ID) =>
   }
 
   override protected def closesControls(action: Action): Boolean = action.id match {
-    case ActionIntId(CREATE_POST_ACTION_ID) => false
+    case ActionIntId(id) => id != CREATE_POST_ACTION_ID && id != SUBSCRIBE_ACTION_ID
     case _ => true
   }
 }
 
 object LoggedUserControls {
-  def makeFactory(creatingPost: CreatingPost, deletingUser: DeletingUser) = {
-    user: User => new LoggedUserControls(user, creatingPost, deletingUser)
+  def makeFactory(creatingPost: CreatingPost, deletingUser: DeletingUser, subscribingUser: SubscribingUser) = {
+    user: User => new LoggedUserControls(user, creatingPost, deletingUser, subscribingUser)
   }
 }
