@@ -16,7 +16,7 @@ CREATE TABLE Posts (
     author varchar,
     creation_time timestamp,
     content text,
-    PRIMARY KEY((author, creation_time))
+    PRIMARY KEY(author, creation_time)
 );
 
 DROP TABLE IF EXISTS Subscriptions;

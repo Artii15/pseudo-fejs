@@ -5,6 +5,6 @@ import na.przypale.fitter.repositories.{PostsRepository, SubscriptionsRepository
 
 class BrowsingPosts(postsRepository: PostsRepository, subscriptionsRepository: SubscriptionsRepository) {
   def browse(user: User): Unit = {
-
+    println(subscriptionsRepository.findSubscriptionsOf(user.nick))
   }
 }

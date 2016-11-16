@@ -16,4 +16,13 @@ class CassandraPostsRepository(session: Session) extends PostsRepository {
 
     session.execute(query)
   }
+
+  val findBySubscriberStatement = session.prepare(
+    "SELECT author, creation_time, content FROM posts WHERE author = :author")
+  override def findBySubscriber(subscriber: String) = {
+    val query = findBySubscriberStatement.bind()
+        .setString("author", subscriber)
+
+    session.execute(query).all()
+  }
 }
