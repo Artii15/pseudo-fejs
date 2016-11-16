@@ -1,8 +1,10 @@
 package na.przypale.fitter.repositories.cassandra
 
-import com.datastax.driver.core.Session
+import com.datastax.driver.core.{Row, Session}
 import na.przypale.fitter.entities.Post
 import na.przypale.fitter.repositories.PostsRepository
+
+import scala.collection.JavaConverters
 
 class CassandraPostsRepository(session: Session) extends PostsRepository {
 
@@ -19,10 +21,12 @@ class CassandraPostsRepository(session: Session) extends PostsRepository {
 
   val findBySubscriberStatement = session.prepare(
     "SELECT author, creation_time, content FROM posts WHERE author = :author")
-  override def findBySubscriber(subscriber: String) = {
+  override def findByAuthor(subscriber: String): Iterable[Post] = {
     val query = findBySubscriberStatement.bind()
         .setString("author", subscriber)
 
-    session.execute(query).all()
+    JavaConverters.collectionAsScalaIterable(session.execute(query).all()).map(row => {
+      Post(row.getString("author"), row.getTimestamp("creation_time"), row.getString("content"))
+    })
   }
 }

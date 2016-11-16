@@ -4,5 +4,5 @@ import na.przypale.fitter.entities.Post
 
 trait PostsRepository {
   def create(post: Post)
-  def findBySubscriber(subscriber: String)
+  def findByAuthor(subscriber: String): Iterable[Post]
 }
