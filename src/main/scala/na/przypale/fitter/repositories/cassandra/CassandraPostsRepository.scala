@@ -19,14 +19,14 @@ class CassandraPostsRepository(session: Session) extends PostsRepository {
     session.execute(query)
   }
 
-  val findBySubscriberStatement = session.prepare(
-    "SELECT author, creation_time, content FROM posts WHERE author = :author")
-  override def findByAuthor(subscriber: String): Iterable[Post] = {
-    val query = findBySubscriberStatement.bind()
-        .setString("author", subscriber)
+  val findByAuthorStatement = session.prepare(
+    "SELECT author, creation_time, content FROM posts WHERE author IN :authors")
+  override def findByAuthors(authors: Iterable[String]): Iterable[Post] = {
+    val query = findByAuthorStatement.bind()
+      .setList("authors", JavaConverters.seqAsJavaList(authors.toSeq))
 
-    JavaConverters.collectionAsScalaIterable(session.execute(query).all()).map(row => {
-      Post(row.getString("author"), row.getTimestamp("creation_time"), row.getString("content"))
-    })
+    JavaConverters.collectionAsScalaIterable(session.execute(query).all()).toVector
+      .map(row => Post(row.getString("author"), row.getTimestamp("creation_time"), row.getString("content")))
+      .sortBy(_.creationTime)
   }
 }
