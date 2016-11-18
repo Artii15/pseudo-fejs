@@ -1,6 +1,9 @@
 package na.przypale.fitter.interactions
 
+import java.text.SimpleDateFormat
+
 import na.przypale.fitter.CommandLineReader
+import na.przypale.fitter.controls.PostsControls
 import na.przypale.fitter.entities.{Post, Subscription, User}
 import na.przypale.fitter.repositories.{PostsRepository, SubscriptionsRepository}
 
@@ -13,6 +16,8 @@ class BrowsingPosts(postsRepository: PostsRepository, subscriptionsRepository: S
     val posts = findPosts(subscriptions)
     posts.foreach(display)
 
+    val controls = new PostsControls()
+
     if(posts.isEmpty) println("No posts to display")
     else showMenu(posts, subscriptions)
   }
@@ -22,9 +27,10 @@ class BrowsingPosts(postsRepository: PostsRepository, subscriptionsRepository: S
     postsRepository.findByAuthors(subscribedPeopleNicks, lastShownPost)
   }
 
+  val dateFormat = new SimpleDateFormat("dd.MM.yyyy hh:mm:ss")
   private def display(post: Post): Unit = {
-    val Post(author, _, content) = post
-    println(s"$author:")
+    val Post(author, creationTime, content) = post
+    println(s"${dateFormat.format(creationTime)} $author:")
     println(content)
   }
 
