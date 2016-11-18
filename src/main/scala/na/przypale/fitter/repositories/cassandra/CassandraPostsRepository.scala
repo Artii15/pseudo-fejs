@@ -21,15 +21,28 @@ class CassandraPostsRepository(session: Session) extends PostsRepository {
     session.execute(insertPostQuery)
   }
 
-  val findByAuthorStatement = session.prepare(
-    "SELECT author, creation_time, content FROM posts WHERE author IN :authors")
-  override def findByAuthors(authors: Iterable[String]): Iterable[Post] = {
+  val findByAuthorNoPostSkipping = session.prepare(
+    "SELECT author, creation_time, content " +
+    "FROM posts " +
+    "WHERE author IN :authors " +
+    "ORDER BY creation_time " +
+    "LIMIT 10")
+  val findByAuthorWithPostSkipping = session.prepare(
+    "SELECT author, creation_time, content " +
+    "FROM posts " +
+    "WHERE author IN :authors AND creation_time < :creationTime " +
+    "ORDER BY creation_time " +
+    "LIMIT 10")
+  override def findByAuthors(authors: Iterable[String], lastPostToSkip: Option[Post] = None) = {
     val postsAuthors = JavaConverters.seqAsJavaList(authors.toSeq)
-    val findPostsQuery = findByAuthorStatement.bind()
-      .setList("authors", postsAuthors)
+    val query = lastPostToSkip match {
+      case None => findByAuthorNoPostSkipping.bind().setList("authors", postsAuthors)
+      case Some(post) => findByAuthorWithPostSkipping.bind()
+        .setList("authors", postsAuthors)
+        .setTimestamp("creationTime", post.creationTime)
+    }
 
-    JavaConverters.collectionAsScalaIterable(session.execute(findPostsQuery).all()).toVector
+    JavaConverters.collectionAsScalaIterable(session.execute(query).all()).toVector
       .map(row => Post(row.getString("author"), row.getTimestamp("creation_time"), row.getString("content")))
-      .sortBy(_.creationTime)
   }
 }

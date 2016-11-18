@@ -1,24 +1,44 @@
 package na.przypale.fitter.interactions
 
-import na.przypale.fitter.entities.{Post, User}
+import na.przypale.fitter.CommandLineReader
+import na.przypale.fitter.entities.{Post, Subscription, User}
 import na.przypale.fitter.repositories.{PostsRepository, SubscriptionsRepository}
 
-class BrowsingPosts(postsRepository: PostsRepository, subscriptionsRepository: SubscriptionsRepository) {
-  def browse(user: User): Unit = {
-    val subscriptions = subscriptionsRepository.findSubscriptionsOf(user.nick)
-    val subscribedPeopleNicks = subscriptions.map(subscription => subscription.subscribedPersonNick)
-    val posts = postsRepository.findByAuthors(subscribedPeopleNicks)
+import scala.annotation.tailrec
 
-    posts.foreach(displayPost)
-    posts.isEmpty match {
-      case true => println("No posts to display")
-      case false => //TODO Let user select post to read or load more posts if available
-    }
+class BrowsingPosts(postsRepository: PostsRepository, subscriptionsRepository: SubscriptionsRepository) {
+
+  final def browse(user: User): Unit = {
+    val subscriptions = subscriptionsRepository.findSubscriptionsOf(user.nick)
+    val posts = findPosts(subscriptions)
+    posts.foreach(display)
+
+    if(posts.isEmpty) println("No posts to display")
+    else showMenu()
   }
 
-  private def displayPost(post: Post): Unit = {
+  def findPosts(subscriptions: Iterable[Subscription], lastShownPost: Option[Post] = None) = {
+    val subscribedPeopleNicks = subscriptions.map(subscription => subscription.subscribedPersonNick)
+    postsRepository.findByAuthors(subscribedPeopleNicks)
+  }
+
+  private def display(post: Post): Unit = {
     val Post(author, _, content) = post
     println(s"$author:")
     println(content)
+  }
+
+  @tailrec
+  private def showMenu() {
+    println("1 - More")
+    println("2 - Read post")
+    println("2 - Exit")
+
+    CommandLineReader.readInt() match {
+      case 1 =>
+      case 2 =>
+      case 3 =>
+      case _ => showMenu()
+    }
   }
 }
