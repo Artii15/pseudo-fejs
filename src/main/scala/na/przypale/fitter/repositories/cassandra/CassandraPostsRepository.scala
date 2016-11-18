@@ -41,6 +41,7 @@ class CassandraPostsRepository(session: Session) extends PostsRepository {
         .setList("authors", postsAuthors)
         .setTimestamp("creationTime", post.creationTime)
     }
+    query.setFetchSize(Integer.MAX_VALUE)
 
     JavaConverters.collectionAsScalaIterable(session.execute(query).all()).toVector
       .map(row => Post(row.getString("author"), row.getTimestamp("creation_time"), row.getString("content")))

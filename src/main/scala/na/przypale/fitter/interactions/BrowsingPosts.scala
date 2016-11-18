@@ -14,12 +14,12 @@ class BrowsingPosts(postsRepository: PostsRepository, subscriptionsRepository: S
     posts.foreach(display)
 
     if(posts.isEmpty) println("No posts to display")
-    else showMenu()
+    else showMenu(posts, subscriptions)
   }
 
   def findPosts(subscriptions: Iterable[Subscription], lastShownPost: Option[Post] = None) = {
     val subscribedPeopleNicks = subscriptions.map(subscription => subscription.subscribedPersonNick)
-    postsRepository.findByAuthors(subscribedPeopleNicks)
+    postsRepository.findByAuthors(subscribedPeopleNicks, lastShownPost)
   }
 
   private def display(post: Post): Unit = {
@@ -29,16 +29,16 @@ class BrowsingPosts(postsRepository: PostsRepository, subscriptionsRepository: S
   }
 
   @tailrec
-  private def showMenu() {
+  private def showMenu(posts: Iterable[Post], subscriptions: Iterable[Subscription]) {
     println("1 - More")
     println("2 - Read post")
-    println("2 - Exit")
+    println("3 - Exit")
 
     CommandLineReader.readInt() match {
-      case 1 =>
+      case 1 => showMenu(findPosts(subscriptions, posts.lastOption), subscriptions)
       case 2 =>
       case 3 =>
-      case _ => showMenu()
+      case _ => showMenu(posts, subscriptions)
     }
   }
 }
