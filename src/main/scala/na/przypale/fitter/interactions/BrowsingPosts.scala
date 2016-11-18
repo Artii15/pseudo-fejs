@@ -6,8 +6,14 @@ import na.przypale.fitter.repositories.{PostsRepository, SubscriptionsRepository
 class BrowsingPosts(postsRepository: PostsRepository, subscriptionsRepository: SubscriptionsRepository) {
   def browse(user: User): Unit = {
     val subscriptions = subscriptionsRepository.findSubscriptionsOf(user.nick)
-    postsRepository.findByAuthors(subscriptions.map(subscription => subscription.subscribedPersonNick))
-        .foreach(displayPost)
+    val subscribedPeopleNicks = subscriptions.map(subscription => subscription.subscribedPersonNick)
+    val posts = postsRepository.findByAuthors(subscribedPeopleNicks)
+
+    posts.foreach(displayPost)
+    posts.isEmpty match {
+      case true => println("No posts to display")
+      case false => //TODO Let user select post to read or load more posts if available
+    }
   }
 
   private def displayPost(post: Post): Unit = {

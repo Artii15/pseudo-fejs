@@ -3,25 +3,32 @@ WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 4 };
 
 USE Test;
 
-DROP TABLE IF EXISTS Users;
-CREATE TABLE Users (
+DROP TABLE IF EXISTS users;
+CREATE TABLE users (
     nick varchar,
     password varchar,
     creation_time timestamp,
     PRIMARY KEY (nick, creation_time)
 );
 
-DROP TABLE IF EXISTS Posts;
-CREATE TABLE Posts (
+DROP TABLE IF EXISTS posts;
+CREATE TABLE posts (
     author varchar,
     creation_time timestamp,
     content text,
     PRIMARY KEY(author, creation_time)
 );
 
-DROP TABLE IF EXISTS Subscriptions;
-CREATE TABLE Subscriptions (
+DROP TABLE IF EXISTS subscriptions;
+CREATE TABLE subscriptions (
     subscriber varchar,
     users set<varchar>,
     PRIMARY KEY(subscriber)
+);
+
+DROP TABLE IF EXISTS users_counters;
+CREATE TABLE users_counters (
+    nick varchar,
+    number_of_created_posts counter,
+    PRIMARY KEY(nick)
 );
