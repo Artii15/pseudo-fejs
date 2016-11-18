@@ -1,6 +1,6 @@
 package na.przypale.fitter.repositories.cassandra
 
-import com.datastax.driver.core.{Row, Session}
+import com.datastax.driver.core.Session
 import na.przypale.fitter.entities.Post
 import na.przypale.fitter.repositories.PostsRepository
 
@@ -8,15 +8,22 @@ import scala.collection.JavaConverters
 
 class CassandraPostsRepository(session: Session) extends PostsRepository {
 
+  val incrementPostsCountStatement = session.prepare(
+    "UPDATE users_counters SET number_of_created_posts = number_of_created_posts + 1 WHERE nick = :author")
   val insertPostStatement = session.prepare(
     "INSERT INTO posts(author, creation_time, content) VALUES(:author, :creationTime, :content)")
   override def create(post: Post): Unit = {
-    val query = insertPostStatement.bind()
-      .setString("author", post.author)
-      .setTimestamp("creationTIme", post.creationTime)
-      .setString("content", post.content)
+    val Post(author, creationTime, content) = post
+    val incrementPostsCountQuery = incrementPostsCountStatement.bind()
+      .setString("author", author)
 
-    session.execute(query)
+    val insertPostQuery = insertPostStatement.bind()
+      .setString("author", author)
+      .setTimestamp("creationTIme", creationTime)
+      .setString("content", content)
+
+    session.execute(insertPostQuery)
+    session.execute(incrementPostsCountQuery)
   }
 
   val findByAuthorStatement = session.prepare(
