@@ -1,12 +1,12 @@
 package na.przypale.fitter.interactions
 
 import na.przypale.fitter.CommandLineReader
-import na.przypale.fitter.entities.User
-import na.przypale.fitter.repositories.UsersRepository
+import na.przypale.fitter.entities.{Subscription, User}
+import na.przypale.fitter.repositories.{SubscriptionsRepository, UsersRepository}
 import na.przypale.fitter.repositories.exceptions.UserAlreadyExistsException
 import org.mindrot.jbcrypt.BCrypt
 
-class CreatingUser(usersRepository: UsersRepository) {
+class CreatingUser(usersRepository: UsersRepository, subscriptionsRepository: SubscriptionsRepository) {
   def create(): Unit = {
     try {
       print("Nick: ")
@@ -16,6 +16,8 @@ class CreatingUser(usersRepository: UsersRepository) {
       val password = BCrypt.hashpw(CommandLineReader.readString(), BCrypt.gensalt())
 
       usersRepository.insertUnique(User(nick, password))
+      subscriptionsRepository.create(Subscription(nick, nick))
+
       println("User successfully created")
     }
     catch {

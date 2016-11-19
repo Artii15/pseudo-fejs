@@ -12,7 +12,7 @@ object App {
     val postsRepository = new CassandraPostsRepository(session)
     val subscriptionsRepository = new CassandraSubscriptionsRepository(session)
 
-    val creatingUser = new CreatingUser(usersRepository)
+    val creatingUser = new CreatingUser(usersRepository, subscriptionsRepository)
     val loggingIn = new LoggingIn(usersRepository)
     val deletingUser = new DeletingUser(usersRepository)
     val creatingPost = new CreatingPost(postsRepository)

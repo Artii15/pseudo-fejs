@@ -1,6 +1,5 @@
 package na.przypale.fitter.repositories.cassandra
 
-import java.util
 import java.util.stream.{Collectors, Stream}
 
 import com.datastax.driver.core.{Row, Session}
@@ -8,7 +7,6 @@ import na.przypale.fitter.entities.Subscription
 import na.przypale.fitter.repositories.SubscriptionsRepository
 
 import scala.collection.JavaConverters
-import scala.collection.immutable.HashSet
 
 class CassandraSubscriptionsRepository(session: Session) extends SubscriptionsRepository {
 

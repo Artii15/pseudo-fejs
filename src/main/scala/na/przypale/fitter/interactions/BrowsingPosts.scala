@@ -37,5 +37,6 @@ class BrowsingPosts(postsRepository: PostsRepository, subscriptionsRepository: S
     val Post(author, creationTime, content) = post
     println(s"${postDateFormat.format(creationTime)} $author:")
     println(content)
+    println()
   }
 }
