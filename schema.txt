@@ -3,6 +3,7 @@ WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 4 };
 
 USE Test;
 
+-- TODO Add SASI index for users nicks
 DROP TABLE IF EXISTS users;
 CREATE TABLE users (
     nick varchar,
@@ -12,6 +13,8 @@ CREATE TABLE users (
 );
 
 -- TODO Need to overcome the limit of 2 billion posts per author
+-- TODO Set default descending order on creation_time column
+-- TODO Add timeuuid
 DROP TABLE IF EXISTS posts;
 CREATE TABLE posts (
     author varchar,
@@ -20,6 +23,7 @@ CREATE TABLE posts (
     PRIMARY KEY(author, creation_time)
 );
 
+-- TODO Replace set with cluster column
 DROP TABLE IF EXISTS subscriptions;
 CREATE TABLE subscriptions (
     subscriber varchar,
