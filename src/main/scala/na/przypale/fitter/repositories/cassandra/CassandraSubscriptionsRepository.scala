@@ -1,11 +1,14 @@
 package na.przypale.fitter.repositories.cassandra
 
+import java.util
 import java.util.stream.{Collectors, Stream}
 
-import com.datastax.driver.core.Session
+import com.datastax.driver.core.{Row, Session}
 import na.przypale.fitter.entities.Subscription
 import na.przypale.fitter.repositories.SubscriptionsRepository
+
 import scala.collection.JavaConverters
+import scala.collection.immutable.HashSet
 
 class CassandraSubscriptionsRepository(session: Session) extends SubscriptionsRepository {
 
@@ -27,10 +30,13 @@ class CassandraSubscriptionsRepository(session: Session) extends SubscriptionsRe
     val query = findSubscriptionStatement.bind()
         .setString("subscriber", subscriber)
 
-    val subscribedPeople = session.execute(query).one()
-        .getSet("users", classOf[String])
-
+    val subscribedPeople = collectSubscribedPeople(session.execute(query).one())
     JavaConverters.collectionAsScalaIterable(subscribedPeople)
       .map(subscribedPerson => Subscription(subscriber, subscribedPerson))
+  }
+
+  private def collectSubscribedPeople(row: Row) = row match {
+      case null => new java.util.HashSet[String]()
+      case entry => entry.getSet("users", classOf[String])
   }
 }
