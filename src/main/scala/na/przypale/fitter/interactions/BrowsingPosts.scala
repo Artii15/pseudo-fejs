@@ -2,8 +2,9 @@ package na.przypale.fitter.interactions
 
 import java.text.SimpleDateFormat
 
-import na.przypale.fitter.controls.PostsControls
+import na.przypale.fitter.controls.PostControls
 import na.przypale.fitter.entities.{Post, User}
+import na.przypale.fitter.menu.{Action, ActionIntId}
 import na.przypale.fitter.repositories.{PostsRepository, SubscriptionsRepository}
 
 import scala.annotation.tailrec
@@ -23,8 +24,8 @@ class BrowsingPosts(postsRepository: PostsRepository, subscriptionsRepository: S
 
     if(posts.isEmpty) println("No more posts to display")
     else {
-      new PostsControls(posts).interact()
-      searchPosts(subscribedPeople, lastDisplayedPost)
+      val Action(ActionIntId(actionId), _) = new PostControls().interact()
+      if(actionId == PostControls.MORE_POSTS_ACTION_ID) searchPosts(subscribedPeople, posts.lastOption)
     }
   }
 

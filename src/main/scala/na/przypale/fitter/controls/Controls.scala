@@ -7,13 +7,14 @@ import scala.annotation.tailrec
 abstract class Controls {
 
   @tailrec
-  final def interact(): Unit = {
+  final def interact(): Action = {
     val menu = getMenu
     menu.display()
-    menu.read match {
+    val selectedAction = menu.read
+    selectedAction match {
       case Some(action) => {
         handle(action)
-        if (!closesControls(action)) interact()
+        if (closesControls(action)) action else interact()
       }
       case None => interact()
     }
