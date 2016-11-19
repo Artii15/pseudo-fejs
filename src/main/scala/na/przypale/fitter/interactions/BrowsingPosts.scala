@@ -11,6 +11,8 @@ import scala.annotation.tailrec
 
 class BrowsingPosts(postsRepository: PostsRepository, subscriptionsRepository: SubscriptionsRepository) {
 
+  private val postsControls = new PostControls()
+
   final def browse(user: User): Unit = {
     val subscribedPeople = subscriptionsRepository.findSubscriptionsOf(user.nick)
         .map(subscription => subscription.subscribedPersonNick)
@@ -24,7 +26,7 @@ class BrowsingPosts(postsRepository: PostsRepository, subscriptionsRepository: S
 
     if(posts.isEmpty) println("No more posts to display")
     else {
-      val Action(ActionIntId(actionId), _) = new PostControls().interact()
+      val Action(ActionIntId(actionId), _) = postsControls.interact()
       if(actionId == PostControls.MORE_POSTS_ACTION_ID) searchPosts(subscribedPeople, posts.lastOption)
     }
   }
