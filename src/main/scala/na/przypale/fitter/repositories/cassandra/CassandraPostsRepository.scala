@@ -25,13 +25,13 @@ class CassandraPostsRepository(session: Session) extends PostsRepository {
     "SELECT author, creation_time, content " +
     "FROM posts " +
     "WHERE author IN :authors " +
-    "ORDER BY creation_time " +
+    "ORDER BY creation_time DESC " +
     "LIMIT 10")
   val findByAuthorWithPostSkipping = session.prepare(
     "SELECT author, creation_time, content " +
     "FROM posts " +
     "WHERE author IN :authors AND creation_time < :creationTime " +
-    "ORDER BY creation_time " +
+    "ORDER BY creation_time DESC " +
     "LIMIT 10")
   override def findByAuthors(authors: Iterable[String], lastPostToSkip: Option[Post] = None) = {
     val postsAuthors = JavaConverters.seqAsJavaList(authors.toSeq)

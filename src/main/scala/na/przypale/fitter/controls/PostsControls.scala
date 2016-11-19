@@ -15,7 +15,7 @@ object PostControls {
   val EXIT_ACTION_ID = 2
 
   val menu = Menu(List(
-    Action(ActionIntId(PostControls.MORE_POSTS_ACTION_ID), "More"),
-    Action(ActionIntId(PostControls.EXIT_ACTION_ID), "Exit")
+    Action(ActionIntId(PostControls.MORE_POSTS_ACTION_ID), s"$MORE_POSTS_ACTION_ID - More"),
+    Action(ActionIntId(PostControls.EXIT_ACTION_ID), s"$EXIT_ACTION_ID - Exit")
   ))
 }

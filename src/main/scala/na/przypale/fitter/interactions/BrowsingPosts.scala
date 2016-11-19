@@ -24,14 +24,15 @@ class BrowsingPosts(postsRepository: PostsRepository, subscriptionsRepository: S
     val posts = postsRepository.findByAuthors(subscribedPeople, lastDisplayedPost)
     posts.foreach(display)
 
-    if(posts.isEmpty) println("No more posts to display")
+    if(posts.isEmpty || posts.size < postsRepository.NUMBER_OF_POSTS_PER_PAGE)
+      println("No more posts to display")
     else {
       val Action(ActionIntId(actionId), _) = postsControls.interact()
       if(actionId == PostControls.MORE_POSTS_ACTION_ID) searchPosts(subscribedPeople, posts.lastOption)
     }
   }
 
-  val postDateFormat = new SimpleDateFormat("dd.MM.yyyy hh:mm:ss")
+  val postDateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss")
   private def display(post: Post): Unit = {
     val Post(author, creationTime, content) = post
     println(s"${postDateFormat.format(creationTime)} $author:")
