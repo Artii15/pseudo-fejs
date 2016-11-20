@@ -1,5 +1,7 @@
 package na.przypale.fitter.repositories.cassandra
 
+import java.util.Calendar
+
 import com.datastax.driver.core.Session
 import na.przypale.fitter.entities.Post
 import na.przypale.fitter.repositories.PostsRepository
@@ -9,12 +11,16 @@ import scala.collection.JavaConverters
 class CassandraPostsRepository(session: Session) extends PostsRepository {
 
   val insertPostStatement = session.prepare(
-    "INSERT INTO posts(author, creation_time, content) VALUES(:author, :creationTime, :content)")
+    "INSERT INTO posts(author, creation_year, time_id, creation_time, content) " +
+    "VALUES(:author, :year, now(), :creationTime, :content)")
   override def create(post: Post): Unit = {
     val Post(author, creationTime, content) = post
+    val calendar = Calendar.getInstance()
+    calendar.setTime(creationTime)
 
     val insertPostQuery = insertPostStatement.bind()
       .setString("author", author)
+      .setInt("year", calendar.get(Calendar.YEAR))
       .setTimestamp("creationTIme", creationTime)
       .setString("content", content)
 

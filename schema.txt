@@ -12,16 +12,16 @@ CREATE TABLE users (
     PRIMARY KEY (nick, creation_time)
 );
 
--- TODO Need to overcome the limit of 2 billion posts per author
--- TODO Set default descending order on creation_time column
--- TODO Add timeuuid
 DROP TABLE IF EXISTS posts;
 CREATE TABLE posts (
     author varchar,
+    creation_year int,
+    time_id timeuuid,
     creation_time timestamp,
     content text,
-    PRIMARY KEY(author, creation_time)
-);
+    PRIMARY KEY((author, creation_year), time_id)
+)
+WITH CLUSTERING ORDER BY (time_id DESC);
 
 DROP TABLE IF EXISTS subscriptions;
 CREATE TABLE subscriptions (
