@@ -23,10 +23,9 @@ CREATE TABLE posts (
     PRIMARY KEY(author, creation_time)
 );
 
--- TODO Replace set with cluster column
 DROP TABLE IF EXISTS subscriptions;
 CREATE TABLE subscriptions (
     subscriber varchar,
-    users set<varchar>,
-    PRIMARY KEY(subscriber)
+    subscribed_person varchar,
+    PRIMARY KEY(subscriber, subscribed_person)
 );
