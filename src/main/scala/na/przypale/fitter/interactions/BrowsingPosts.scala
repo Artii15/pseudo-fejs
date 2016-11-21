@@ -34,8 +34,8 @@ class BrowsingPosts(postsRepository: PostsRepository, subscriptionsRepository: S
 
   val postDateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss")
   private def display(post: Post): Unit = {
-    val Post(author, creationTime, content) = post
-    println(s"${postDateFormat.format(creationTime)} $author:")
+    val Post(author, timeId, content) = post
+    println(s"${postDateFormat.format(timeId)} $author:")
     println(content)
     println()
   }
