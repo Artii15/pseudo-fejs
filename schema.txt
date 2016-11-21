@@ -8,18 +8,16 @@ DROP TABLE IF EXISTS users;
 CREATE TABLE users (
     nick varchar,
     password varchar,
-    creation_time timestamp,
-    PRIMARY KEY (nick, creation_time)
+    time_id timeuuid,
+    PRIMARY KEY (nick, time_id)
 );
 
 DROP TABLE IF EXISTS posts;
 CREATE TABLE posts (
     author varchar,
-    creation_year int,
     time_id timeuuid,
-    creation_time timestamp,
     content text,
-    PRIMARY KEY((author, creation_year), time_id)
+    PRIMARY KEY(author, time_id)
 )
 WITH CLUSTERING ORDER BY (time_id DESC);
 

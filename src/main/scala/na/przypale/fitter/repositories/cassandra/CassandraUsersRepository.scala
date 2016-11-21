@@ -1,8 +1,7 @@
 package na.przypale.fitter.repositories.cassandra
 
-import java.util.Date
-
 import com.datastax.driver.core.Session
+import com.datastax.driver.core.utils.UUIDs
 import na.przypale.fitter.entities.User
 import na.przypale.fitter.repositories.UsersRepository
 import na.przypale.fitter.repositories.exceptions.{UserAlreadyExistsException, UserNotExistsException}
@@ -12,12 +11,12 @@ import scala.collection.JavaConverters
 class CassandraUsersRepository(val session: Session) extends UsersRepository {
 
   override def insertUnique(user: User) = {
-    val userToInsert = UsersDTO(user.nick, user.password, new Date())
+    val userToInsert = UsersDTO(user.nick, user.password, UUIDs.timeBased())
     forceInsert(userToInsert)
 
     getOldestByNick(userToInsert.nick) match {
       case None => throw new UserNotExistsException
-      case Some(userDTO) if userDTO.creationTime != userToInsert.creationTime => {
+      case Some(userDTO) if userDTO.timeId.compareTo(userToInsert.timeId) != 0  => {
         deleteByNickAndCreationTime(userToInsert)
         throw new UserAlreadyExistsException
       }
@@ -26,34 +25,35 @@ class CassandraUsersRepository(val session: Session) extends UsersRepository {
   }
 
   private val insertUserStatement = session.prepare(
-    "INSERT INTO users(nick, password, creation_time) VALUES(:nick, :password, :creationTime)")
+    "INSERT INTO users(nick, password, time_id) VALUES(:nick, :password, :timeId)")
   private def forceInsert(user: UsersDTO) {
-    val statement = insertUserStatement.bind().setString("nick", user.nick)
+    val statement = insertUserStatement.bind()
+      .setString("nick", user.nick)
       .setString("password", user.password)
-      .setTimestamp("creationTime", user.creationTime)
+      .setUUID("timeId", user.timeId)
     session.execute(statement)
   }
 
   private def getOldestByNick(nick: String): Option[UsersDTO] = getDTOsByNick(nick) match {
     case Nil => None
-    case users => Some(users.minBy(_.creationTime))
+    case users => Some(users.minBy(_.timeId))
   }
 
   private val getByNickStatement = session.prepare(
-    "SELECT nick, password, creation_time FROM users WHERE nick = :nick")
+    "SELECT nick, password, time_id FROM users WHERE nick = :nick")
   private def getDTOsByNick(nick: String) = {
     val query = getByNickStatement.bind().setString("nick", nick)
     JavaConverters.collectionAsScalaIterable(session.execute(query).all()).map(row => {
-      UsersDTO(row.getString("nick"), row.getString("password"), row.getTimestamp("creation_time"))
+      UsersDTO(row.getString("nick"), row.getString("password"), row.getUUID("time_id"))
     })
   }
 
   private val deleteByNickAndCreationTimeStatement = session.prepare(
-    "DELETE FROM users WHERE nick = :nick AND creation_time = :creationTime")
+    "DELETE FROM users WHERE nick = :nick AND time_id = :timeId")
   private def deleteByNickAndCreationTime(user: UsersDTO): Unit = {
     val query = deleteByNickAndCreationTimeStatement.bind()
       .setString("nick", user.nick)
-      .setTimestamp("creationTime", user.creationTime)
+      .setUUID("timeId", user.timeId)
     session.execute(query)
   }
 
