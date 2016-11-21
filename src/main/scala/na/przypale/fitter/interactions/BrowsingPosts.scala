@@ -1,6 +1,7 @@
 package na.przypale.fitter.interactions
 
 import java.text.SimpleDateFormat
+import java.util.{Date, UUID}
 
 import na.przypale.fitter.controls.PostControls
 import na.przypale.fitter.entities.{Post, User}
@@ -35,8 +36,10 @@ class BrowsingPosts(postsRepository: PostsRepository, subscriptionsRepository: S
   val postDateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss")
   private def display(post: Post): Unit = {
     val Post(author, timeId, content) = post
-    println(s"${postDateFormat.format(timeId)} $author:")
+    println(s"${postDateFormat.format(timeIdToDate(timeId))} $author:")
     println(content)
     println()
   }
+
+  private def timeIdToDate(timeId: UUID) = new Date((timeId.timestamp() - 0x01b21dd213814000L) / 10000)
 }
