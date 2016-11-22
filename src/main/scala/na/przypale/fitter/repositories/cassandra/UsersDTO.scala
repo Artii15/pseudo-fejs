@@ -1,5 +1,5 @@
 package na.przypale.fitter.repositories.cassandra
 
-import java.util.Date
+import java.util.UUID
 
-case class UsersDTO(nick: String, password: String, creationTime: Date)
+case class UsersDTO(nick: String, password: String, timeId: UUID)

@@ -1,5 +1,5 @@
 package na.przypale.fitter.entities
 
-import java.util.Date
+import java.util.UUID
 
-case class Post(author: String, creationTime: Date, content: String)
+case class Post(author: String, timeId: UUID, content: String)

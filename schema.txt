@@ -7,26 +7,28 @@ USE Test;
 DROP TABLE IF EXISTS users;
 CREATE TABLE users (
     nick varchar,
+    searchable_nick varchar,
     password varchar,
-    creation_time timestamp,
-    PRIMARY KEY (nick, creation_time)
+    time_id timeuuid,
+    PRIMARY KEY (nick, time_id)
 );
 
--- TODO Need to overcome the limit of 2 billion posts per author
--- TODO Set default descending order on creation_time column
--- TODO Add timeuuid
+DROP INDEX IF EXISTS user_nick_prefix;
+CREATE CUSTOM INDEX user_nick_prefix ON users(searchable_nick)
+USING 'org.apache.cassandra.index.sasi.SASIIndex';
+
 DROP TABLE IF EXISTS posts;
 CREATE TABLE posts (
     author varchar,
-    creation_time timestamp,
+    time_id timeuuid,
     content text,
-    PRIMARY KEY(author, creation_time)
-);
+    PRIMARY KEY(author, time_id)
+)
+WITH CLUSTERING ORDER BY (time_id DESC);
 
--- TODO Replace set with cluster column
 DROP TABLE IF EXISTS subscriptions;
 CREATE TABLE subscriptions (
     subscriber varchar,
-    users set<varchar>,
-    PRIMARY KEY(subscriber)
+    subscribed_person varchar,
+    PRIMARY KEY(subscriber, subscribed_person)
 );

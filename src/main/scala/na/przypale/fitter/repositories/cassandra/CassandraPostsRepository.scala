@@ -1,6 +1,8 @@
 package na.przypale.fitter.repositories.cassandra
 
 import com.datastax.driver.core.Session
+import com.datastax.driver.core.utils.UUIDs
+import na.przypale.fitter.Config
 import na.przypale.fitter.entities.Post
 import na.przypale.fitter.repositories.PostsRepository
 
@@ -8,42 +10,36 @@ import scala.collection.JavaConverters
 
 class CassandraPostsRepository(session: Session) extends PostsRepository {
 
-  val insertPostStatement = session.prepare(
-    "INSERT INTO posts(author, creation_time, content) VALUES(:author, :creationTime, :content)")
+  lazy val insertPostStatement = session.prepare(
+    "INSERT INTO posts(author, time_id, content) " +
+    "VALUES(:author, :timeId, :content)")
   override def create(post: Post): Unit = {
-    val Post(author, creationTime, content) = post
+    val Post(author, timeId, content) = post
 
     val insertPostQuery = insertPostStatement.bind()
       .setString("author", author)
-      .setTimestamp("creationTIme", creationTime)
+      .setUUID("timeId", timeId)
       .setString("content", content)
 
     session.execute(insertPostQuery)
   }
 
-  val findByAuthorNoPostSkipping = session.prepare(
-    "SELECT author, creation_time, content " +
+  lazy val findByAuthorStatement = session.prepare(
+    "SELECT author, time_id, content " +
     "FROM posts " +
-    "WHERE author IN :authors " +
-    "ORDER BY creation_time DESC " +
-    "LIMIT 10")
-  val findByAuthorWithPostSkipping = session.prepare(
-    "SELECT author, creation_time, content " +
-    "FROM posts " +
-    "WHERE author IN :authors AND creation_time < :creationTime " +
-    "ORDER BY creation_time DESC " +
-    "LIMIT 10")
+    "WHERE author IN :authors AND time_id < :timeId " +
+    s"LIMIT ${Config.DEFAULT_PAGE_SIZE}"
+  )
   override def findByAuthors(authors: Iterable[String], lastPostToSkip: Option[Post] = None) = {
     val postsAuthors = JavaConverters.seqAsJavaList(authors.toSeq)
-    val query = lastPostToSkip match {
-      case None => findByAuthorNoPostSkipping.bind().setList("authors", postsAuthors)
-      case Some(post) => findByAuthorWithPostSkipping.bind()
-        .setList("authors", postsAuthors)
-        .setTimestamp("creationTime", post.creationTime)
-    }
+    val timeId = UUIDs.endOf(System.currentTimeMillis())
+
+    val query = findByAuthorStatement.bind()
+      .setList("authors", postsAuthors)
+      .setUUID("timeId", timeId)
     query.setFetchSize(Integer.MAX_VALUE)
 
     JavaConverters.collectionAsScalaIterable(session.execute(query).all()).toVector
-      .map(row => Post(row.getString("author"), row.getTimestamp("creation_time"), row.getString("content")))
+      .map(row => Post(row.getString("author"), row.getUUID("time_id"), row.getString("content")))
   }
 }
