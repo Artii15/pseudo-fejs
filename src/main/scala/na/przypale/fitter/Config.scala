@@ -1,5 +1,5 @@
 package na.przypale.fitter
 
 object Config {
-  val DEFAULT_PAGE_SIZE = 1
+  val DEFAULT_PAGE_SIZE = 10
 }
