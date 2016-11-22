@@ -75,7 +75,7 @@ class CassandraUsersRepository(val session: Session) extends UsersRepository {
     "AND token(nick) > token(:lastRowNickToken) " +
     s"LIMIT ${Config.DEFAULT_PAGE_SIZE}")
   private lazy val searchByNickNoSkipStatement = session.prepare(
-    "SELECT nick " +
+    "SELECT * " +
     "FROM users " +
     "WHERE searchable_nick LIKE :term " +
     s"LIMIT ${Config.DEFAULT_PAGE_SIZE}")
