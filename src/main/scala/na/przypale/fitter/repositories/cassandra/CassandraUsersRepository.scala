@@ -68,7 +68,8 @@ class CassandraUsersRepository(val session: Session) extends UsersRepository {
     session.execute(query)
   }
 
-  private val searchByNickStatement = session.prepare("SELECT nick, password FROM users WHERE searchable_nick LIKE :term")
+  private val searchByNickStatement = session.prepare(
+    "SELECT nick, password FROM users WHERE searchable_nick LIKE :term LIMIT ")
   override def searchByNickTerm(searchedTerm: String): Iterable[User] = {
     val query = searchByNickStatement.bind()
       .setString("term", s"$searchedTerm%")

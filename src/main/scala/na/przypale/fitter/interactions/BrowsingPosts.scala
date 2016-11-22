@@ -3,6 +3,7 @@ package na.przypale.fitter.interactions
 import java.text.SimpleDateFormat
 import java.util.{Date, UUID}
 
+import na.przypale.fitter.Config
 import na.przypale.fitter.controls.PostControls
 import na.przypale.fitter.entities.{Post, User}
 import na.przypale.fitter.menu.{Action, ActionIntId}
@@ -25,7 +26,7 @@ class BrowsingPosts(postsRepository: PostsRepository, subscriptionsRepository: S
     val posts = postsRepository.findByAuthors(subscribedPeople, lastDisplayedPost)
     posts.foreach(display)
 
-    if(posts.isEmpty || posts.size < postsRepository.NUMBER_OF_POSTS_PER_PAGE)
+    if(posts.isEmpty || posts.size < Config.DEFAULT_PAGE_SIZE)
       println("No more posts to display")
     else {
       val Action(ActionIntId(actionId), _) = postsControls.interact()
