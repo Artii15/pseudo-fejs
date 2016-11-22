@@ -7,7 +7,7 @@ import scala.runtime.BoxedUnit;
 
 public class Main {
     public static void main(String[] args) {
-        ClusterConnector.connect("127.0.0.1").apply(cluster -> {
+        ClusterConnector.connect("192.168.1.169").apply(cluster -> {
             SessionConnector.connect(cluster).apply("test").apply(session -> {
                 startApp(session);
                 return BoxedUnit.UNIT;

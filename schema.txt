@@ -32,3 +32,15 @@ CREATE TABLE subscriptions (
     subscribed_person varchar,
     PRIMARY KEY(subscriber, subscribed_person)
 );
+
+DROP TABLE IF EXISTS comments;
+CREATE TABLE comments (
+     post_author varchar,
+     post_time_id timeuuid,
+     comment_time_id timeuuid,
+     comment_author varchar,
+     content text,
+     id uuid,
+     parent_id uuid,
+     PRIMARY KEY((post_author, post_time_id), comment_time_id, comment_author)
+);
