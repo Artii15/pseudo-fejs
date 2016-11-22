@@ -2,6 +2,7 @@ package na.przypale.fitter.repositories.cassandra
 
 import com.datastax.driver.core.Session
 import com.datastax.driver.core.utils.UUIDs
+import na.przypale.fitter.Config
 import na.przypale.fitter.entities.{User, UsersSearchRow}
 import na.przypale.fitter.repositories.UsersRepository
 import na.przypale.fitter.repositories.exceptions.{UserAlreadyExistsException, UserNotExistsException}
@@ -68,10 +69,23 @@ class CassandraUsersRepository(val session: Session) extends UsersRepository {
   }
 
   private lazy val searchByNickStatement = session.prepare(
-    "SELECT nick FROM users WHERE searchable_nick LIKE :term LIMIT ")
+    "SELECT nick " +
+    "FROM users " +
+    "WHERE searchable_nick LIKE :term " +
+    "AND token(nick) > token(:lastRowNickToken) " +
+    s"LIMIT ${Config.DEFAULT_PAGE_SIZE}")
+  private lazy val searchByNickNoSkipStatement = session.prepare(
+    "SELECT nick " +
+    "FROM users " +
+    "WHERE searchable_nick LIKE :term " +
+    s"LIMIT ${Config.DEFAULT_PAGE_SIZE}")
   override def searchByNickTerm(searchedTerm: String, lastRow: Option[UsersSearchRow] = None): Iterable[UsersSearchRow] = {
-    val query = searchByNickStatement.bind()
-      .setString("term", s"$searchedTerm%")
+    val query = lastRow match {
+      case Some(UsersSearchRow(nick)) => searchByNickStatement.bind()
+        .setString("lastRowNickToken", nick)
+      case _ => searchByNickNoSkipStatement.bind()
+    }
+    query.setString("term", s"$searchedTerm%")
 
     JavaConverters.collectionAsScalaIterable(session.execute(query).all())
       .map(row => UsersSearchRow(row.getString("nick")))
