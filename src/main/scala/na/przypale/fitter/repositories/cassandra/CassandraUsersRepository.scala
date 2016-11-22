@@ -25,7 +25,7 @@ class CassandraUsersRepository(val session: Session) extends UsersRepository {
   }
 
   private val insertUserStatement = session.prepare(
-    "INSERT INTO users(nick, password, time_id) VALUES(:nick, :password, :timeId)")
+    "INSERT INTO users(nick, searchable_nick, password, time_id) VALUES(:nick, :nick, :password, :timeId)")
   private def forceInsert(user: UsersDTO) {
     val statement = insertUserStatement.bind()
       .setString("nick", user.nick)
@@ -66,5 +66,14 @@ class CassandraUsersRepository(val session: Session) extends UsersRepository {
       .setString("nick", user.nick)
 
     session.execute(query)
+  }
+
+  private val searchByNickStatement = session.prepare("SELECT nick, password FROM users WHERE searchable_nick LIKE :term")
+  override def searchByNickTerm(searchedTerm: String): Iterable[User] = {
+    val query = searchByNickStatement.bind()
+      .setString("term", s"$searchedTerm%")
+
+    JavaConverters.collectionAsScalaIterable(session.execute(query).all())
+      .map(row => User(row.getString("nick"), row.getString("password")))
   }
 }

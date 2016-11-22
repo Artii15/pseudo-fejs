@@ -7,10 +7,15 @@ USE Test;
 DROP TABLE IF EXISTS users;
 CREATE TABLE users (
     nick varchar,
+    searchable_nick varchar,
     password varchar,
     time_id timeuuid,
     PRIMARY KEY (nick, time_id)
 );
+
+DROP INDEX IF EXISTS user_nick_prefix;
+CREATE CUSTOM INDEX user_nick_prefix ON users(searchable_nick)
+USING 'org.apache.cassandra.index.sasi.SASIIndex';
 
 DROP TABLE IF EXISTS posts;
 CREATE TABLE posts (
