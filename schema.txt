@@ -32,3 +32,12 @@ CREATE TABLE subscriptions (
     subscribed_person varchar,
     PRIMARY KEY(subscriber, subscribed_person)
 );
+
+DROP TABLE IF EXISTS posts_counters;
+CREATE TABLE posts_counters (
+    author varchar,
+    time_id timeuuid,
+    likes counter,
+    comments counter,
+    PRIMARY KEY(author, time_id)
+);
