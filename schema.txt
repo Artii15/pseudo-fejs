@@ -40,3 +40,24 @@ CREATE TABLE posts_counters (
     comments counter,
     PRIMARY KEY(author, time_id)
 );
+
+DROP TABLE IF EXISTS events;
+CREATE TABLE events (
+    year int,
+    start_date timestamp,
+    end_date timestamp,
+    id uuid,
+    participants set<varchar>,
+    description text,
+    author varchar,
+    name varchar,
+    PRIMARY KEY(year, start_date, end_date, id)
+);
+
+DROP TABLE IF EXISTS events_counters;
+CREATE TABLE events_counters (
+    id uuid,
+    max_users_count counter,
+    current_users_count counter,
+    PRIMARY KEY(id)
+);
