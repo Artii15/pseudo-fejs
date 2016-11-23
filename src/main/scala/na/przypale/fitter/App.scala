@@ -17,7 +17,7 @@ object App {
     val deletingUser = new DeletingUser(usersRepository)
     val creatingPost = new CreatingPost(postsRepository)
     val subscribingUser = new SubscribingUser(usersRepository, subscriptionsRepository)
-    val browsingPosts = new BrowsingPosts(postsRepository, subscriptionsRepository)
+    val browsingPosts = new BrowsingPosts(postsRepository, subscriptionsRepository, new DisplayingPost())
     val searchingForUsers = new SearchingForUsers(usersRepository)
 
     val loggedUserControlsFactory = LoggedUserControls.makeFactory(creatingPost, deletingUser, subscribingUser,
