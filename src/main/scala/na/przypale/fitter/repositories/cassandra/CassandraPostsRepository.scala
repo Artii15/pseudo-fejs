@@ -3,7 +3,7 @@ package na.przypale.fitter.repositories.cassandra
 import com.datastax.driver.core.Session
 import com.datastax.driver.core.utils.UUIDs
 import na.przypale.fitter.Config
-import na.przypale.fitter.entities.Post
+import na.przypale.fitter.entities.{Post, UserContent}
 import na.przypale.fitter.repositories.PostsRepository
 
 import scala.collection.JavaConverters
@@ -14,7 +14,7 @@ class CassandraPostsRepository(session: Session) extends PostsRepository {
     "INSERT INTO posts(author, time_id, content) " +
     "VALUES(:author, :timeId, :content)")
   override def create(post: Post): Unit = {
-    val Post(author, timeId, content) = post
+    val Post(UserContent(author, timeId, content)) = post
 
     val insertPostQuery = insertPostStatement.bind()
       .setString("author", author)
@@ -40,6 +40,6 @@ class CassandraPostsRepository(session: Session) extends PostsRepository {
     query.setFetchSize(Integer.MAX_VALUE)
 
     JavaConverters.collectionAsScalaIterable(session.execute(query).all()).toVector
-      .map(row => Post(row.getString("author"), row.getUUID("time_id"), row.getString("content")))
+      .map(row => Post(UserContent(row.getString("author"), row.getUUID("time_id"), row.getString("content"))))
   }
 }

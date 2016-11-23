@@ -3,9 +3,8 @@ package na.przypale.fitter.interactions
 import java.text.SimpleDateFormat
 import java.util.{Date, UUID}
 
-import na.przypale.fitter.Config
 import na.przypale.fitter.controls.PostsControls
-import na.przypale.fitter.entities.{EnumeratedPost, Post, User}
+import na.przypale.fitter.entities.{EnumeratedPost, Post, User, UserContent}
 import na.przypale.fitter.menu.ActionIntId
 import na.przypale.fitter.repositories.{PostsRepository, SubscriptionsRepository}
 
@@ -29,17 +28,19 @@ class BrowsingPosts(postsRepository: PostsRepository,
     val enumeratedPosts = enumerate(posts)
     enumeratedPosts.foreach(display)
 
-    if(posts.isEmpty || posts.size < Config.DEFAULT_PAGE_SIZE) println("No more posts to display")
-    postsControls.interact().id match {
-      case ActionIntId(PostsControls.MORE_POSTS_ACTION_ID) => searchPosts(subscribedPeople, posts.lastOption)
-      case ActionIntId(PostsControls.DISPLAY_POST_ACTION_ID) =>
-      case _ =>
+    if(posts.isEmpty) println("No more posts to display")
+    else {
+      postsControls.interact().id match {
+        case ActionIntId(PostsControls.MORE_POSTS_ACTION_ID) => searchPosts(subscribedPeople, posts.lastOption)
+        case ActionIntId(PostsControls.DISPLAY_POST_ACTION_ID) =>
+        case _ =>
+      }
     }
   }
 
   val postDateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss")
   private def display(enumeratedPost: EnumeratedPost): Unit = {
-    val EnumeratedPost(number, Post(author, timeId, content)) = enumeratedPost
+    val EnumeratedPost(number, Post(UserContent(author, timeId, content))) = enumeratedPost
     println(s"$number - ${postDateFormat.format(timeIdToDate(timeId))} $author:")
     println(content)
     println()
