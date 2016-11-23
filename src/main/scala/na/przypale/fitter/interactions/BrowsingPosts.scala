@@ -3,6 +3,7 @@ package na.przypale.fitter.interactions
 import java.text.SimpleDateFormat
 import java.util.{Date, UUID}
 
+import na.przypale.fitter.CommandLineReader
 import na.przypale.fitter.controls.PostsControls
 import na.przypale.fitter.entities.{EnumeratedPost, Post, User, UserContent}
 import na.przypale.fitter.menu.ActionIntId
@@ -33,6 +34,8 @@ class BrowsingPosts(postsRepository: PostsRepository,
       postsControls.interact().id match {
         case ActionIntId(PostsControls.MORE_POSTS_ACTION_ID) => searchPosts(subscribedPeople, posts.lastOption)
         case ActionIntId(PostsControls.DISPLAY_POST_ACTION_ID) =>
+          letUserSelectPost(enumeratedPosts)
+          searchPosts(subscribedPeople, posts.lastOption)
         case _ =>
       }
     }
@@ -44,6 +47,17 @@ class BrowsingPosts(postsRepository: PostsRepository,
     println(s"$number - ${postDateFormat.format(timeIdToDate(timeId))} $author:")
     println(content)
     println()
+  }
+
+  private def letUserSelectPost(posts: Iterable[EnumeratedPost]): Unit = {
+    print("Post nr: ")
+    val selectedPostNr = CommandLineReader.readInt()
+    posts.find(post => post.number == selectedPostNr) match {
+      case None =>
+        println("Invalid post number")
+        letUserSelectPost(posts)
+      case Some(post) => displayingPost.display(post)
+    }
   }
 
   private def enumerate(posts: Iterable[Post]): Iterable[EnumeratedPost] = posts.zip(Stream.from(1))
