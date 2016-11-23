@@ -3,7 +3,6 @@ WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 4 };
 
 USE Test;
 
--- TODO Add SASI index for users nicks
 DROP TABLE IF EXISTS users;
 CREATE TABLE users (
     nick varchar,
