@@ -56,7 +56,7 @@ class BrowsingPosts(postsRepository: PostsRepository,
       case None =>
         println("Invalid post number")
         letUserSelectPost(user, posts)
-      case Some(post) => displayingPost.display(user, post)
+      case Some(post) => displayingPost.display(user, post.post)
     }
   }
 

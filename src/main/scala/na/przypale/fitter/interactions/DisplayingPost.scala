@@ -15,12 +15,13 @@ class DisplayingPost(commentsRepository: CommentsRepository, creatingComment: Cr
 
   val commentsControls = new CommentsControls
 
-  def display(user: User, enumeratedPost: EnumeratedPost): Unit = {
-    searchComments(user, enumeratedPost.post)
+  def display(user: User, userContent: UserContent): Unit = {
+    searchComments(user, userContent)
   }
 
   @tailrec
-  private def searchComments(user: User, post: Post, lastDisplayedComment: Option[Comment] = None) {
+  private def searchComments(user: User, userContent: UserContent, lastDisplayedComment: Option[Comment] = None) {
+    val post = extractPost(userContent)
     val comments = commentsRepository.findByPost(post, lastDisplayedComment)
     val enumeratedComments = enumerate(comments)
     displayPost(post)
@@ -56,4 +57,11 @@ class DisplayingPost(commentsRepository: CommentsRepository, creatingComment: Cr
     .map{case (comment, index) => EnumeratedComment(index, comment) }
 
   private def timeIdToDate(timeId: UUID) = new Date((timeId.timestamp() - 0x01b21dd213814000L) / 10000)
+
+  private def extractPost(userContent: UserContent): Post = {
+    userContent match {
+      case Post(author, timeId, content) => Post(author, timeId, content)
+      case Comment(postAuthor, postTimeId, _, _, _, _, _) => Post(postAuthor, postTimeId, null)
+    }
+  }
 }
