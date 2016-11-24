@@ -16,7 +16,6 @@ class DisplayingPost(commentsRepository: CommentsRepository, creatingComment: Cr
   val commentsControls = new CommentsControls
 
   def display(user: User, enumeratedPost: EnumeratedPost): Unit = {
-    displayPost(enumeratedPost.post)
     searchComments(user, enumeratedPost.post)
   }
 
@@ -24,13 +23,16 @@ class DisplayingPost(commentsRepository: CommentsRepository, creatingComment: Cr
   private def searchComments(user: User, post: Post, lastDisplayedComment: Option[Comment] = None) {
     val comments = commentsRepository.findByPost(post, lastDisplayedComment)
     val enumeratedComments = enumerate(comments)
+    displayPost(post)
     enumeratedComments.foreach(displayComment)
 
     if(comments.isEmpty || comments.size < Config.DEFAULT_PAGE_SIZE)
       println("No more comments to display")
     commentsControls.interact().id match {
       case ActionIntId(CommentsControls.MORE_COMMENTS_ACTION_ID) => searchComments(user, post, comments.lastOption)
-      case ActionIntId(CommentsControls.CREATE_COMMENT_ACTION_ID) => creatingComment.create(user, post)
+      case ActionIntId(CommentsControls.CREATE_COMMENT_ACTION_ID) =>
+        creatingComment.create(user, post)
+        searchComments(user, post)
       case _ =>
     }
   }
