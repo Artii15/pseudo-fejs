@@ -1,8 +1,10 @@
 package na.przypale.fitter.controls
+import na.przypale.fitter.entities.User
 import na.przypale.fitter.interactions._
 import na.przypale.fitter.menu.{Action, ActionIntId, Menu}
 
-class EventsControls(creatingEvent: CreatingEvent,
+class EventsControls(loggedUser: User,
+                     creatingEvent: CreatingEvent,
                      browsingEvents: BrowsingEvents,
                      joiningEvent: JoiningEvent,
                      leavingEvent: LeavingEvent,
@@ -10,7 +12,7 @@ class EventsControls(creatingEvent: CreatingEvent,
   override protected def getMenu: Menu = EventsControls.menu
 
   override protected def handle(action: Action): Unit = action.id match {
-    case ActionIntId(EventsControls.CREATE_ACTION_ID) => creatingEvent.create()
+    case ActionIntId(EventsControls.CREATE_ACTION_ID) => creatingEvent.create(loggedUser.nick)
     case ActionIntId(EventsControls.BROWSE_ACTION_ID) => browsingEvents.browse()
     case ActionIntId(EventsControls.JOIN_ACTION_ID) => joiningEvent.join()
     case ActionIntId(EventsControls.LEAVE_ACTION_ID) => leavingEvent.leave()
