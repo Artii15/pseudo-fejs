@@ -12,9 +12,9 @@ class CreatingComment(commentsRepository: CommentsRepository) {
 
     userContent match {
       case Comment(postAuthor, postTimeId, commentTimeId, commentAuthor, content, id, parentId) =>
-        commentsRepository.create(Comment(postAuthor, postTimeId, UUIDs.timeBased(), user.nick, commentText, UUIDs.timeBased(), id))
+        commentsRepository.create(Comment(postAuthor, postTimeId, UUIDs.timeBased(), user.nick, commentText, UUIDs.random(), id))
       case Post(author, timeId, content) =>
-        commentsRepository.create(Comment(author, timeId, UUIDs.timeBased(), user.nick, commentText, UUIDs.timeBased(), null))
+        commentsRepository.create(Comment(author, timeId, UUIDs.timeBased(), user.nick, commentText, UUIDs.random(), null))
       case _ =>
     }
 

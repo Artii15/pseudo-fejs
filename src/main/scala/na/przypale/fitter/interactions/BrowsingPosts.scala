@@ -20,11 +20,11 @@ class BrowsingPosts(postsRepository: PostsRepository,
   final def browse(user: User): Unit = {
     val subscribedPeople = subscriptionsRepository.findSubscriptionsOf(user.nick)
         .map(subscription => subscription.subscribedPersonNick)
-    searchPosts(subscribedPeople)
+    searchPosts(user, subscribedPeople)
   }
 
   @tailrec
-  private def searchPosts(subscribedPeople: Iterable[String], lastDisplayedPost: Option[Post] = None) {
+  private def searchPosts(user: User, subscribedPeople: Iterable[String], lastDisplayedPost: Option[Post] = None) {
     val posts = postsRepository.findByAuthors(subscribedPeople, lastDisplayedPost)
     val enumeratedPosts = enumerate(posts)
     enumeratedPosts.foreach(display)
@@ -32,10 +32,10 @@ class BrowsingPosts(postsRepository: PostsRepository,
     if(posts.isEmpty) println("No more posts to display")
     else {
       postsControls.interact().id match {
-        case ActionIntId(PostsControls.MORE_POSTS_ACTION_ID) => searchPosts(subscribedPeople, posts.lastOption)
+        case ActionIntId(PostsControls.MORE_POSTS_ACTION_ID) => searchPosts(user, subscribedPeople, posts.lastOption)
         case ActionIntId(PostsControls.DISPLAY_POST_ACTION_ID) =>
-          letUserSelectPost(enumeratedPosts)
-          searchPosts(subscribedPeople, posts.lastOption)
+          letUserSelectPost(user, enumeratedPosts)
+          searchPosts(user, subscribedPeople, posts.lastOption)
         case _ =>
       }
     }
@@ -49,14 +49,14 @@ class BrowsingPosts(postsRepository: PostsRepository,
     println()
   }
 
-  private def letUserSelectPost(posts: Iterable[EnumeratedPost]): Unit = {
+  private def letUserSelectPost(user: User, posts: Iterable[EnumeratedPost]): Unit = {
     print("Post nr: ")
     val selectedPostNr = CommandLineReader.readInt()
     posts.find(post => post.number == selectedPostNr) match {
       case None =>
         println("Invalid post number")
-        letUserSelectPost(posts)
-      case Some(post) => displayingPost.display(post)
+        letUserSelectPost(user, posts)
+      case Some(post) => displayingPost.display(user, post)
     }
   }
 

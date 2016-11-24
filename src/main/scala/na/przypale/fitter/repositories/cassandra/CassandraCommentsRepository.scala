@@ -15,7 +15,6 @@ class CassandraCommentsRepository(session: Session) extends CommentsRepository {
       "VALUES(:postAuthor, :postTimeId, :commentTimeId, :commentAuthor, :content, :id, :parentId)")
 
   override def create(comment: Comment): Unit = {
-    //val Post(postAuthor, postTimeId, postContent) = post
     val Comment(postAuthor, postTimeId, commentTimeId, commentAuthor, content, id, parentId) = comment
 
     val insertCommentQuery = insertCommentStatement.bind()
@@ -38,7 +37,10 @@ class CassandraCommentsRepository(session: Session) extends CommentsRepository {
   )
 
   override def findByPost(post: Post, lastCommentToSkip: Option[Comment]): Iterable[Comment] = {
-    val timeId = UUIDs.endOf(System.currentTimeMillis())
+    val timeId = lastCommentToSkip match {
+      case Some(comment) => comment.commentTimeId
+      case None => null
+    }
 
     val query = findByPostStatement.bind()
       .setString("postAuthor", post.author)
