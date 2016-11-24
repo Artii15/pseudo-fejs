@@ -7,12 +7,12 @@ class PostsControls extends PassiveControls {
 
 object PostsControls {
   val MORE_POSTS_ACTION_ID = 1
-  val BROWSE_COMMENTS_ACTION_ID = 2
+  val DISPLAY_POST_ACTION_ID = 2
   val EXIT_ACTION_ID = 3
 
   val menu = Menu(List(
     Action(ActionIntId(MORE_POSTS_ACTION_ID), s"$MORE_POSTS_ACTION_ID - More"),
-    Action(ActionIntId(BROWSE_COMMENTS_ACTION_ID), s"$BROWSE_COMMENTS_ACTION_ID - Browse comments"),
+    Action(ActionIntId(DISPLAY_POST_ACTION_ID), s"$DISPLAY_POST_ACTION_ID - Display post"),
     Action(ActionIntId(EXIT_ACTION_ID), s"$EXIT_ACTION_ID - Exit")
   ))
 }

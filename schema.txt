@@ -3,7 +3,6 @@ WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 4 };
 
 USE Test;
 
--- TODO Add SASI index for users nicks
 DROP TABLE IF EXISTS users;
 CREATE TABLE users (
     nick varchar,
@@ -52,4 +51,25 @@ CREATE TABLE comments (
      id uuid,
      parent_id uuid,
      PRIMARY KEY((post_author, post_time_id), comment_time_id, comment_author)
+);
+
+DROP TABLE IF EXISTS events;
+CREATE TABLE events (
+    year int,
+    start_date timestamp,
+    end_date timestamp,
+    id uuid,
+    participants set<varchar>,
+    description text,
+    author varchar,
+    name varchar,
+    PRIMARY KEY(year, start_date, end_date, id)
+);
+
+DROP TABLE IF EXISTS events_counters;
+CREATE TABLE events_counters (
+    id uuid,
+    max_users_count counter,
+    current_users_count counter,
+    PRIMARY KEY(id)
 );
