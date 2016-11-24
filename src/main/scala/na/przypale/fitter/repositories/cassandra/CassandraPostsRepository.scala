@@ -3,18 +3,18 @@ package na.przypale.fitter.repositories.cassandra
 import com.datastax.driver.core.Session
 import com.datastax.driver.core.utils.UUIDs
 import na.przypale.fitter.Config
-import na.przypale.fitter.entities.Post
+import na.przypale.fitter.entities.{Post, UserContent}
 import na.przypale.fitter.repositories.PostsRepository
 
 import scala.collection.JavaConverters
 
 class CassandraPostsRepository(session: Session) extends PostsRepository {
 
-  lazy val insertPostStatement = session.prepare(
+  private lazy val insertPostStatement = session.prepare(
     "INSERT INTO posts(author, time_id, content) " +
     "VALUES(:author, :timeId, :content)")
   override def create(post: Post): Unit = {
-    val Post(author, timeId, content) = post
+    val Post(UserContent(author, timeId, content)) = post
 
     val insertPostQuery = insertPostStatement.bind()
       .setString("author", author)
@@ -24,13 +24,13 @@ class CassandraPostsRepository(session: Session) extends PostsRepository {
     session.execute(insertPostQuery)
   }
 
-  lazy val findByAuthorStatement = session.prepare(
+  private lazy val findByAuthorStatement = session.prepare(
     "SELECT author, time_id, content " +
     "FROM posts " +
     "WHERE author IN :authors AND time_id < :timeId " +
     s"LIMIT ${Config.DEFAULT_PAGE_SIZE}"
   )
-  override def findByAuthors(authors: Iterable[String], lastPostToSkip: Option[Post] = None) = {
+  override def findByAuthors(authors: Iterable[String], lastPostToSkip: Option[Post] = None): Iterable[Post] = {
     val postsAuthors = JavaConverters.seqAsJavaList(authors.toSeq)
     val timeId = UUIDs.endOf(System.currentTimeMillis())
 
@@ -40,6 +40,6 @@ class CassandraPostsRepository(session: Session) extends PostsRepository {
     query.setFetchSize(Integer.MAX_VALUE)
 
     JavaConverters.collectionAsScalaIterable(session.execute(query).all()).toVector
-      .map(row => Post(row.getString("author"), row.getUUID("time_id"), row.getString("content")))
+      .map(row => Post(UserContent(row.getString("author"), row.getUUID("time_id"), row.getString("content"))))
   }
 }
