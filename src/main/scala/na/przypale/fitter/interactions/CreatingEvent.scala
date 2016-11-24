@@ -20,7 +20,10 @@ class CreatingEvent(eventsRepository: EventsRepository) {
     print(s"Event end date ($datesFormat): ")
     val endDate = CommandLineReader.readDate(datesFormat)
 
-    val event = Event(UUIDs.random(), beginDate, endDate, name, description, creator)
+    print("Max participants count: ")
+    val maxParticipantsCount = CommandLineReader.readInt()
+
+    val event = Event(UUIDs.random(), beginDate, endDate, maxParticipantsCount, name, description, creator)
     eventsRepository.create(event)
   }
 }

@@ -57,7 +57,7 @@ CREATE TABLE events (
 DROP TABLE IF EXISTS events_counters;
 CREATE TABLE events_counters (
     id uuid,
-    max_users_count counter,
+    max_users_count int,
     current_users_count counter,
-    PRIMARY KEY(id)
+    PRIMARY KEY(id, max_users_count)
 );
