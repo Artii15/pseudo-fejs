@@ -14,7 +14,7 @@ class CassandraPostsRepository(session: Session) extends PostsRepository {
     "INSERT INTO posts(author, time_id, content) " +
     "VALUES(:author, :timeId, :content)")
   override def create(post: Post): Unit = {
-    val Post(UserContent(author, timeId, content)) = post
+    val Post(author, timeId, content) = post
 
     val insertPostQuery = insertPostStatement.bind()
       .setString("author", author)
@@ -40,6 +40,6 @@ class CassandraPostsRepository(session: Session) extends PostsRepository {
     query.setFetchSize(Integer.MAX_VALUE)
 
     JavaConverters.collectionAsScalaIterable(session.execute(query).all()).toVector
-      .map(row => Post(UserContent(row.getString("author"), row.getUUID("time_id"), row.getString("content"))))
+      .map(row => Post(row.getString("author"), row.getUUID("time_id"), row.getString("content")))
   }
 }

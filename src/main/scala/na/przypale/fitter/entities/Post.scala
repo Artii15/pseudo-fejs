@@ -1,3 +1,6 @@
 package na.przypale.fitter.entities
 
-case class Post(content: UserContent)
+import java.util.UUID
+
+//case class Post(content: UserContent)
+case class  Post(author: String, timeId: UUID, content: String) extends UserContent

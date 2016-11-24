@@ -42,7 +42,7 @@ class CassandraCommentsRepository(session: Session) extends CommentsRepository {
 
     val query = findByPostStatement.bind()
       .setString("postAuthor", post.author)
-      .setUUID("post_time_id", post.timeId)
+      .setUUID("postTimeId", post.timeId)
       .setUUID("timeId", timeId)
     query.setFetchSize(Integer.MAX_VALUE)
 

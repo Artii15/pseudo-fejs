@@ -10,6 +10,6 @@ class CreatingPost(postsRepository: PostsRepository) {
     print("Content: ")
     val content = CommandLineReader.readString()
 
-    postsRepository.create(Post(UserContent(user.nick, UUIDs.timeBased(), content)))
+    postsRepository.create(Post(user.nick, UUIDs.timeBased(), content))
   }
 }

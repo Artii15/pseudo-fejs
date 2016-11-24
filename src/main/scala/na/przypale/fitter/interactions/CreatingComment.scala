@@ -2,14 +2,21 @@ package na.przypale.fitter.interactions
 
 import com.datastax.driver.core.utils.UUIDs
 import na.przypale.fitter.CommandLineReader
-import na.przypale.fitter.entities.{Comment, Post, User}
+import na.przypale.fitter.entities.{Comment, Post, User, UserContent}
 import na.przypale.fitter.repositories.CommentsRepository
 
 class CreatingComment(commentsRepository: CommentsRepository) {
-  def create(user: User, post: Post): Unit = {
+  def create(user: User, userContent: UserContent): Unit = {
     print("Content: ")
-    val content = CommandLineReader.readString()
+    val commentText = CommandLineReader.readString()
 
-    commentsRepository.create(Comment(post.author, post.timeId, UUIDs.timeBased(), user.nick, content, UUIDs.timeBased(), null))
+    userContent match {
+      case Comment(postAuthor, postTimeId, commentTimeId, commentAuthor, content, id, parentId) =>
+        commentsRepository.create(Comment(postAuthor, postTimeId, UUIDs.timeBased(), user.nick, commentText, UUIDs.timeBased(), id))
+      case Post(author, timeId, content) =>
+        commentsRepository.create(Comment(author, timeId, UUIDs.timeBased(), user.nick, commentText, UUIDs.timeBased(), null))
+      case _ =>
+    }
+
   }
 }

@@ -43,7 +43,7 @@ class BrowsingPosts(postsRepository: PostsRepository,
 
   val postDateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss")
   private def display(enumeratedPost: EnumeratedPost): Unit = {
-    val EnumeratedPost(number, Post(UserContent(author, timeId, content))) = enumeratedPost
+    val EnumeratedPost(number, Post(author, timeId, content)) = enumeratedPost
     println(s"$number - ${postDateFormat.format(timeIdToDate(timeId))} $author:")
     println(content)
     println()
