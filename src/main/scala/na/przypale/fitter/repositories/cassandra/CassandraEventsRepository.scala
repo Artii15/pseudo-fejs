@@ -46,7 +46,7 @@ class CassandraEventsRepository(session: Session) extends EventsRepository {
   }
 
   private lazy val joinEventStatement = session.prepare(
-    "gt")
+    "SELECT id, max_users_count, current_users_count FROM events_counters WHERE id = :id AND ")
   override def join(eventId: UUID): Unit = {
 
   }

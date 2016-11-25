@@ -44,20 +44,28 @@ CREATE TABLE posts_counters (
 DROP TABLE IF EXISTS events;
 CREATE TABLE events (
     year int,
-    start_date timestamp,
-    end_date timestamp,
+    start_date timeuuid,
+    end_date timeuuid,
     id uuid,
-    participants set<varchar>,
+    max_users_count int,
     description text,
     author varchar,
     name varchar,
-    PRIMARY KEY(year, start_date, end_date, id)
+    PRIMARY KEY(year, start_date, id)
+)
+WITH CLUSTERING ORDER BY (start_date DESC);
+
+DROP TABLE IF EXISTS events_participants;
+CREATE TABLE events_participants (
+    event_id uuid,
+    participant varchar,
+    join_time timestamp,
+    PRIMARY KEY(event_id, participant)
 );
 
 DROP TABLE IF EXISTS events_counters;
 CREATE TABLE events_counters (
-    id uuid,
-    max_users_count int,
+    event_id uuid,
     current_users_count counter,
-    PRIMARY KEY(id, max_users_count)
+    PRIMARY KEY(event_id)
 );
