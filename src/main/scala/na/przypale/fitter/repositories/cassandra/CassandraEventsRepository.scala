@@ -3,7 +3,8 @@ package na.przypale.fitter.repositories.cassandra
 import java.util.{Calendar, UUID}
 
 import com.datastax.driver.core.Session
-import na.przypale.fitter.entities.{Event, EventParticipation}
+import com.datastax.driver.core.utils.UUIDs
+import na.przypale.fitter.entities.{Event, EventParticipation, EventParticipationRequest}
 import na.przypale.fitter.repositories.EventsRepository
 import na.przypale.fitter.repositories.exceptions.AlreadyParticipatesException
 
@@ -46,7 +47,7 @@ class CassandraEventsRepository(session: Session) extends EventsRepository {
     session.execute(createEventCounterQuery)
   }
 
-  override def join(eventParticipation: EventParticipation): Unit = {
+  override def join(eventParticipation: EventParticipationRequest): EventParticipation = {
     findParticipantJoinTime(eventParticipation) match {
       case None => addParticipation(eventParticipation)
       case _ => throw new AlreadyParticipatesException
@@ -55,8 +56,8 @@ class CassandraEventsRepository(session: Session) extends EventsRepository {
 
   private lazy val findParticipantJoinTimeStatement = session.prepare(
     "SELECT join_time FROM events_participants WHERE event_id = :eventId AND participant = :participant")
-  private def findParticipantJoinTime(eventParticipation: EventParticipation): Option[UUID] = {
-    val EventParticipation(participant, eventId) = eventParticipation
+  private def findParticipantJoinTime(eventParticipation: EventParticipationRequest): Option[UUID] = {
+    val EventParticipationRequest(participant, eventId) = eventParticipation
     val query = findParticipantJoinTimeStatement.bind()
       .setUUID("eventId", eventId)
       .setString("participant", participant)
@@ -69,12 +70,17 @@ class CassandraEventsRepository(session: Session) extends EventsRepository {
 
   private lazy val addToParticipantsListStatement = session.prepare(
     "INSERT INTO events_participants(event_id, participant, join_time)" +
-      "VALUES(:eventId, :participant, now())")
-  private def addParticipation(eventParticipation: EventParticipation): Unit = {
+      "VALUES(:eventId, :participant, :joinTime")
+  private def addParticipation(eventParticipationRequest: EventParticipationRequest): EventParticipation = {
+    val applicationTime = UUIDs.timeBased()
+    val EventParticipationRequest(participant, eventId) = eventParticipationRequest
+
     val query = addToParticipantsListStatement.bind()
-      .setUUID("eventId", eventParticipation.eventId)
-      .setString("participant", eventParticipation.participant)
+      .setUUID("eventId", eventId)
+      .setString("participant", participant)
+      .setUUID("joinTime", applicationTime)
 
     session.execute(query)
+    EventParticipation(eventId, participant, applicationTime)
   }
 }
