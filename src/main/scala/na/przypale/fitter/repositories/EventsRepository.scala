@@ -1,10 +1,8 @@
 package na.przypale.fitter.repositories
 
-import java.util.UUID
-
-import na.przypale.fitter.entities.Event
+import na.przypale.fitter.entities.{Event, EventParticipation}
 
 trait EventsRepository {
   def create(event: Event): Unit
-  def join(eventId: UUID): Unit
+  def join(eventParticipation: EventParticipation): Unit
 }

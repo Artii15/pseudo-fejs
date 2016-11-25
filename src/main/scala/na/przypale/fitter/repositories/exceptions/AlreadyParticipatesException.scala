@@ -1,0 +1,3 @@
+package na.przypale.fitter.repositories.exceptions
+
+class AlreadyParticipatesException extends RuntimeException

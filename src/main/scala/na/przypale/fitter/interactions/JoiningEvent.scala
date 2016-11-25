@@ -10,6 +10,6 @@ class JoiningEvent(eventsRepository: EventsRepository) {
     print("Event id: ")
     val eventId = UUID.fromString(CommandLineReader.readString())
 
-    eventsRepository.
+    eventsRepository.join(eventId)
   }
 }
