@@ -1,8 +1,10 @@
 package na.przypale.fitter.repositories.cassandra
 
+import java.util
 import java.util.Calendar
 
-import com.datastax.driver.core.{Session, SimpleStatement}
+import com.datastax.driver.core.{ResultSet, Row, Session, SimpleStatement}
+import na.przypale.fitter.Config
 import na.przypale.fitter.entities.Event
 import na.przypale.fitter.repositories.{Dates, EventsRepository}
 
@@ -34,13 +36,34 @@ class CassandraEventsRepository(session: Session) extends EventsRepository {
     "SELECT year, start_date, end_date, id, description, author, name, max_users_count " +
     "FROM events" +
     "WHERE year IN :years AND start_date > now()")
-  def findIncoming() {}
+  def findIncoming(): Unit = {
+    val currentYear = Dates.currentYear()
+    val eventsYearsToSearch = findEventsYears().filter(year => year >= currentYear)
+
+    val query = findIncomingStatement.bind()
+      .setList("years", JavaConverters.seqAsJavaList(eventsYearsToSearch.toSeq))
+
+    makeEventsStream(session.execute(query).iterator())
+  }
+
+  private def makeEventsStream(iterator: util.Iterator[Row]): Stream[Event] =
+    if(iterator.hasNext)
+      rowToEvent(iterator.next()) #:: makeEventsStream(iterator)
+    else
+      Stream.empty
+
+  private def rowToEvent(row: Row) = Event(
+    row.getUUID("id"),
+    row.getTimestamp("start_date"),
+    row.getTimestamp("end_date"),
+    row.getInt("max_users_count"),
+    row.getString("name"),
+    row.getString("description"),
+    row.getString("author")
+  )
 
   private lazy val findEventsYearsStatement = new SimpleStatement("SELECT year FROM events")
-  def findEventsYears(): Iterable[Int] = {
-    val currentYear = Dates.currentYear()
-    JavaConverters.collectionAsScalaIterable(session.execute(findEventsYearsStatement).all())
-      .map(row => row.getInt("year"))
-      .filter(year => year >= currentYear)
-  }
+  def findEventsYears(): Iterable[Int] = JavaConverters
+    .collectionAsScalaIterable(session.execute(findEventsYearsStatement).all())
+    .map(row => row.getInt("year"))
 }
