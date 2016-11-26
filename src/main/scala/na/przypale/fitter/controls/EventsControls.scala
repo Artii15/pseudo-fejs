@@ -5,18 +5,12 @@ import na.przypale.fitter.menu.{Action, ActionIntId, Menu}
 
 class EventsControls(loggedUser: User,
                      creatingEvent: CreatingEvent,
-                     browsingEvents: BrowsingEvents,
-                     joiningEvent: JoiningEvent,
-                     leavingEvent: LeavingEvent,
-                     deletingEvent: DeletingEvent) extends Controls {
+                     browsingEvents: BrowsingEvents) extends Controls {
   override protected def getMenu: Menu = EventsControls.menu
 
   override protected def handle(action: Action): Unit = action.id match {
     case ActionIntId(EventsControls.CREATE_ACTION_ID) => creatingEvent.create(loggedUser.nick)
     case ActionIntId(EventsControls.BROWSE_ACTION_ID) => browsingEvents.browse()
-    case ActionIntId(EventsControls.JOIN_ACTION_ID) => joiningEvent.join(loggedUser.nick)
-    case ActionIntId(EventsControls.LEAVE_ACTION_ID) => leavingEvent.leave()
-    case ActionIntId(EventsControls.DELETE_ACTION_ID) => deletingEvent.delete()
     case _ =>
   }
 
@@ -42,4 +36,9 @@ object EventsControls {
     Action(ActionIntId(DELETE_ACTION_ID), s"$DELETE_ACTION_ID - Delete event"),
     Action(ActionIntId(EXIT_ACTION_ID), s"$EXIT_ACTION_ID - Exit")
   ))
+
+  def factory(creatingEvent: CreatingEvent, browsingEvents: BrowsingEvents): (User => EventsControls) = {
+
+    user => new EventsControls(user, creatingEvent, browsingEvents)
+  }
 }
