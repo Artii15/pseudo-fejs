@@ -42,6 +42,7 @@ class CassandraEventsRepository(session: Session) extends EventsRepository {
 
     val query = findIncomingStatement.bind()
       .setList("years", JavaConverters.seqAsJavaList(eventsYearsToSearch.toSeq))
+    query.setFetchSize(Config.DEFAULT_PAGE_SIZE)
 
     makeEventsStream(session.execute(query).iterator())
   }
