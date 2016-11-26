@@ -1,9 +1,9 @@
 package na.przypale.fitter.repositories.cassandra
 
 import java.util
-import java.util.Calendar
+import java.util.{Calendar, Date}
 
-import com.datastax.driver.core.{ResultSet, Row, Session, SimpleStatement}
+import com.datastax.driver.core.{Row, Session, SimpleStatement}
 import na.przypale.fitter.Config
 import na.przypale.fitter.entities.Event
 import na.przypale.fitter.repositories.{Dates, EventsRepository}
@@ -34,15 +34,16 @@ class CassandraEventsRepository(session: Session) extends EventsRepository {
 
   private lazy val findIncomingStatement = session.prepare(
     "SELECT year, start_date, end_date, id, description, author, name, max_users_count " +
-    "FROM events" +
-    "WHERE year IN :years AND start_date > now()")
-  def findIncoming(): Unit = {
+    "FROM events " +
+    "WHERE year IN :years AND start_date > :minimalDate")
+
+  override def findIncoming(): Stream[Event] = {
     val currentYear = Dates.currentYear()
     val eventsYearsToSearch = findEventsYears().filter(year => year >= currentYear)
 
     val query = findIncomingStatement.bind()
       .setList("years", JavaConverters.seqAsJavaList(eventsYearsToSearch.toSeq))
-    query.setFetchSize(Config.DEFAULT_PAGE_SIZE)
+      .setTimestamp("minimalDate", new Date())
 
     makeEventsStream(session.execute(query).iterator())
   }

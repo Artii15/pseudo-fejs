@@ -38,7 +38,6 @@ object EventsControls {
   ))
 
   def factory(creatingEvent: CreatingEvent, browsingEvents: BrowsingEvents): (User => EventsControls) = {
-
     user => new EventsControls(user, creatingEvent, browsingEvents)
   }
 }

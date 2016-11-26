@@ -4,4 +4,5 @@ import na.przypale.fitter.entities.Event
 
 trait EventsRepository {
   def create(event: Event): Unit
+  def findIncoming(): Stream[Event]
 }
