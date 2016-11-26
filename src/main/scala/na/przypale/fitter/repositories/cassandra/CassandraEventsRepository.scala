@@ -2,9 +2,11 @@ package na.przypale.fitter.repositories.cassandra
 
 import java.util.Calendar
 
-import com.datastax.driver.core.Session
+import com.datastax.driver.core.{Session, SimpleStatement}
 import na.przypale.fitter.entities.Event
-import na.przypale.fitter.repositories.EventsRepository
+import na.przypale.fitter.repositories.{Dates, EventsRepository}
+
+import scala.collection.JavaConverters
 
 class CassandraEventsRepository(session: Session) extends EventsRepository {
 
@@ -26,5 +28,19 @@ class CassandraEventsRepository(session: Session) extends EventsRepository {
       .setInt("maxUsersCount", event.maxParticipantsCount)
 
     session.execute(createEventQuery)
+  }
+
+  private lazy val findIncomingStatement = session.prepare(
+    "SELECT year, start_date, end_date, id, description, author, name, max_users_count " +
+    "FROM events" +
+    "WHERE year IN :years AND start_date > now()")
+  def findIncoming() {}
+
+  private lazy val findEventsYearsStatement = new SimpleStatement("SELECT year FROM events")
+  def findEventsYears(): Iterable[Int] = {
+    val currentYear = Dates.currentYear()
+    JavaConverters.collectionAsScalaIterable(session.execute(findEventsYearsStatement).all())
+      .map(row => row.getInt("year"))
+      .filter(year => year >= currentYear)
   }
 }
