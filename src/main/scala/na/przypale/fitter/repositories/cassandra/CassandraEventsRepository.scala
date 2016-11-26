@@ -3,7 +3,7 @@ package na.przypale.fitter.repositories.cassandra
 import java.util.{Calendar, UUID}
 
 import com.datastax.driver.core.Session
-import na.przypale.fitter.entities.{Event, EventParticipation}
+import na.przypale.fitter.entities.Event
 import na.przypale.fitter.repositories.EventsRepository
 import na.przypale.fitter.repositories.exceptions.AlreadyParticipatesException
 
@@ -41,41 +41,5 @@ class CassandraEventsRepository(session: Session) extends EventsRepository {
       .setUUID("eventId", event.id)
 
     session.execute(createEventCounterQuery)
-  }
-
-  override def join(eventParticipation: EventParticipation): EventParticipation = {
-    findParticipantJoinTime(eventParticipation) match {
-      case None => addParticipation(eventParticipation)
-      case _ => throw new AlreadyParticipatesException
-    }
-  }
-
-  private lazy val findParticipantJoinTimeStatement = session.prepare(
-    "SELECT join_time FROM events_participants WHERE event_id = :eventId AND participant = :participant")
-  private def findParticipantJoinTime(eventParticipation: EventParticipation): Option[UUID] = {
-    val EventParticipation(eventId, participant, _) = eventParticipation
-    val query = findParticipantJoinTimeStatement.bind()
-      .setUUID("eventId", eventId)
-      .setString("participant", participant)
-
-    session.execute(query).one() match {
-      case null => None
-      case row => Some(row.getUUID("join_time"))
-    }
-  }
-
-  private lazy val addToParticipantsListStatement = session.prepare(
-    "INSERT INTO events_participants(event_id, participant, join_time)" +
-      "VALUES(:eventId, :participant, :joinTime")
-  private def addParticipation(eventParticipationRequest: EventParticipation): EventParticipation = {
-    val EventParticipation(eventId, participant, applicationTime) = eventParticipationRequest
-
-    val query = addToParticipantsListStatement.bind()
-      .setUUID("eventId", eventId)
-      .setString("participant", participant)
-      .setUUID("joinTime", applicationTime)
-
-    session.execute(query)
-    EventParticipation(eventId, participant, applicationTime)
   }
 }
