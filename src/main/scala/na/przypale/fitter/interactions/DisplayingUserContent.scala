@@ -1,8 +1,5 @@
 package na.przypale.fitter.interactions
 
-import java.text.SimpleDateFormat
-import java.util.{Date, UUID}
-
 import na.przypale.fitter.{CommandLineReader, Config}
 import na.przypale.fitter.controls.UserContentControls
 import na.przypale.fitter.entities._
@@ -11,7 +8,7 @@ import na.przypale.fitter.repositories.CommentsRepository
 
 import scala.annotation.tailrec
 
-class DisplayingUserContent(commentsRepository: CommentsRepository, creatingComment: CreatingComment) {
+class DisplayingUserContent(commentsRepository: CommentsRepository, creatingComment: CreatingComment) extends BrowsingUserContent{
 
   val userContentControls = new UserContentControls
 
@@ -46,7 +43,6 @@ class DisplayingUserContent(commentsRepository: CommentsRepository, creatingComm
     }
   }
 
-  val dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss")
   private def displayComment(enumeratedComment: EnumeratedComment): Unit = {
     val EnumeratedComment(number, Comment(_, _, commentTimeId, commentAuthor, content, _, _)) = enumeratedComment
     println(s"\t$number - ${dateFormat.format(timeIdToDate(commentTimeId))} $commentAuthor:")
@@ -68,8 +64,6 @@ class DisplayingUserContent(commentsRepository: CommentsRepository, creatingComm
 
   private def enumerate(comments: Iterable[Comment]): Iterable[EnumeratedComment] = comments.zip(Stream.from(1))
     .map{case (comment, index) => EnumeratedComment(index, comment) }
-
-  private def timeIdToDate(timeId: UUID) = new Date((timeId.timestamp() - 0x01b21dd213814000L) / 10000)
 
   @tailrec
   private def letUserSelectComment(user: User, comments: Iterable[EnumeratedComment]): Unit = {

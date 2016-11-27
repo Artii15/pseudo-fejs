@@ -1,11 +1,8 @@
 package na.przypale.fitter.interactions
 
-import java.text.SimpleDateFormat
-import java.util.{Date, UUID}
-
 import na.przypale.fitter.CommandLineReader
 import na.przypale.fitter.controls.PostsControls
-import na.przypale.fitter.entities.{EnumeratedPost, Post, User, UserContent}
+import na.przypale.fitter.entities.{EnumeratedPost, Post, User}
 import na.przypale.fitter.menu.ActionIntId
 import na.przypale.fitter.repositories.{PostsRepository, SubscriptionsRepository}
 
@@ -13,7 +10,7 @@ import scala.annotation.tailrec
 
 class BrowsingPosts(postsRepository: PostsRepository,
                     subscriptionsRepository: SubscriptionsRepository,
-                    displayingPost: DisplayingUserContent) {
+                    displayingPost: DisplayingUserContent) extends BrowsingUserContent{
 
   private val postsControls = new PostsControls()
 
@@ -41,10 +38,9 @@ class BrowsingPosts(postsRepository: PostsRepository,
     }
   }
 
-  val postDateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss")
   private def display(enumeratedPost: EnumeratedPost): Unit = {
     val EnumeratedPost(number, Post(author, timeId, content)) = enumeratedPost
-    println(s"$number - ${postDateFormat.format(timeIdToDate(timeId))} $author:")
+    println(s"$number - ${dateFormat.format(timeIdToDate(timeId))} $author:")
     println(content)
     println()
   }
@@ -62,6 +58,4 @@ class BrowsingPosts(postsRepository: PostsRepository,
 
   private def enumerate(posts: Iterable[Post]): Iterable[EnumeratedPost] = posts.zip(Stream.from(1))
     .map{case (post, index) => EnumeratedPost(index, post) }
-
-  private def timeIdToDate(timeId: UUID) = new Date((timeId.timestamp() - 0x01b21dd213814000L) / 10000)
 }
