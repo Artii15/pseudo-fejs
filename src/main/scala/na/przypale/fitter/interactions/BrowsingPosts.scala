@@ -13,7 +13,7 @@ import scala.annotation.tailrec
 
 class BrowsingPosts(postsRepository: PostsRepository,
                     subscriptionsRepository: SubscriptionsRepository,
-                    displayingPost: DisplayingPost) {
+                    displayingPost: DisplayingUserContent) {
 
   private val postsControls = new PostsControls()
 

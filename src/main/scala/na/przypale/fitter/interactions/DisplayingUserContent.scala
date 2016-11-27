@@ -4,16 +4,16 @@ import java.text.SimpleDateFormat
 import java.util.{Date, UUID}
 
 import na.przypale.fitter.{CommandLineReader, Config}
-import na.przypale.fitter.controls.CommentsControls
+import na.przypale.fitter.controls.UserContentControls
 import na.przypale.fitter.entities._
 import na.przypale.fitter.menu.ActionIntId
 import na.przypale.fitter.repositories.CommentsRepository
 
 import scala.annotation.tailrec
 
-class DisplayingPost(commentsRepository: CommentsRepository, creatingComment: CreatingComment) {
+class DisplayingUserContent(commentsRepository: CommentsRepository, creatingComment: CreatingComment) {
 
-  val commentsControls = new CommentsControls
+  val userContentControls = new UserContentControls
 
   def display(user: User, userContent: UserContent): Unit = {
     searchComments(user, userContent)
@@ -23,8 +23,8 @@ class DisplayingPost(commentsRepository: CommentsRepository, creatingComment: Cr
   private def searchComments(user: User, userContent: UserContent, lastDisplayedComment: Option[Comment] = None) {
 
     val comments = userContent match {
-      case p: Post => commentsRepository.findByPost(p, lastDisplayedComment)
-      case c: Comment => commentsRepository.findByParentComment(c, lastDisplayedComment)
+      case post: Post => commentsRepository.findByPost(post, lastDisplayedComment)
+      case comment: Comment => commentsRepository.findByParentComment(comment, lastDisplayedComment)
     }
 
     val enumeratedComments = enumerate(comments)
@@ -33,13 +33,13 @@ class DisplayingPost(commentsRepository: CommentsRepository, creatingComment: Cr
 
     if(comments.isEmpty || comments.size < Config.DEFAULT_PAGE_SIZE)
       println("No more comments to display")
-    commentsControls.interact().id match {
-      case ActionIntId(CommentsControls.MORE_COMMENTS_ACTION_ID) =>
+    userContentControls.interact().id match {
+      case ActionIntId(UserContentControls.MORE_COMMENTS_ACTION_ID) =>
         searchComments(user, userContent, comments.lastOption)
-      case ActionIntId(CommentsControls.CREATE_COMMENT_ACTION_ID) =>
+      case ActionIntId(UserContentControls.CREATE_COMMENT_ACTION_ID) =>
         creatingComment.create(user, userContent)
         searchComments(user, userContent)
-      case ActionIntId(CommentsControls.DISPLAY_COMMENT_ACTION_ID) =>
+      case ActionIntId(UserContentControls.DISPLAY_COMMENT_ACTION_ID) =>
         letUserSelectComment(user, enumeratedComments)
         searchComments(user, userContent)
       case _ =>
@@ -73,7 +73,7 @@ class DisplayingPost(commentsRepository: CommentsRepository, creatingComment: Cr
 
   @tailrec
   private def letUserSelectComment(user: User, comments: Iterable[EnumeratedComment]): Unit = {
-    if (comments.size == 0)
+    if (comments.isEmpty)
       println("No comments to display")
     else {
       print("Comment nr: ")

@@ -19,7 +19,7 @@ object App {
     val creatingPost = new CreatingPost(postsRepository)
     val creatingComment = new CreatingComment(commentsRepository)
     val subscribingUser = new SubscribingUser(usersRepository, subscriptionsRepository)
-    val displayingPost = new DisplayingPost(commentsRepository, creatingComment)
+    val displayingPost = new DisplayingUserContent(commentsRepository, creatingComment)
     val browsingPosts = new BrowsingPosts(postsRepository, subscriptionsRepository, displayingPost)
     val searchingForUsers = new SearchingForUsers(usersRepository)
 
