@@ -21,13 +21,12 @@ class DisplayingPost(commentsRepository: CommentsRepository, creatingComment: Cr
 
   @tailrec
   private def searchComments(user: User, userContent: UserContent, lastDisplayedComment: Option[Comment] = None) {
-    val post = extractPost(userContent)
-    //val parentId = extractParentId(userContent)
+
     val comments = userContent match {
       case p: Post => commentsRepository.findByPost(p, lastDisplayedComment)
       case c: Comment => commentsRepository.findByParentComment(c, lastDisplayedComment)
     }
-    //val comments = commentsRepository.findByPost(post, lastDisplayedComment)
+
     val enumeratedComments = enumerate(comments)
     displayUserContent(userContent)
     enumeratedComments.foreach(displayComment)
@@ -35,11 +34,14 @@ class DisplayingPost(commentsRepository: CommentsRepository, creatingComment: Cr
     if(comments.isEmpty || comments.size < Config.DEFAULT_PAGE_SIZE)
       println("No more comments to display")
     commentsControls.interact().id match {
-      case ActionIntId(CommentsControls.MORE_COMMENTS_ACTION_ID) => searchComments(user, userContent, comments.lastOption)
+      case ActionIntId(CommentsControls.MORE_COMMENTS_ACTION_ID) =>
+        searchComments(user, userContent, comments.lastOption)
       case ActionIntId(CommentsControls.CREATE_COMMENT_ACTION_ID) =>
         creatingComment.create(user, userContent)
         searchComments(user, userContent)
-      case ActionIntId(CommentsControls.DISPLAY_COMMENT_ACTION_ID) => letUserSelectComment(user, enumeratedComments)
+      case ActionIntId(CommentsControls.DISPLAY_COMMENT_ACTION_ID) =>
+        letUserSelectComment(user, enumeratedComments)
+        searchComments(user, userContent)
       case _ =>
     }
   }
@@ -49,13 +51,6 @@ class DisplayingPost(commentsRepository: CommentsRepository, creatingComment: Cr
     val EnumeratedComment(number, Comment(_, _, commentTimeId, commentAuthor, content, _, _)) = enumeratedComment
     println(s"\t$number - ${dateFormat.format(timeIdToDate(commentTimeId))} $commentAuthor:")
     println("\t" + content)
-    println()
-  }
-
-  private def displayPost(post: Post): Unit = {
-    val Post(author, timeId, content) = post
-    println(s"${dateFormat.format(timeIdToDate(timeId))} $author:")
-    println(content)
     println()
   }
 
@@ -76,28 +71,19 @@ class DisplayingPost(commentsRepository: CommentsRepository, creatingComment: Cr
 
   private def timeIdToDate(timeId: UUID) = new Date((timeId.timestamp() - 0x01b21dd213814000L) / 10000)
 
-  private def extractPost(userContent: UserContent): Post = {
-    userContent match {
-      case Post(author, timeId, content) => Post(author, timeId, content)
-      case Comment(postAuthor, postTimeId, _, _, _, _, _) => Post(postAuthor, postTimeId, null)
-    }
-  }
-
-  private def extractParentId(userContent: UserContent) = {
-    userContent match {
-      case Comment(_, _, _, _, _, _, parentId) => parentId
-      case Post(author, timeId, content) =>
-    }
-  }
-
+  @tailrec
   private def letUserSelectComment(user: User, comments: Iterable[EnumeratedComment]): Unit = {
-    print("Comment nr: ")
-    val selectedPostNr = CommandLineReader.readInt()
-    comments.find(post => post.number == selectedPostNr) match {
-      case None =>
-        println("Invalid comment number")
-        letUserSelectComment(user, comments)
-      case Some(comment) => display(user, comment.comment)
+    if (comments.size == 0)
+      println("No comments to display")
+    else {
+      print("Comment nr: ")
+      val selectedPostNr = CommandLineReader.readInt()
+      comments.find(post => post.number == selectedPostNr) match {
+        case None =>
+          println("Invalid comment number")
+          letUserSelectComment(user, comments)
+        case Some(comment) => display(user, comment.comment)
+      }
     }
   }
 }

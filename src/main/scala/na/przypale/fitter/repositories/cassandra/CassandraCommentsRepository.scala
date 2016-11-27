@@ -1,9 +1,6 @@
 package na.przypale.fitter.repositories.cassandra
 
-import java.util.UUID
-
 import com.datastax.driver.core.Session
-import com.datastax.driver.core.utils.UUIDs
 import na.przypale.fitter.Config
 import na.przypale.fitter.entities.{Comment, Post}
 import na.przypale.fitter.repositories.CommentsRepository
@@ -39,16 +36,7 @@ class CassandraCommentsRepository(session: Session) extends CommentsRepository {
   )
 
   override def findByPost(post: Post, lastCommentToSkip: Option[Comment]): Iterable[Comment] = {
-    /*val timeId = lastCommentToSkip match {
-      case Some(comment) => comment.commentTimeId
-      case None => null
-    }*/
     val timeId = getTimeId(lastCommentToSkip)
-    /*
-    val parentId = parentCommentId match {
-      case Some(id) => id
-      case None => null
-    }*/
 
     val query = findByPostStatement.bind()
       .setString("postAuthor", post.author)
@@ -87,7 +75,7 @@ class CassandraCommentsRepository(session: Session) extends CommentsRepository {
 
   def getTimeId(comment: Option[Comment]) = {
     comment match {
-      case Some(comment) => comment.commentTimeId
+      case Some(com) => com.commentTimeId
       case None => null
     }
   }
