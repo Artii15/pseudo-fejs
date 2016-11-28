@@ -9,12 +9,17 @@ import scala.annotation.tailrec
 class BrowsingEvents(eventsRepository: EventsRepository) {
   def browse(): Unit = {
     val incomingEvents = eventsRepository.findIncoming()
-    val paginatedEvents = incomingEvents.grouped(Config.DEFAULT_PAGE_SIZE).takeWhile(eventsPage => {
-      eventsPage.foreach(event => display(event))
-      userWantsToSeeNext()
-    })
+    showEventsToUser(incomingEvents.grouped(Config.DEFAULT_PAGE_SIZE))
+  }
 
-    paginatedEvents.toStream.force
+  @tailrec
+  private def showEventsToUser(eventsPages: Iterator[Stream[Event]]): Unit = {
+    if(eventsPages.hasNext) {
+      val eventsPage = eventsPages.next()
+      eventsPage.foreach(display)
+      if (userWantsToSeeNext()) showEventsToUser(eventsPages)
+    }
+    else println("No events")
   }
 
   @tailrec
