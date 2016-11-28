@@ -1,35 +1,32 @@
 package na.przypale.fitter.interactions
 
-import na.przypale.fitter.{CommandLineReader, Config}
+import na.przypale.fitter.controls.EventsBrowserControls
+import na.przypale.fitter.Config
 import na.przypale.fitter.entities.Event
+import na.przypale.fitter.menu.{Action, ActionIntId}
 import na.przypale.fitter.repositories.EventsRepository
 
 import scala.annotation.tailrec
 
 class BrowsingEvents(eventsRepository: EventsRepository) {
+
   def browse(): Unit = {
     val incomingEvents = eventsRepository.findIncoming()
     showEventsToUser(incomingEvents.grouped(Config.DEFAULT_PAGE_SIZE))
   }
 
-  @tailrec
-  private def showEventsToUser(eventsPages: Iterator[Stream[Event]]): Unit = {
-    if(eventsPages.hasNext) {
-      val eventsPage = eventsPages.next()
-      eventsPage.foreach(display)
-      if (userWantsToSeeNext()) showEventsToUser(eventsPages)
-    }
-    else println("No events")
-  }
+  private val controls = new EventsBrowserControls()
 
   @tailrec
-  private def userWantsToSeeNext(): Boolean = {
-    println("1 - more\n2 - exit")
-    CommandLineReader.readInt() match {
-      case 1 => true
-      case 2 => false
-      case _ => userWantsToSeeNext()
+  private def showEventsToUser(pagesIterator: Iterator[Stream[Event]]): Unit = {
+    if(pagesIterator.hasNext) {
+      pagesIterator.next().foreach(display)
+
+      val Action(ActionIntId(selectedActionId), _) = controls.interact()
+      if (selectedActionId == EventsBrowserControls.MORE_ACTION_ID)
+        showEventsToUser(pagesIterator)
     }
+    else println("No events")
   }
 
   private def display(event: Event): Unit = {
