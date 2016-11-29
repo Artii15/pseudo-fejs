@@ -68,30 +68,46 @@ class CassandraEventsRepository(session: Session) extends EventsRepository {
     .collectionAsScalaIterable(session.execute(findEventsYearsStatement).all())
     .map(row => row.getInt("year"))
 
+  def assignUserToEvent(eventId: UUID, user: String): Unit = {
+    forceUserAssignmentToEvent(eventId, user)
+    val oldestJoinTime = findOldestJoinTimeOfUserToEvent(eventId, user)
+    dropIrrelevantAssignments(eventId, user, oldestJoinTime)
+  }
+
   private lazy val assignToEventStatement = session.prepare(
     "INSERT INTO events_participants(event_id, participant, join_time) VALUES(:eventId, :participant, now())")
-  private lazy val selectParticipantJoinTimeStatement = session.prepare(
-    "SELECT join_time " +
-    "FROM events_participants " +
-    "WHERE event_id = :eventId AND participant = :participant " +
-    "ORDER BY join_time")
-  private lazy val dropRedundantAssignmentsStatement = session.prepare(
-    "DELETE FROM events_participants " +
-    "WHERE event_id = :eventId AND participant = :participant AND join_time > :oldestJoinTime")
-  def assignUserToEvent(eventId: UUID, user: String): Unit = {
+  private def forceUserAssignmentToEvent(eventId: UUID, user: String): Unit = {
     val assignUserQuery = assignToEventStatement.bind()
       .setUUID("eventId", eventId)
       .setString("participant", user)
     session.execute(assignUserQuery)
+  }
 
+  private lazy val selectParticipantJoinTimeStatement = session.prepare(
+    "SELECT join_time " +
+      "FROM events_participants " +
+      "WHERE event_id = :eventId AND participant = :participant " +
+      "ORDER BY join_time")
+  private def findOldestJoinTimeOfUserToEvent(eventId: UUID, user: String): Option[UUID] = {
     val selectParticipantQuery = selectParticipantJoinTimeStatement.bind()
       .setUUID("eventId", eventId)
       .setString("participant", user)
 
-    val oldestJoinTime = session.execute(selectParticipantQuery).one().getUUID("join_time")
-    dropRedundantAssignmentsStatement.bind()
-      .setUUID("eventId", eventId)
-      .setString("participant", user)
-      .setUUID("oldestJoinTime", oldestJoinTime)
+    val oldestAssignmentRow = session.execute(selectParticipantQuery).one()
+    if (oldestAssignmentRow == null) None else Some(oldestAssignmentRow.getUUID("join_time"))
+  }
+
+  private lazy val dropRedundantAssignmentsStatement = session.prepare(
+    "DELETE FROM events_participants " +
+      "WHERE event_id = :eventId AND participant = :participant AND join_time > :oldestJoinTime")
+  private def dropIrrelevantAssignments(eventId: UUID, user: String, oldestJoinTime: Option[UUID]): Unit = {
+    if(oldestJoinTime.isDefined) {
+      val Some(joinTime) = oldestJoinTime
+      val query = dropRedundantAssignmentsStatement.bind()
+        .setUUID("eventId", eventId)
+        .setString("participant", user)
+        .setUUID("oldestJoinTime", joinTime)
+      session.execute(query)
+    }
   }
 }
