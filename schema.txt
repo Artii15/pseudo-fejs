@@ -58,7 +58,7 @@ DROP TABLE IF EXISTS events_participants;
 CREATE TABLE events_participants (
     event_id uuid,
     participant varchar,
-    join_time timestamp,
+    join_time timeuuid,
     PRIMARY KEY(event_id, participant, join_time)
 );
 

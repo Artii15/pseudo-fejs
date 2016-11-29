@@ -1,10 +1,9 @@
 package na.przypale.fitter.repositories.cassandra
 
 import java.util
-import java.util.{Calendar, Date}
+import java.util.{Calendar, Date, UUID}
 
 import com.datastax.driver.core.{Row, Session, SimpleStatement}
-import na.przypale.fitter.Config
 import na.przypale.fitter.entities.Event
 import na.przypale.fitter.repositories.{Dates, EventsRepository}
 
@@ -68,4 +67,31 @@ class CassandraEventsRepository(session: Session) extends EventsRepository {
   def findEventsYears(): Iterable[Int] = JavaConverters
     .collectionAsScalaIterable(session.execute(findEventsYearsStatement).all())
     .map(row => row.getInt("year"))
+
+  private lazy val assignToEventStatement = session.prepare(
+    "INSERT INTO events_participants(event_id, participant, join_time) VALUES(:eventId, :participant, now())")
+  private lazy val selectParticipantJoinTimeStatement = session.prepare(
+    "SELECT join_time " +
+    "FROM events_participants " +
+    "WHERE event_id = :eventId AND participant = :participant " +
+    "ORDER BY join_time")
+  private lazy val dropRedundantAssignmentsStatement = session.prepare(
+    "DELETE FROM events_participants " +
+    "WHERE event_id = :eventId AND participant = :participant AND join_time > :oldestJoinTime")
+  def assignUserToEvent(eventId: UUID, user: String): Unit = {
+    val assignUserQuery = assignToEventStatement.bind()
+      .setUUID("eventId", eventId)
+      .setString("participant", user)
+    session.execute(assignUserQuery)
+
+    val selectParticipantQuery = selectParticipantJoinTimeStatement.bind()
+      .setUUID("eventId", eventId)
+      .setString("participant", user)
+
+    val oldestJoinTime = session.execute(selectParticipantQuery).one().getUUID("join_time")
+    dropRedundantAssignmentsStatement.bind()
+      .setUUID("eventId", eventId)
+      .setString("participant", user)
+      .setUUID("oldestJoinTime", oldestJoinTime)
+  }
 }

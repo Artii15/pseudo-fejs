@@ -31,12 +31,11 @@ class BrowsingEvents(eventsRepository: EventsRepository) {
 
   private def display(event: Event): Unit = {
     val Event(id, startDate, endDate, maxParticipantsCount, name, description, author) = event
-    println(id)
-    println(name)
-    println(author)
+    println(s"Id: $id")
+    println(s"Name: $name")
+    println(s"Author: $author")
     println(s"Duration: $startDate - $endDate")
     println(s"Max number of participants: $maxParticipantsCount")
-    println(maxParticipantsCount)
     println(s"$description\n")
   }
 }
