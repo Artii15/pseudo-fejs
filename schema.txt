@@ -53,6 +53,17 @@ CREATE TABLE comments (
      PRIMARY KEY((post_author, post_time_id), comment_time_id, comment_author)
 );
 
+DROP TABLE IF EXISTS comments_counters;
+CREATE TABLE comments_counters (
+    post_author varchar,
+    post_time_id timeuuid,
+    comment_time_id timeuuid,
+    comment_author varchar,
+    likes counter,
+    answers counter,
+    PRIMARY KEY((post_author, post_time_id, comment_time_id, comment_author))
+);
+
 DROP TABLE IF EXISTS events;
 CREATE TABLE events (
     year int,
