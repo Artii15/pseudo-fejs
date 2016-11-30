@@ -5,6 +5,7 @@ import java.util.{Calendar, Date, UUID}
 
 import com.datastax.driver.core.{Row, Session, SimpleStatement}
 import na.przypale.fitter.entities.Event
+import na.przypale.fitter.repositories.exceptions.EventParticipantLimitExceedException
 import na.przypale.fitter.repositories.{Dates, EventsRepository}
 
 import scala.collection.JavaConverters
@@ -68,17 +69,20 @@ class CassandraEventsRepository(session: Session) extends EventsRepository {
     .collectionAsScalaIterable(session.execute(findEventsYearsStatement).all())
     .map(row => row.getInt("year"))
 
-  override def assignUserToEvent(eventId: UUID, user: String): Unit = {
-    forceUserAssignmentToEvent(eventId, user)
-    val oldestJoinTime = findOldestJoinTimeOfUserToEvent(eventId, user)
-    dropIrrelevantAssignments(eventId, user, oldestJoinTime)
+  override def assignUserToEvent(event: Event, user: String): Unit = {
+    forceUserAssignmentToEvent(event, user)
+    val oldestJoinTime = findOldestJoinTimeOfUserToEvent(event, user)
+    dropIrrelevantAssignments(event, user, oldestJoinTime)
+
+    if(belongsToEvent(event, user)) incrementParticipantsCount(event)
+    else throw new EventParticipantLimitExceedException
   }
 
   private lazy val assignToEventStatement = session.prepare(
     "INSERT INTO events_participants(event_id, participant, join_time) VALUES(:eventId, :participant, now())")
-  private def forceUserAssignmentToEvent(eventId: UUID, user: String): Unit = {
+  private def forceUserAssignmentToEvent(event: Event, user: String): Unit = {
     val assignUserQuery = assignToEventStatement.bind()
-      .setUUID("eventId", eventId)
+      .setUUID("eventId", event.id)
       .setString("participant", user)
     session.execute(assignUserQuery)
   }
@@ -88,10 +92,11 @@ class CassandraEventsRepository(session: Session) extends EventsRepository {
       "FROM events_participants " +
       "WHERE event_id = :eventId AND participant = :participant " +
       "ORDER BY join_time")
-  private def findOldestJoinTimeOfUserToEvent(eventId: UUID, user: String): Option[UUID] = {
+  private def findOldestJoinTimeOfUserToEvent(event: Event, user: String): Option[UUID] = {
     val selectParticipantQuery = selectParticipantJoinTimeStatement.bind()
-      .setUUID("eventId", eventId)
+      .setUUID("eventId", event.id)
       .setString("participant", user)
+    selectParticipantQuery.setFetchSize(1)
 
     val oldestAssignmentRow = session.execute(selectParticipantQuery).one()
     if (oldestAssignmentRow == null) None else Some(oldestAssignmentRow.getUUID("join_time"))
@@ -100,14 +105,34 @@ class CassandraEventsRepository(session: Session) extends EventsRepository {
   private lazy val dropRedundantAssignmentsStatement = session.prepare(
     "DELETE FROM events_participants " +
       "WHERE event_id = :eventId AND participant = :participant AND join_time > :oldestJoinTime")
-  private def dropIrrelevantAssignments(eventId: UUID, user: String, oldestJoinTime: Option[UUID]): Unit = {
+  private def dropIrrelevantAssignments(event: Event, user: String, oldestJoinTime: Option[UUID]): Unit = {
     if(oldestJoinTime.isDefined) {
       val Some(joinTime) = oldestJoinTime
       val query = dropRedundantAssignmentsStatement.bind()
-        .setUUID("eventId", eventId)
+        .setUUID("eventId", event.id)
         .setString("participant", user)
         .setUUID("oldestJoinTime", joinTime)
       session.execute(query)
     }
+  }
+
+  private lazy val selectRelevantParticipantsStatement = session.prepare(
+    "SELECT participant FROM events_participants WHERE event_id = :eventId ORDER BY join_time LIMIT :limit")
+  private def belongsToEvent(event: Event, user: String): Boolean = {
+    val query = selectRelevantParticipantsStatement.bind()
+      .setUUID("eventId", event.id)
+      .setInt("limit", event.maxParticipantsCount)
+    query.setFetchSize(Integer.MAX_VALUE)
+
+    val relevantParticipants = JavaConverters.collectionAsScalaIterable(session.execute(query).all())
+    relevantParticipants.exists(row => row.getString("participant") == user)
+  }
+
+  private lazy val incrementParticipantsCountStatement = session.prepare(
+    "UPDATE events_counters SET current_users_count = current_users_count + 1 WHERE event_id = :eventId")
+  private def incrementParticipantsCount(event: Event): Unit = {
+    val query = incrementParticipantsCountStatement.bind()
+      .setUUID("eventId", event.id)
+    session.execute(query)
   }
 }
