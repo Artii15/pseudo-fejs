@@ -1,0 +1,10 @@
+package na.przypale.fitter.repositories
+
+import na.przypale.fitter.entities.Post
+
+trait PostsCountersRepository {
+  def getLikesAndComments(post: Post):  Map[String, Int]
+  def likePost(post: Post)
+  def increaseCommentsCounter(post: Post)
+  def initiateCounters(post: Post)
+}

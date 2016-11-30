@@ -6,6 +6,26 @@ import na.przypale.fitter.repositories.CommentsCountersRepository
 
 class CassandraCommentsCountersRepository(session: Session) extends CommentsCountersRepository{
 
+  private lazy val getLikesAndAnswersStatement = session.prepare(
+    "SELECT likes, answers " +
+      "FROM comments_counters " +
+      "WHERE post_author = :postAuthor AND post_time_id = :postTimeId AND comment_time_id = :commentTimeId  AND comment_author = :commentAuthor"
+  )
+
+  override def getLikesAndAnswers(comment: Comment): Map[String, Int] = {
+    val Comment(postAuthor, postTimeId, commentTimeId, commentAuthor, _, _, _) = comment
+
+    val  getLikesAndAnswersQuery = getLikesAndAnswersStatement.bind()
+      .setString("postAuthor", postAuthor)
+      .setUUID("postTimeId", postTimeId)
+      .setUUID("commentTimeId", commentTimeId)
+      .setString("commentAuthor", commentAuthor)
+
+    val row = session.execute(getLikesAndAnswersQuery).one()
+    println(row)
+    Map("Likes" -> row.getInt("likes"), "Answers" -> row.getInt("answers"))
+  }
+
   private lazy val likeCommentStatement = session.prepare(
     "UPDATE comments_counters " +
       "SET likes = likes + 1 " +
@@ -22,7 +42,7 @@ class CassandraCommentsCountersRepository(session: Session) extends CommentsCoun
 
     session.execute(likeCommentQuery)
   }
-  
+
   private lazy val increaseAnswersStatement = session.prepare(
     "UPDATE comments_counters " +
       "SET answers = answers + 1 " +
@@ -31,12 +51,29 @@ class CassandraCommentsCountersRepository(session: Session) extends CommentsCoun
   override def increaseAnswersCounter(comment: Comment): Unit = {
     val Comment(postAuthor, postTimeId, commentTimeId, commentAuthor, _, _, _) = comment
 
-    val likeCommentQuery = increaseAnswersStatement.bind()
+    val increaseAnswersQuery = increaseAnswersStatement.bind()
       .setString("postAuthor", postAuthor)
       .setUUID("postTimeId", postTimeId)
       .setUUID("commentTimeId", commentTimeId)
       .setString("commentAuthor", commentAuthor)
 
-    session.execute(likeCommentQuery)
+    session.execute(increaseAnswersQuery)
+  }
+
+  private lazy val initiateCountersStatement = session.prepare(
+    "INSERT INTO comments_counters(post_author, post_time_id, comment_time_id, comment_author, likes, answers) " +
+      "VALUES(:postAuthor, :postTimeId, :commentTimeId, :commentAuthor, 0, 0)"
+  )
+
+  override def initiateCounters(comment: Comment): Unit = {
+    val Comment(postAuthor, postTimeId, commentTimeId, commentAuthor, _, _, _) = comment
+
+    val initiateCountersQuery = initiateCountersStatement.bind()
+      .setString("postAuthor", postAuthor)
+      .setUUID("postTimeId", postTimeId)
+      .setUUID("commentTimeId", commentTimeId)
+      .setString("commentAuthor", commentAuthor)
+
+    session.execute(initiateCountersQuery)
   }
 }
