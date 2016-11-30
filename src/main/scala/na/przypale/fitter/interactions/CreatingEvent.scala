@@ -13,7 +13,7 @@ class CreatingEvent(eventsRepository: EventsRepository) {
     print("Description: ")
     val description = CommandLineReader.readString()
 
-    val datesFormat = "dd-mm-YYYY"
+    val datesFormat = "yyyy-MM-dd HH:mm"
     print(s"Event begin date ($datesFormat): ")
     val beginDate = CommandLineReader.readDate(datesFormat)
 
