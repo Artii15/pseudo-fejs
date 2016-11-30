@@ -4,11 +4,15 @@ import na.przypale.fitter.{CommandLineReader, Config}
 import na.przypale.fitter.controls.UserContentControls
 import na.przypale.fitter.entities._
 import na.przypale.fitter.menu.ActionIntId
-import na.przypale.fitter.repositories.CommentsRepository
+import na.przypale.fitter.repositories.{CommentsCountersRepository, CommentsRepository, PostsCountersRepository}
 
 import scala.annotation.tailrec
 
-class DisplayingUserContent(commentsRepository: CommentsRepository, creatingComment: CreatingComment) extends BrowsingUserContent{
+class DisplayingUserContent(commentsRepository: CommentsRepository,
+                            commentsCountersRepository: CommentsCountersRepository,
+                            postsCountersRepository: PostsCountersRepository,
+                            creatingComment: CreatingComment,
+                            likingUserContent: LikingUserContent) extends BrowsingUserContent{
 
   val userContentControls = new UserContentControls
 
@@ -33,6 +37,9 @@ class DisplayingUserContent(commentsRepository: CommentsRepository, creatingComm
     userContentControls.interact().id match {
       case ActionIntId(UserContentControls.MORE_COMMENTS_ACTION_ID) =>
         searchComments(user, userContent, comments.lastOption)
+      case ActionIntId(UserContentControls.LIKE_ACTION_ID) =>
+        likingUserContent.like(userContent)
+        searchComments(user, userContent)
       case ActionIntId(UserContentControls.CREATE_COMMENT_ACTION_ID) =>
         creatingComment.create(user, userContent)
         searchComments(user, userContent)
@@ -55,9 +62,15 @@ class DisplayingUserContent(commentsRepository: CommentsRepository, creatingComm
       case post: Post =>
         println(s"${dateFormat.format(timeIdToDate(post.timeId))} ${post.author}:")
         println(post.content)
+        val counters = postsCountersRepository.getLikesAndComments(post)
+        counters.keys.foreach{key => print(s"$key: ${counters(key)} ")}
+        println()
       case comment: Comment =>
         println(s"${dateFormat.format(timeIdToDate(comment.commentTimeId))} ${comment.commentAuthor}:")
         println(comment.content)
+        val counters = commentsCountersRepository.getLikesAndAnswers(comment)
+        counters.keys.foreach{key => print(s"$key: ${counters(key)} ")}
+        println()
     }
     println()
   }

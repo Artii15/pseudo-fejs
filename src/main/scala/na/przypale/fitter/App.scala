@@ -3,7 +3,7 @@ package na.przypale.fitter
 import com.datastax.driver.core.Session
 import na.przypale.fitter.controls.{AnonymousUserControls, LoggedUserControls}
 import na.przypale.fitter.interactions._
-import na.przypale.fitter.repositories.cassandra.{CassandraCommentsRepository, CassandraPostsRepository, CassandraSubscriptionsRepository, CassandraUsersRepository}
+import na.przypale.fitter.repositories.cassandra._
 
 object App {
 
@@ -12,14 +12,17 @@ object App {
     val postsRepository = new CassandraPostsRepository(session)
     val subscriptionsRepository = new CassandraSubscriptionsRepository(session)
     val commentsRepository = new CassandraCommentsRepository(session)
+    val commentsCountersRepository = new CassandraCommentsCountersRepository(session)
+    val postsCountersRepository = new CassandraPostsCountersRepository(session)
 
     val creatingUser = new CreatingUser(usersRepository, subscriptionsRepository)
     val loggingIn = new LoggingIn(usersRepository)
     val deletingUser = new DeletingUser(usersRepository)
-    val creatingPost = new CreatingPost(postsRepository)
-    val creatingComment = new CreatingComment(commentsRepository)
+    val creatingPost = new CreatingPost(postsRepository, postsCountersRepository)
+    val creatingComment = new CreatingComment(commentsRepository, commentsCountersRepository, postsCountersRepository)
+    val likingUserContent = new LikingUserContent(commentsCountersRepository, postsCountersRepository)
     val subscribingUser = new SubscribingUser(usersRepository, subscriptionsRepository)
-    val displayingPost = new DisplayingUserContent(commentsRepository, creatingComment)
+    val displayingPost = new DisplayingUserContent(commentsRepository, commentsCountersRepository, postsCountersRepository, creatingComment, likingUserContent)
     val browsingPosts = new BrowsingPosts(postsRepository, subscriptionsRepository, displayingPost)
     val searchingForUsers = new SearchingForUsers(usersRepository)
 

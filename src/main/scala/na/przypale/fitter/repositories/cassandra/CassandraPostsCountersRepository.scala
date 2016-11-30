@@ -12,7 +12,7 @@ class CassandraPostsCountersRepository(session: Session) extends PostsCountersRe
       "WHERE author = :author AND time_id = :timeId"
   )
 
-  override def getLikesAndComments(post: Post): Map[String, Int] = {
+  override def getLikesAndComments(post: Post): Map[String, Long] = {
 
     val Post(author, timeId, _) = post
 
@@ -21,8 +21,10 @@ class CassandraPostsCountersRepository(session: Session) extends PostsCountersRe
       .setUUID("timeId", timeId)
 
     val row = session.execute(getLikesAndCommentsQuery).one()
-    println(row)
-    Map("Likes" -> row.getInt("likes"), "Answers" -> row.getInt("answers"))
+    row match {
+      case null => Map("Likes" -> 0, "Answers" -> 0)
+      case _ => Map("Likes" -> row.getLong("likes"), "Comments" -> row.getLong("comments"))
+    }
   }
 
   private lazy val initiateCountersStatement = session.prepare(

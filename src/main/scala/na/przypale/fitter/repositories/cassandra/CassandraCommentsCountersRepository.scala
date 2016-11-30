@@ -12,7 +12,7 @@ class CassandraCommentsCountersRepository(session: Session) extends CommentsCoun
       "WHERE post_author = :postAuthor AND post_time_id = :postTimeId AND comment_time_id = :commentTimeId  AND comment_author = :commentAuthor"
   )
 
-  override def getLikesAndAnswers(comment: Comment): Map[String, Int] = {
+  override def getLikesAndAnswers(comment: Comment): Map[String, Long] = {
     val Comment(postAuthor, postTimeId, commentTimeId, commentAuthor, _, _, _) = comment
 
     val  getLikesAndAnswersQuery = getLikesAndAnswersStatement.bind()
@@ -22,8 +22,10 @@ class CassandraCommentsCountersRepository(session: Session) extends CommentsCoun
       .setString("commentAuthor", commentAuthor)
 
     val row = session.execute(getLikesAndAnswersQuery).one()
-    println(row)
-    Map("Likes" -> row.getInt("likes"), "Answers" -> row.getInt("answers"))
+    row match {
+      case null => Map("Likes" -> 0, "Answers" -> 0)
+      case _ => Map("Likes" -> row.getLong("likes"), "Answers" -> row.getLong("answers"))
+    }
   }
 
   private lazy val likeCommentStatement = session.prepare(
