@@ -10,7 +10,7 @@ class EventsControls(loggedUser: User,
 
   override protected def handle(action: Action): Unit = action.id match {
     case ActionIntId(EventsControls.CREATE_ACTION_ID) => creatingEvent.create(loggedUser.nick)
-    case ActionIntId(EventsControls.BROWSE_ACTION_ID) => browsingEvents.browse()
+    case ActionIntId(EventsControls.BROWSE_ACTION_ID) => browsingEvents.browse(loggedUser.nick)
     case _ =>
   }
 

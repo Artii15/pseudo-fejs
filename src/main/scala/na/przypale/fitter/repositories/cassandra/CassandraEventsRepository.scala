@@ -68,7 +68,7 @@ class CassandraEventsRepository(session: Session) extends EventsRepository {
     .collectionAsScalaIterable(session.execute(findEventsYearsStatement).all())
     .map(row => row.getInt("year"))
 
-  def assignUserToEvent(eventId: UUID, user: String): Unit = {
+  override def assignUserToEvent(eventId: UUID, user: String): Unit = {
     forceUserAssignmentToEvent(eventId, user)
     val oldestJoinTime = findOldestJoinTimeOfUserToEvent(eventId, user)
     dropIrrelevantAssignments(eventId, user, oldestJoinTime)
