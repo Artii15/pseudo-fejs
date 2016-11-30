@@ -26,22 +26,7 @@ class CassandraPostsCountersRepository(session: Session) extends PostsCountersRe
       case _ => Map("Likes" -> row.getLong("likes"), "Comments" -> row.getLong("comments"))
     }
   }
-
-  private lazy val initiateCountersStatement = session.prepare(
-    "INSERT INTO posts_counters(author, time_id, likes, comments) " +
-      "VALUES(:author, :timeId, 0, 0)"
-  )
-
-  override def initiateCounters(post: Post): Unit = {
-    val Post(author, timeId, _) = post
-
-    val  initiateCountersQuery = initiateCountersStatement.bind()
-      .setString("author", author)
-      .setUUID("timeId", timeId)
-
-    session.execute(initiateCountersQuery)
-  }
-
+  
   private lazy val likePostStatement = session.prepare(
     "UPDATE posts_counters " +
       "SET likes = likes + 1 " +

@@ -6,5 +6,4 @@ trait PostsCountersRepository {
   def getLikesAndComments(post: Post):  Map[String, Long]
   def likePost(post: Post)
   def increaseCommentsCounter(post: Post)
-  def initiateCounters(post: Post)
 }

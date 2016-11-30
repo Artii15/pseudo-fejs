@@ -61,21 +61,4 @@ class CassandraCommentsCountersRepository(session: Session) extends CommentsCoun
 
     session.execute(increaseAnswersQuery)
   }
-
-  private lazy val initiateCountersStatement = session.prepare(
-    "INSERT INTO comments_counters(post_author, post_time_id, comment_time_id, comment_author, likes, answers) " +
-      "VALUES(:postAuthor, :postTimeId, :commentTimeId, :commentAuthor, 0, 0)"
-  )
-
-  override def initiateCounters(comment: Comment): Unit = {
-    val Comment(postAuthor, postTimeId, commentTimeId, commentAuthor, _, _, _) = comment
-
-    val initiateCountersQuery = initiateCountersStatement.bind()
-      .setString("postAuthor", postAuthor)
-      .setUUID("postTimeId", postTimeId)
-      .setUUID("commentTimeId", commentTimeId)
-      .setString("commentAuthor", commentAuthor)
-
-    session.execute(initiateCountersQuery)
-  }
 }
