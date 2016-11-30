@@ -62,16 +62,22 @@ class DisplayingUserContent(commentsRepository: CommentsRepository,
       case post: Post =>
         println(s"${dateFormat.format(timeIdToDate(post.timeId))} ${post.author}:")
         println(post.content)
-        val counters = postsCountersRepository.getLikesAndComments(post)
-        counters.keys.foreach{key => print(s"$key: ${counters(key)} ")}
-        println()
       case comment: Comment =>
         println(s"${dateFormat.format(timeIdToDate(comment.commentTimeId))} ${comment.commentAuthor}:")
         println(comment.content)
-        val counters = commentsCountersRepository.getLikesAndAnswers(comment)
-        counters.keys.foreach{key => print(s"$key: ${counters(key)} ")}
-        println()
     }
+    displayContentCounters(userContent)
+    println()
+  }
+
+  private def displayContentCounters(userContent: UserContent) : Unit = {
+    val counters = userContent match {
+      case post: Post =>
+        postsCountersRepository.getLikesAndComments(post)
+      case comment: Comment =>
+        commentsCountersRepository.getLikesAndAnswers(comment)
+    }
+    counters.keys.foreach{key => print(s"$key: ${counters(key)} ")}
     println()
   }
 

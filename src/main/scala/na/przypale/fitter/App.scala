@@ -18,7 +18,7 @@ object App {
     val creatingUser = new CreatingUser(usersRepository, subscriptionsRepository)
     val loggingIn = new LoggingIn(usersRepository)
     val deletingUser = new DeletingUser(usersRepository)
-    val creatingPost = new CreatingPost(postsRepository, postsCountersRepository)
+    val creatingPost = new CreatingPost(postsRepository)
     val creatingComment = new CreatingComment(commentsRepository, commentsCountersRepository, postsCountersRepository)
     val likingUserContent = new LikingUserContent(commentsCountersRepository, postsCountersRepository)
     val subscribingUser = new SubscribingUser(usersRepository, subscriptionsRepository)
