@@ -3,13 +3,20 @@ package na.przypale.fitter.interactions
 import na.przypale.fitter.CommandLineReader
 import na.przypale.fitter.entities.Event
 import na.przypale.fitter.repositories.EventsRepository
+import na.przypale.fitter.repositories.exceptions.EventParticipantLimitExceedException
 
 import scala.annotation.tailrec
 
 class JoiningEvent(eventsRepository: EventsRepository) {
   def join(loggedUser: String, availableEvents: Iterable[(Event, Int)]): Unit = {
     val selectedEvent = letUserSelectEvent(availableEvents)
-    eventsRepository.
+
+    try {
+      eventsRepository.assignUserToEvent(selectedEvent, loggedUser)
+    }
+    catch {
+      case _ : EventParticipantLimitExceedException => println("Participants limit exceeded")
+    }
   }
 
   @tailrec
