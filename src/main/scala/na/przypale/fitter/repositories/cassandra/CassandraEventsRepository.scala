@@ -3,6 +3,7 @@ package na.przypale.fitter.repositories.cassandra
 import java.util
 import java.util.{Calendar, Date, UUID}
 
+import com.datastax.driver.core.utils.UUIDs
 import com.datastax.driver.core.{Row, Session, SimpleStatement}
 import na.przypale.fitter.entities.Event
 import na.przypale.fitter.repositories.exceptions.EventParticipantLimitExceedException
@@ -72,19 +73,36 @@ class CassandraEventsRepository(session: Session) extends EventsRepository {
   override def assignUserToEvent(event: Event, user: String): Unit = {
     forceUserAssignmentToEvent(event, user)
     val oldestJoinTime = findOldestJoinTimeOfUserToEvent(event, user)
-    dropIrrelevantAssignments(event, user, oldestJoinTime)
+    dropRedundantAssignments(event, user, oldestJoinTime)
 
-    if(belongsToEvent(event, user)) incrementParticipantsCount(event)
-    else throw new EventParticipantLimitExceedException
+    if(!belongsToEvent(event, user))
+      throw new EventParticipantLimitExceedException
   }
 
-  private lazy val assignToEventStatement = session.prepare(
-    "INSERT INTO events_participants(event_id, participant, join_time) VALUES(:eventId, :participant, now())")
   private def forceUserAssignmentToEvent(event: Event, user: String): Unit = {
-    val assignUserQuery = assignToEventStatement.bind()
-      .setUUID("eventId", event.id)
-      .setString("participant", user)
-    session.execute(assignUserQuery)
+    val joinTime = UUIDs.timeBased()
+    assignToParticipants(event.id, user, joinTime)
+    assignJoinTime(event.id, user, joinTime)
+  }
+
+  private lazy val assignToParticipantsStatement = session.prepare(
+    "INSERT INTO events_participants(event_id, participant, join_time) VALUES(:eventId, :participant, :joinTime")
+  private def assignToParticipants(eventId: UUID, participant: String, joinTime: UUID): Unit = {
+    val assignToParticipantsQuery = assignToParticipantsStatement.bind()
+      .setUUID("eventId", eventId)
+      .setString("participant", participant)
+      .setUUID("joinTime", joinTime)
+    session.execute(assignToParticipantsQuery)
+  }
+
+  private lazy val assignJoinTimeStatement = session.prepare(
+    "INSERT INTO events_join_times(event_id, join_time, participant) VALUES(:eventId, :joinTime, :participant)")
+  private def assignJoinTime(eventId: UUID, participant: String, joinTime: UUID): Unit = {
+    val assignJoinTimeQuery = assignJoinTimeStatement.bind()
+      .setUUID("eventId", eventId)
+      .setUUID("joinTime", joinTime)
+      .setString("participant", participant)
+    session.execute(assignJoinTimeQuery)
   }
 
   private lazy val selectParticipantJoinTimeStatement = session.prepare(
@@ -105,7 +123,7 @@ class CassandraEventsRepository(session: Session) extends EventsRepository {
   private lazy val dropRedundantAssignmentsStatement = session.prepare(
     "DELETE FROM events_participants " +
       "WHERE event_id = :eventId AND participant = :participant AND join_time > :oldestJoinTime")
-  private def dropIrrelevantAssignments(event: Event, user: String, oldestJoinTime: Option[UUID]): Unit = {
+  private def dropRedundantAssignments(event: Event, user: String, oldestJoinTime: Option[UUID]): Unit = {
     if(oldestJoinTime.isDefined) {
       val Some(joinTime) = oldestJoinTime
       val query = dropRedundantAssignmentsStatement.bind()
