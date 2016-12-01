@@ -1,6 +1,5 @@
 package na.przypale.fitter.repositories.cassandra
 
-import java.util
 import java.util.{Calendar, Date, UUID}
 
 import com.datastax.driver.core.utils.UUIDs
@@ -46,14 +45,8 @@ class CassandraEventsRepository(session: Session) extends EventsRepository {
       .setList("years", JavaConverters.seqAsJavaList(eventsYearsToSearch.toSeq))
       .setTimestamp("minimalDate", new Date())
 
-    makeEventsStream(session.execute(query).iterator())
+    JavaConverters.asScalaIterator(session.execute(query).iterator()).toStream.map(rowToEvent)
   }
-
-  private def makeEventsStream(iterator: util.Iterator[Row]): Stream[Event] =
-    if(iterator.hasNext)
-      rowToEvent(iterator.next()) #:: makeEventsStream(iterator)
-    else
-      Stream.empty
 
   private def rowToEvent(row: Row) = Event(
     row.getUUID("id"),
@@ -152,22 +145,16 @@ class CassandraEventsRepository(session: Session) extends EventsRepository {
   }
 
   private lazy val selectRelevantParticipantsStatement = session.prepare(
-    "SELECT participant FROM events_participants WHERE event_id = :eventId ORDER BY join_time LIMIT :limit")
+    "SELECT participant FROM events_join_times WHERE event_id = :eventId ORDER BY join_time")
   private def belongsToEvent(event: Event, user: String): Boolean = {
     val query = selectRelevantParticipantsStatement.bind()
       .setUUID("eventId", event.id)
-      .setInt("limit", event.maxParticipantsCount)
-    query.setFetchSize(Integer.MAX_VALUE)
+    query.setFetchSize(event.maxParticipantsCount)
 
-    val relevantParticipants = JavaConverters.collectionAsScalaIterable(session.execute(query).all())
-    relevantParticipants.exists(row => row.getString("participant") == user)
-  }
-
-  private lazy val incrementParticipantsCountStatement = session.prepare(
-    "UPDATE events_counters SET current_users_count = current_users_count + 1 WHERE event_id = :eventId")
-  private def incrementParticipantsCount(event: Event): Unit = {
-    val query = incrementParticipantsCountStatement.bind()
-      .setUUID("eventId", event.id)
-    session.execute(query)
+    JavaConverters.asScalaIterator(session.execute(query).iterator()).toStream
+      .map(row => row.getString("participant"))
+      .distinct
+      .take(event.maxParticipantsCount)
+      .contains(user)
   }
 }
