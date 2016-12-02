@@ -69,3 +69,13 @@ CREATE TABLE events_join_times (
     participant varchar,
     PRIMARY KEY(event_id, join_time, participant)
 );
+
+DROP TABLE IF EXISTS users_events;
+CREATE TABLE users_events (
+    nick varchar,
+    year int,
+    start_date timestamp,
+    end_date timestamp,
+    event_id UUID,
+    PRIMARY KEY((nick, year), start_date, end_date, event_id)
+);
