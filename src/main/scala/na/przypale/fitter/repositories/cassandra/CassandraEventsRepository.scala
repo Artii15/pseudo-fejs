@@ -67,11 +67,15 @@ class CassandraEventsRepository(session: Session) extends EventsRepository {
   }
 
   private lazy val checkUserAssignmentStatement = session.prepare(
-    "SELECT * FROM events_participants WHERE event_id = :eventId AND participant = :participant")
+    "SELECT * FROM users_events " +
+    "WHERE nick = :nick AND year = :year AND start_date = :startDate AND end_date = :endDate AND event_id = :eventId")
   private def hasTriedToAssign(event: Event, user: String): Boolean = {
     val query = checkUserAssignmentStatement.bind()
+      .setString("nick", user)
+      .setInt("year", Dates.extractYear(event.startDate))
+      .setTimestamp("startDate", event.startDate)
+      .setTimestamp("endDate", event.endDate)
       .setUUID("eventId", event.id)
-      .setString("participant", user)
     session.execute(query).one() != null
   }
 
