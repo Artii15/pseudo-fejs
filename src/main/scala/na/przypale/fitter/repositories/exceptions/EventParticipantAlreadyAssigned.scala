@@ -1,0 +1,3 @@
+package na.przypale.fitter.repositories.exceptions
+
+class EventParticipantAlreadyAssigned extends RuntimeException
