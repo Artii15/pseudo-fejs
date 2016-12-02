@@ -1,4 +1,4 @@
-package na.przypale.fitter.repositories
+package na.przypale.fitter
 
 import java.util.{Calendar, Date}
 

@@ -13,7 +13,7 @@ class BrowsingEvents(eventsRepository: EventsRepository, joiningEvent: JoiningEv
   private val controls = new EventsBrowserControls()
 
   def browse(browsingUserNick: String): Unit = {
-    val incomingEvents = eventsRepository.findIncoming()
+    val incomingEvents = eventsRepository.findAllIncoming()
     showEventsToUser(incomingEvents.grouped(Config.DEFAULT_PAGE_SIZE), browsingUserNick)
   }
 

@@ -4,9 +4,10 @@ import java.util.{Date, UUID}
 
 import com.datastax.driver.core.utils.UUIDs
 import com.datastax.driver.core.{Row, Session, SimpleStatement}
+import na.przypale.fitter.Dates
 import na.przypale.fitter.entities.Event
 import na.przypale.fitter.repositories.exceptions.{EventParticipantAlreadyAssigned, EventParticipantLimitExceedException}
-import na.przypale.fitter.repositories.{Dates, EventsRepository}
+import na.przypale.fitter.repositories.EventsRepository
 
 import scala.collection.JavaConverters
 
@@ -34,7 +35,7 @@ class CassandraEventsRepository(session: Session) extends EventsRepository {
     "FROM events " +
     "WHERE year IN :years AND start_date > :minimalDate")
 
-  override def findIncoming(): Stream[Event] = {
+  override def findAllIncoming(): Stream[Event] = {
     val currentYear = Dates.currentYear()
     val eventsYearsToSearch = findEventsYears().filter(year => year >= currentYear)
 
@@ -131,5 +132,34 @@ class CassandraEventsRepository(session: Session) extends EventsRepository {
       .distinct
       .take(event.maxParticipantsCount)
       .contains(user)
+  }
+
+  private lazy val findUserIncomingEventsStatement = session.prepare(
+    "SELECT event_id, start_date FROM users_events WHERE nick = :nick AND year = :year ORDER BY start_date")
+  override def findUserIncomingEvents(user: String): Stream[Event] = {
+    val currentYear = Dates.currentYear()
+    val query = findUserIncomingEventsStatement.bind()
+      .setString("nick", user)
+      .setInt("year", currentYear)
+
+    JavaConverters.asScalaIterator(session.execute(query).iterator()).toStream
+      .map(row => findEvent(currentYear, row.getTimestamp("start_date"), row.getUUID("event_id")))
+      .filter(_.isDefined)
+      .map(_.get)
+      .filter(event => belongsToEvent(event, user))
+  }
+
+  private lazy val findSingleEventStatement = session.prepare(
+    "SELECT * FROM events WHERE year = :year AND start_date = :startDate AND id = :id")
+  private def findEvent(year: Int, startDate: Date, eventId: UUID): Option[Event] = {
+    val query = findSingleEventStatement.bind()
+      .setInt("year", year)
+      .setTimestamp("startDate", startDate)
+      .setUUID("id", eventId)
+
+    session.execute(query).one() match {
+      case null => None
+      case row => Some(rowToEvent(row))
+    }
   }
 }
