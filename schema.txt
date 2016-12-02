@@ -41,6 +41,15 @@ CREATE TABLE posts_counters (
     PRIMARY KEY(author, time_id)
 );
 
+DROP TABLE IF EXISTS posts_likes_journal;
+CREATE TABLE posts_likes_journal (
+    post_author varchar,
+    post_time_id timeuuid,
+    author varchar,
+    time_id timeuuid,
+    PRIMARY KEY((post_author, post_time_id), author)
+);
+
 DROP TABLE IF EXISTS comments;
 CREATE TABLE comments (
      post_author varchar,
@@ -62,6 +71,17 @@ CREATE TABLE comments_counters (
     likes counter,
     answers counter,
     PRIMARY KEY((post_author, post_time_id, comment_time_id, comment_author))
+);
+
+DROP TABLE IF EXISTS comments_likes;
+CREATE TABLE comments_likes (
+    post_author varchar,
+    post_time_id timeuuid,
+    comment_time_id timeuuid,
+    comment_author varchar,
+    author varchar,
+    time_id timeuuid,
+    PRIMARY KEY((post_author, post_time_id, comment_time_id, comment_author), author)
 );
 
 DROP TABLE IF EXISTS events;
