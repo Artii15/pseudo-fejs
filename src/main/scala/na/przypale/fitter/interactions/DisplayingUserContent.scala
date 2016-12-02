@@ -38,7 +38,7 @@ class DisplayingUserContent(commentsRepository: CommentsRepository,
       case ActionIntId(UserContentControls.MORE_COMMENTS_ACTION_ID) =>
         searchComments(user, userContent, comments.lastOption)
       case ActionIntId(UserContentControls.LIKE_ACTION_ID) =>
-        likingUserContent.like(userContent)
+        likingUserContent.like(userContent, user.nick)
         searchComments(user, userContent)
       case ActionIntId(UserContentControls.CREATE_COMMENT_ACTION_ID) =>
         creatingComment.create(user, userContent)
