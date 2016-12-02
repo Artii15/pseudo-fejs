@@ -1,6 +1,6 @@
 package na.przypale.fitter.repositories.cassandra
 
-import java.util.{Calendar, Date, UUID}
+import java.util.{Date, UUID}
 
 import com.datastax.driver.core.utils.UUIDs
 import com.datastax.driver.core.{Row, Session, SimpleStatement}
@@ -16,11 +16,9 @@ class CassandraEventsRepository(session: Session) extends EventsRepository {
     "INSERT INTO events(year, start_date, end_date, id, description, author, name, max_users_count) " +
       "VALUES(:year, :startDate, :endDate, :id, :description, :author, :name, :maxUsersCount)")
   override def create(event: Event): Unit = {
-    val eventStartCalendar = Calendar.getInstance()
-    eventStartCalendar.setTime(event.startDate)
 
     val createEventQuery = createEventStatement.bind()
-      .setInt("year", eventStartCalendar.get(Calendar.YEAR))
+      .setInt("year", Dates.extractYear(event.startDate))
       .setTimestamp("startDate", event.startDate)
       .setTimestamp("endDate", event.endDate)
       .setUUID("id", event.id)
@@ -81,6 +79,7 @@ class CassandraEventsRepository(session: Session) extends EventsRepository {
     val joinTime = UUIDs.timeBased()
     assignToParticipants(event.id, user, joinTime)
     assignJoinTime(event.id, user, joinTime)
+    logAssignmentAttempt(event, user)
   }
 
   private lazy val assignToParticipantsStatement = session.prepare(
@@ -101,6 +100,19 @@ class CassandraEventsRepository(session: Session) extends EventsRepository {
       .setUUID("joinTime", joinTime)
       .setString("participant", participant)
     session.execute(assignJoinTimeQuery)
+  }
+
+  private lazy val logAssignmentAttemptStatement = session.prepare(
+    "INSERT INTO users_events(nick, year, start_date, end_date, event_id) " +
+    "VALUES(:nick, :year, :startDate, :endDate, :eventId)")
+  private def logAssignmentAttempt(event: Event, user: String): Unit = {
+    val query = logAssignmentAttemptStatement.bind()
+      .setString("nick", user)
+      .setInt("year", Dates.extractYear(event.startDate))
+      .setTimestamp("startDate", event.startDate)
+      .setTimestamp("endDate", event.endDate)
+      .setUUID("eventId", event.id)
+    session.execute(query)
   }
 
   private lazy val selectRelevantParticipantsStatement = session.prepare(
