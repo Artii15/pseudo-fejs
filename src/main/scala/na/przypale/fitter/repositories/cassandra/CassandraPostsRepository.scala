@@ -29,7 +29,7 @@ class CassandraPostsRepository(session: Session) extends PostsRepository {
   private lazy val findByAuthorStatement = session.prepare(
     "SELECT author, time_id, content " +
     "FROM posts " +
-    "WHERE author IN :authors AND time_id < :timeId " +
+    "WHERE author IN :authors AND time_id <= :timeId " +
     s"LIMIT ${Config.DEFAULT_PAGE_SIZE}"
   )
   override def findByAuthors(authors: Iterable[String], lastPostToSkip: Option[Post] = None): Iterable[Post] = {

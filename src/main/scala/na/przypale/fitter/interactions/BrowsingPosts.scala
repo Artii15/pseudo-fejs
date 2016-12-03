@@ -37,7 +37,7 @@ class BrowsingPosts(postsRepository: PostsRepository,
         case ActionIntId(PostsControls.MORE_POSTS_ACTION_ID) => searchPosts(user, subscribedPeople, posts.lastOption)
         case ActionIntId(PostsControls.DISPLAY_POST_ACTION_ID) =>
           letUserSelectPost(user, enumeratedPosts)
-          searchPosts(user, subscribedPeople, posts.lastOption)
+          searchPosts(user, subscribedPeople, posts.headOption)
         case _ =>
       }
     }
