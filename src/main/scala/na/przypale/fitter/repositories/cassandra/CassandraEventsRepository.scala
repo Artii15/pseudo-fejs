@@ -42,7 +42,6 @@ class CassandraEventsRepository(session: Session) extends EventsRepository {
     val query = findIncomingStatement.bind()
       .setList("years", JavaConverters.seqAsJavaList(eventsYearsToSearch.toSeq))
       .setTimestamp("minimalDate", new Date())
-
     JavaConverters.asScalaIterator(session.execute(query).iterator()).toStream.map(rowToEvent)
   }
 
@@ -154,6 +153,8 @@ class CassandraEventsRepository(session: Session) extends EventsRepository {
   override def leave(event: Event, user: String): Unit = {
     val joinTimes = findUserJoinTimes(event, user)
     removeFromEventsJoinTimes(event, user, joinTimes)
+    removeFromEventsParticipants(event, user)
+    removeFromUsersEvents(event, user)
   }
 
   private lazy val findUserJoinTimesStatement = session.prepare(
@@ -174,7 +175,26 @@ class CassandraEventsRepository(session: Session) extends EventsRepository {
       .setUUID("eventId", event.id)
       .setString("participant", user)
       .setList("joinTimes", JavaConverters.seqAsJavaList(joinTimes.toSeq))
+    session.execute(query)
+  }
 
+  private lazy val removeFromEventsParticipantsStatement = session.prepare(
+    "DELETE FROM events_participants WHERE event_id = :eventId AND participant = :participant")
+  private def removeFromEventsParticipants(event: Event, user: String): Unit = {
+    val query = removeFromEventsParticipantsStatement.bind()
+      .setUUID("eventId", event.id)
+      .setString("participant", user)
+    session.execute(query)
+  }
+
+  private lazy val removeFromUsersEventsStatement = session.prepare(
+    "DELETE FROM users_events WHERE nick = :nick AND year = :year AND start_date = :startDate AND id = :id")
+  private def removeFromUsersEvents(event: Event, user: String): Unit = {
+    val query = removeFromUsersEventsStatement.bind()
+      .setString("nick", user)
+      .setInt("year", Dates.extractYear(event.startDate))
+      .setTimestamp("startDate", event.startDate)
+      .setUUID("id", event.id)
     session.execute(query)
   }
 }
