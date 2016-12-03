@@ -47,17 +47,39 @@ CREATE TABLE events (
     start_date timestamp,
     end_date timestamp,
     id uuid,
-    participants set<varchar>,
+    max_users_count int,
     description text,
     author varchar,
     name varchar,
-    PRIMARY KEY(year, start_date, end_date, id)
+    PRIMARY KEY(year, start_date, id)
 );
 
-DROP TABLE IF EXISTS events_counters;
-CREATE TABLE events_counters (
-    id uuid,
-    max_users_count counter,
-    current_users_count counter,
-    PRIMARY KEY(id)
+DROP TABLE IF EXISTS events_participants;
+CREATE TABLE events_participants (
+    event_id uuid,
+    participant varchar,
+    join_time timeuuid,
+    PRIMARY KEY(event_id, participant, join_time)
+);
+
+DROP TABLE IF EXISTS events_join_times;
+CREATE TABLE events_join_times (
+    event_id uuid,
+    join_time timeuuid,
+    participant varchar,
+    PRIMARY KEY(event_id, join_time, participant)
+);
+
+DROP TABLE IF EXISTS users_events;
+CREATE TABLE users_events (
+    nick varchar,
+    year int,
+    start_date timestamp,
+    end_date timestamp,
+    id UUID,
+    max_users_count int,
+    description text,
+    author varchar,
+    name varchar,
+    PRIMARY KEY((nick, year), start_date, id)
 );
