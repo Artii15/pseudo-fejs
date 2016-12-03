@@ -19,7 +19,7 @@ class ShowingUserEvents(eventsRepository: EventsRepository) {
 
   @tailrec
   private def letUserBrowseHisEvents(events: Stream[Event], user: String): Unit = events match {
-    case Stream.empty => println("No more events to show")
+    case Stream.Empty => println("No more events to show")
     case event #:: moreEvents =>
       EventPresenter.display(event)
       val Action(ActionIntId(userActionId), _) = controls.interact()
