@@ -76,6 +76,10 @@ CREATE TABLE users_events (
     year int,
     start_date timestamp,
     end_date timestamp,
-    event_id UUID,
-    PRIMARY KEY((nick, year), start_date, end_date, event_id)
+    id UUID,
+    max_users_count int,
+    description text,
+    author varchar,
+    name varchar,
+    PRIMARY KEY((nick, year), start_date, id)
 );

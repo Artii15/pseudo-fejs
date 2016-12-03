@@ -11,6 +11,7 @@ class EventsControls(loggedUser: User,
   override protected def handle(action: Action): Unit = action.id match {
     case ActionIntId(EventsControls.CREATE_ACTION_ID) => creatingEvent.create(loggedUser.nick)
     case ActionIntId(EventsControls.BROWSE_ACTION_ID) => browsingEvents.browse(loggedUser.nick)
+    case ActionIntId(EventsControls.SHOW_USER_INCOMING_ACTION_ID) => browsingEvents.browse(loggedUser.nick)
     case _ =>
   }
 
@@ -23,15 +24,13 @@ class EventsControls(loggedUser: User,
 object EventsControls {
   private val CREATE_ACTION_ID = 1
   private val BROWSE_ACTION_ID = 2
-  private val LEAVE_ACTION_ID = 3
-  private val DELETE_ACTION_ID = 4
-  private val EXIT_ACTION_ID = 5
+  private val SHOW_USER_INCOMING_ACTION_ID = 3
+  private val EXIT_ACTION_ID = 4
 
   private val menu = Menu(List(
     Action(ActionIntId(CREATE_ACTION_ID), s"$CREATE_ACTION_ID - Create event"),
     Action(ActionIntId(BROWSE_ACTION_ID), s"$BROWSE_ACTION_ID - Browse events"),
-    Action(ActionIntId(LEAVE_ACTION_ID), s"$LEAVE_ACTION_ID - Leave event"),
-    Action(ActionIntId(DELETE_ACTION_ID), s"$DELETE_ACTION_ID - Delete event"),
+    Action(ActionIntId(SHOW_USER_INCOMING_ACTION_ID), s"$SHOW_USER_INCOMING_ACTION_ID - Show your incoming events"),
     Action(ActionIntId(EXIT_ACTION_ID), s"$EXIT_ACTION_ID - Exit")
   ))
 

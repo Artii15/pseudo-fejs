@@ -4,6 +4,7 @@ import na.przypale.fitter.controls.EventsBrowserControls
 import na.przypale.fitter.Config
 import na.przypale.fitter.entities.Event
 import na.przypale.fitter.menu.{Action, ActionIntId}
+import na.przypale.fitter.presenters.console.EventPresenter
 import na.przypale.fitter.repositories.EventsRepository
 
 import scala.annotation.tailrec
@@ -34,12 +35,8 @@ class BrowsingEvents(eventsRepository: EventsRepository, joiningEvent: JoiningEv
   }
 
   private def display(enumeratedEvent: (Event, Int)): Unit = {
-    val (Event(_, startDate, endDate, maxParticipantsCount, name, description, author), index) = enumeratedEvent
+    val (event, index) = enumeratedEvent
     println(s"Nr: $index")
-    println(s"Name: $name")
-    println(s"Author: $author")
-    println(s"Duration: $startDate - $endDate")
-    println(s"Max number of participants: $maxParticipantsCount")
-    println(s"$description\n")
+    EventPresenter.display(event)
   }
 }
