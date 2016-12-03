@@ -151,5 +151,30 @@ class CassandraEventsRepository(session: Session) extends EventsRepository {
       .filter(event => belongsToEvent(event, user))
   }
 
-  override def leave(event: Event, user: String): Unit = ???
+  override def leave(event: Event, user: String): Unit = {
+    val joinTimes = findUserJoinTimes(event, user)
+    removeFromEventsJoinTimes(event, user, joinTimes)
+  }
+
+  private lazy val findUserJoinTimesStatement = session.prepare(
+    "SELECT join_time FROM events_participants WHERE event_id = :eventId AND participant = :participant")
+  private def findUserJoinTimes(event: Event, user: String): Iterable[UUID] = {
+    val query = findUserJoinTimesStatement.bind()
+      .setUUID("eventId", event.id)
+      .setString("participant", user)
+
+    JavaConverters.collectionAsScalaIterable(session.execute(query).all())
+      .map(row => row.getUUID("join_time"))
+  }
+
+  private lazy val removeFromEventsJoinTimesStatement = session.prepare(
+    "DELETE FROM events_join_times WHERE event_id = :eventId AND participant = :participant AND join_time IN :joinTimes")
+  private def removeFromEventsJoinTimes(event: Event, user: String, joinTimes: Iterable[UUID]): Unit = {
+    val query = removeFromEventsJoinTimesStatement.bind()
+      .setUUID("eventId", event.id)
+      .setString("participant", user)
+      .setList("joinTimes", JavaConverters.seqAsJavaList(joinTimes.toSeq))
+
+    session.execute(query)
+  }
 }
