@@ -35,7 +35,7 @@ class CassandraCommentsRepository(session: Session) extends CommentsRepository {
   private lazy val findByPostStatement = session.prepare(
     "SELECT post_author, post_time_id, comment_time_id, comment_author, content, id, parent_id " +
       "FROM comments " +
-      "WHERE post_author = :postAuthor AND post_time_id = :postTimeId AND comment_time_id > :timeId AND parent_id = ''" +
+      "WHERE post_author = :postAuthor AND post_time_id = :postTimeId AND comment_time_id >= :timeId AND parent_id = ''" +
       s"LIMIT ${Config.DEFAULT_PAGE_SIZE} " +
       "ALLOW FILTERING"
   )
@@ -58,7 +58,7 @@ class CassandraCommentsRepository(session: Session) extends CommentsRepository {
   private lazy val findByCommentStatement = session.prepare(
     "SELECT post_author, post_time_id, comment_time_id, comment_author, content, id, parent_id " +
       "FROM comments " +
-      "WHERE post_author = :postAuthor AND post_time_id = :postTimeId AND comment_time_id > :timeId AND parent_id = :id " +
+      "WHERE post_author = :postAuthor AND post_time_id = :postTimeId AND comment_time_id >= :timeId AND parent_id = :id " +
       s"LIMIT ${Config.DEFAULT_PAGE_SIZE} " +
       "ALLOW FILTERING"
   )

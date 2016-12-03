@@ -45,7 +45,7 @@ class DisplayingUserContent(commentsRepository: CommentsRepository,
         searchComments(user, userContent)
       case ActionIntId(UserContentControls.DISPLAY_COMMENT_ACTION_ID) =>
         letUserSelectComment(user, enumeratedComments)
-        searchComments(user, userContent)
+        searchComments(user, userContent, comments.headOption)
       case _ =>
     }
   }
