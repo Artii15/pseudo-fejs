@@ -68,13 +68,12 @@ class CassandraEventsRepository(session: Session) extends EventsRepository {
 
   private lazy val checkUserAssignmentStatement = session.prepare(
     "SELECT * FROM users_events " +
-    "WHERE nick = :nick AND year = :year AND start_date = :startDate AND end_date = :endDate AND event_id = :eventId")
+    "WHERE nick = :nick AND year = :year AND start_date = :startDate AND id = :eventId")
   private def hasTriedToAssign(event: Event, user: String): Boolean = {
     val query = checkUserAssignmentStatement.bind()
       .setString("nick", user)
       .setInt("year", Dates.extractYear(event.startDate))
       .setTimestamp("startDate", event.startDate)
-      .setTimestamp("endDate", event.endDate)
       .setUUID("eventId", event.id)
     session.execute(query).one() != null
   }
@@ -108,7 +107,7 @@ class CassandraEventsRepository(session: Session) extends EventsRepository {
 
   private lazy val logAssignmentAttemptStatement = session.prepare(
     "INSERT INTO users_events(nick, year, start_date, end_date, id, description, author, name, max_users_count) " +
-    "VALUES(:nick, :year, :startDate, :endDate, :id, :description, :author, :name: maxUsersCount)")
+    "VALUES(:nick, :year, :startDate, :endDate, :id, :description, :author, :name, :maxUsersCount)")
   private def logAssignmentAttempt(event: Event, user: String): Unit = {
     val query = logAssignmentAttemptStatement.bind()
       .setString("nick", user)
