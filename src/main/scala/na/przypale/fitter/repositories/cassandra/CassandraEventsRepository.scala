@@ -108,15 +108,19 @@ class CassandraEventsRepository(session: Session) extends EventsRepository {
   }
 
   private lazy val logAssignmentAttemptStatement = session.prepare(
-    "INSERT INTO users_events(nick, year, start_date, end_date, event_id) " +
-    "VALUES(:nick, :year, :startDate, :endDate, :eventId)")
+    "INSERT INTO users_events(nick, year, start_date, end_date, id, description, author, name, max_users_count) " +
+    "VALUES(:nick, :year, :startDate, :endDate, :id, :description, :author, :name: maxUsersCount)")
   private def logAssignmentAttempt(event: Event, user: String): Unit = {
     val query = logAssignmentAttemptStatement.bind()
       .setString("nick", user)
       .setInt("year", Dates.extractYear(event.startDate))
       .setTimestamp("startDate", event.startDate)
       .setTimestamp("endDate", event.endDate)
-      .setUUID("eventId", event.id)
+      .setUUID("id", event.id)
+      .setString("description", event.description)
+      .setString("author", event.author)
+      .setString("name", event.name)
+      .setInt("maxUsersCount", event.maxParticipantsCount)
     session.execute(query)
   }
 
@@ -135,7 +139,7 @@ class CassandraEventsRepository(session: Session) extends EventsRepository {
   }
 
   private lazy val findUserIncomingEventsStatement = session.prepare(
-    "SELECT event_id, start_date FROM users_events WHERE nick = :nick AND year = :year ORDER BY start_date")
+    "SELECT * FROM users_events WHERE nick = :nick AND year = :year ORDER BY start_date")
   override def findUserIncomingEvents(user: String): Stream[Event] = {
     val currentYear = Dates.currentYear()
     val query = findUserIncomingEventsStatement.bind()
@@ -143,23 +147,9 @@ class CassandraEventsRepository(session: Session) extends EventsRepository {
       .setInt("year", currentYear)
 
     JavaConverters.asScalaIterator(session.execute(query).iterator()).toStream
-      .map(row => findEvent(currentYear, row.getTimestamp("start_date"), row.getUUID("event_id")))
-      .filter(_.isDefined)
-      .map(_.get)
+      .map(rowToEvent)
       .filter(event => belongsToEvent(event, user))
   }
 
-  private lazy val findSingleEventStatement = session.prepare(
-    "SELECT * FROM events WHERE year = :year AND start_date = :startDate AND id = :id")
-  private def findEvent(year: Int, startDate: Date, eventId: UUID): Option[Event] = {
-    val query = findSingleEventStatement.bind()
-      .setInt("year", year)
-      .setTimestamp("startDate", startDate)
-      .setUUID("id", eventId)
-
-    session.execute(query).one() match {
-      case null => None
-      case row => Some(rowToEvent(row))
-    }
-  }
+  override def leave(event: Event, user: String): Unit = ???
 }
