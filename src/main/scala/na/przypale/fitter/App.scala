@@ -25,8 +25,9 @@ object App {
 
     val creatingEvent = new CreatingEvent(eventsRepository)
     val browsingEvents = new BrowsingEvents(eventsRepository, joiningEvent)
+    val showingUserEvents = new ShowingUserEvents(eventsRepository)
 
-    val eventsControlsFactory = EventsControls.factory(creatingEvent, browsingEvents)
+    val eventsControlsFactory = EventsControls.factory(creatingEvent, browsingEvents, showingUserEvents)
     val loggedUserControlsFactory = LoggedUserControls.factory(creatingPost, deletingUser, subscribingUser,
       browsingPosts, searchingForUsers, eventsControlsFactory)
 
