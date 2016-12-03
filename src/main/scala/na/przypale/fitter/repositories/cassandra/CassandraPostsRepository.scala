@@ -34,7 +34,7 @@ class CassandraPostsRepository(session: Session) extends PostsRepository {
   )
   override def findByAuthors(authors: Iterable[String], lastPostToSkip: Option[Post] = None): Iterable[Post] = {
     val postsAuthors = JavaConverters.seqAsJavaList(authors.toSeq)
-    val timeId = UUIDs.endOf(System.currentTimeMillis())
+    val timeId =getTimeId(lastPostToSkip)
 
     val query = findByAuthorStatement.bind()
       .setList("authors", postsAuthors)
@@ -43,6 +43,8 @@ class CassandraPostsRepository(session: Session) extends PostsRepository {
 
     JavaConverters.collectionAsScalaIterable(session.execute(query).all()).toVector
       .map(row => Post(row.getString("author"), row.getUUID("time_id"), row.getString("content")))
+      .sortBy(post => post.timeId)
+      .reverse
   }
 
   private lazy val getSpecificPostStatement = session.prepare(
@@ -60,6 +62,13 @@ class CassandraPostsRepository(session: Session) extends PostsRepository {
     row match {
       case null => null
       case _ => Post(row.getString("author"), row.getUUID("time_id"), row.getString("content"))
+    }
+  }
+
+  def getTimeId(likedPost: Option[Post]) = {
+    likedPost match {
+      case Some(post) => post.timeId
+      case None =>  UUIDs.endOf(System.currentTimeMillis())
     }
   }
 }
