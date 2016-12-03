@@ -25,7 +25,7 @@ object App {
     val likingUserContent = new LikingUserContent(commentsCountersRepository, postsCountersRepository, commentsLikesRepository, postsLikesJournalRepository)
     val subscribingUser = new SubscribingUser(usersRepository, subscriptionsRepository)
     val displayingPost = new DisplayingUserContent(commentsRepository, commentsCountersRepository, postsCountersRepository, creatingComment, likingUserContent)
-    val browsingPosts = new BrowsingPosts(postsRepository, subscriptionsRepository, displayingPost)
+    val browsingPosts = new BrowsingPosts(postsRepository, subscriptionsRepository, postsLikesJournalRepository, displayingPost)
     val searchingForUsers = new SearchingForUsers(usersRepository)
 
     val loggedUserControlsFactory = LoggedUserControls.makeFactory(creatingPost, deletingUser, subscribingUser,

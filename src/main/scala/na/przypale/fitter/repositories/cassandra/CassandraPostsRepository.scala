@@ -1,5 +1,7 @@
 package na.przypale.fitter.repositories.cassandra
 
+import java.util.UUID
+
 import com.datastax.driver.core.Session
 import com.datastax.driver.core.utils.UUIDs
 import na.przypale.fitter.Config
@@ -41,5 +43,23 @@ class CassandraPostsRepository(session: Session) extends PostsRepository {
 
     JavaConverters.collectionAsScalaIterable(session.execute(query).all()).toVector
       .map(row => Post(row.getString("author"), row.getUUID("time_id"), row.getString("content")))
+  }
+
+  private lazy val getSpecificPostStatement = session.prepare(
+    "SELECT author, time_id, content " +
+      "FROM posts " +
+      "WHERE author = :author AND time_id = :timeId"
+  )
+
+  override def getSpecificPost(postAuthor: String, postTimeId: UUID): Post = {
+    val query = getSpecificPostStatement.bind()
+      .setString("author", postAuthor)
+      .setUUID("timeId", postTimeId)
+
+    val row = session.execute(query).one()
+    row match {
+      case null => null
+      case _ => Post(row.getString("author"), row.getUUID("time_id"), row.getString("content"))
+    }
   }
 }
