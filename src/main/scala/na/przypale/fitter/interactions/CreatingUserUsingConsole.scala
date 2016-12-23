@@ -1,7 +1,7 @@
 package na.przypale.fitter.interactions
 
 import na.przypale.fitter.CommandLineReader
-import na.przypale.fitter.entities.{Credentials, Subscription, User}
+import na.przypale.fitter.entities.Credentials
 import na.przypale.fitter.logic.CreatingUser
 import na.przypale.fitter.repositories.exceptions.UserAlreadyExistsException
 import org.mindrot.jbcrypt.BCrypt
