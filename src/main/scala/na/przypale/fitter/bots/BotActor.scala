@@ -4,32 +4,42 @@ import java.util.UUID
 
 import akka.actor.Actor
 import na.przypale.fitter.bots.commands.Start
-import na.przypale.fitter.entities.Credentials
+import na.przypale.fitter.entities.{Credentials, User}
+import na.przypale.fitter.logic.exceptions.AuthenticationException
 import na.przypale.fitter.logic.{Authenticating, CreatingUser}
 import na.przypale.fitter.repositories.exceptions.UserAlreadyExistsException
 
 import scala.annotation.tailrec
 
 class BotActor(creatingUser: CreatingUser, authenticating: Authenticating) extends Actor {
-  private var credentials: Credentials = generateCredentials()
+  private var loggedUser: Option[User] = None
 
   override def receive: Receive = {
-    case Start => enterTheSystem()
-  }
-
-  private def enterTheSystem(): Unit = {
-    register()
+    case Start => gainAccessToSystem()
   }
 
   @tailrec
-  private def register(): Unit = {
+  private def gainAccessToSystem(): Unit = {
     try {
-      creatingUser.create(credentials)
+      val registeredUserCredentials = register()
+      loggedUser = Some(logIn(registeredUserCredentials))
     }
     catch {
-      case _: UserAlreadyExistsException => credentials = generateCredentials(); register()
+      case _: AuthenticationException => gainAccessToSystem()
     }
   }
 
-  private def generateCredentials(): Credentials = Credentials(UUID.randomUUID().toString, UUID.randomUUID().toString)
+  @tailrec
+  private def register(): Credentials = {
+    val credentials = Credentials(UUID.randomUUID().toString, UUID.randomUUID().toString)
+    try {
+      creatingUser.create(credentials)
+      credentials
+    }
+    catch {
+      case _: UserAlreadyExistsException => register()
+    }
+  }
+
+  private def logIn(credentials: Credentials): User = authenticating.authenticate(credentials)
 }
