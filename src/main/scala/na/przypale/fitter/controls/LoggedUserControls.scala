@@ -18,7 +18,8 @@ class LoggedUserControls(val user: User,
   private val BROWSE_POSTS_ACTION_ID = 4
   private val SUBSCRIBE_ACTION_ID = 5
   private val RUN_EVENTS_CONTROLS_ACTION_ID = 6
-  private val LOGOUT_ACTION_ID = 7
+  private val BROWSE_POSTS_JOURNAL_ACTION_ID = 7
+  private val LOGOUT_ACTION_ID = 8
 
   private val menu = Menu(List(
     Action(ActionIntId(DELETE_ACTION_ID), s"$DELETE_ACTION_ID - Delete account"),
@@ -27,6 +28,7 @@ class LoggedUserControls(val user: User,
     Action(ActionIntId(BROWSE_POSTS_ACTION_ID), s"$BROWSE_POSTS_ACTION_ID - Browse posts"),
     Action(ActionIntId(SUBSCRIBE_ACTION_ID), s"$SUBSCRIBE_ACTION_ID - Subscribe user"),
     Action(ActionIntId(RUN_EVENTS_CONTROLS_ACTION_ID), s"$RUN_EVENTS_CONTROLS_ACTION_ID - Events"),
+    Action(ActionIntId(BROWSE_POSTS_JOURNAL_ACTION_ID), s"$BROWSE_POSTS_JOURNAL_ACTION_ID - Browse posts journal"),
     Action(ActionIntId(LOGOUT_ACTION_ID), s"$LOGOUT_ACTION_ID - Logout")
   ))
 
@@ -39,6 +41,7 @@ class LoggedUserControls(val user: User,
     case ActionIntId(SUBSCRIBE_ACTION_ID) => subscribingUser.createSubscription(user)
     case ActionIntId(BROWSE_POSTS_ACTION_ID) => browsingPosts.browse(user)
     case ActionIntId(RUN_EVENTS_CONTROLS_ACTION_ID) => eventsControlsFactory(user).interact()
+    case ActionIntId(BROWSE_POSTS_JOURNAL_ACTION_ID) => browsingPosts.browseJournal(user)
     case ActionIntId(LOGOUT_ACTION_ID) =>
   }
 
