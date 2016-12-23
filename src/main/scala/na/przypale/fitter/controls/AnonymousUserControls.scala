@@ -1,10 +1,10 @@
 package na.przypale.fitter.controls
 
 import na.przypale.fitter.entities.User
-import na.przypale.fitter.interactions.{CreatingUser, LoggingIn}
+import na.przypale.fitter.interactions.{CreatingUserUsingConsole, LoggingIn}
 import na.przypale.fitter.menu.{Action, ActionIntId, Menu}
 
-class AnonymousUserControls(creatingUser: CreatingUser,
+class AnonymousUserControls(creatingUser: CreatingUserUsingConsole,
                             loggingIn: LoggingIn,
                             loggedUserControlsFactory: (User => LoggedUserControls))
   extends Controls {
