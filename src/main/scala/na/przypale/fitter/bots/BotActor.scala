@@ -3,26 +3,33 @@ package na.przypale.fitter.bots
 import java.util.UUID
 
 import akka.actor.Actor
-import na.przypale.fitter.bots.commands.Start
+import com.thedeanda.lorem.LoremIpsum
+import na.przypale.fitter.bots.commands.{PostsWritingCommand, Start}
 import na.przypale.fitter.entities.{Credentials, User}
 import na.przypale.fitter.logic.exceptions.AuthenticationException
-import na.przypale.fitter.logic.{Authenticating, CreatingUser}
+import na.przypale.fitter.logic.{Authenticating, CreatingPost, CreatingUser}
 import na.przypale.fitter.repositories.exceptions.UserAlreadyExistsException
 
 import scala.annotation.tailrec
 
-class BotActor(creatingUser: CreatingUser, authenticating: Authenticating) extends Actor {
-  private var loggedUser: Option[User] = None
+class BotActor(creatingUser: CreatingUser,
+               authenticating: Authenticating,
+               creatingPost: CreatingPost,
+               config: Config) extends Actor {
+
+  private val loremIpsum = LoremIpsum.getInstance()
 
   override def receive: Receive = {
     case Start => gainAccessToSystem()
+    case PostsWritingCommand(loggedUser) => writeRandomPost(loggedUser)
   }
 
   @tailrec
   private def gainAccessToSystem(): Unit = {
     try {
       val registeredUserCredentials = register()
-      loggedUser = Some(logIn(registeredUserCredentials))
+      val loggedUser = logIn(registeredUserCredentials)
+      self ! PostsWritingCommand(loggedUser)
     }
     catch {
       case _: AuthenticationException => gainAccessToSystem()
@@ -42,4 +49,9 @@ class BotActor(creatingUser: CreatingUser, authenticating: Authenticating) exten
   }
 
   private def logIn(credentials: Credentials): User = authenticating.authenticate(credentials)
+
+  private def writeRandomPost(loggedUser: User): Unit ={
+    val postContent = loremIpsum.getParagraphs(config.minParagraphsPerPost, config.maxParagraphsPerPost)
+    creatingPost.create(postContent, loggedUser)
+  }
 }
