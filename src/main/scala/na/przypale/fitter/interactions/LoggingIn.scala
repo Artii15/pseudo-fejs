@@ -1,24 +1,34 @@
 package na.przypale.fitter.interactions
 
 import na.przypale.fitter.CommandLineReader
-import na.przypale.fitter.entities.User
-import na.przypale.fitter.repositories.UsersRepository
-import org.mindrot.jbcrypt.BCrypt
+import na.przypale.fitter.entities.{Credentials, User}
+import na.przypale.fitter.logic.Authenticating
+import na.przypale.fitter.logic.exceptions.AuthenticationException
 
-class LoggingIn(usersRepository: UsersRepository) {
+class LoggingIn(authenticating: Authenticating) {
+
   def logIn(): Option[User] = {
     print("Nick: ")
     val nick = CommandLineReader.readString()
     print("Password: ")
     val password = CommandLineReader.readString()
 
-    authenticate(usersRepository.getByNick(nick), password)
+    authenticate(Credentials(nick, password))
   }
 
-  private def authenticate(user: Option[User], password: String) = user match {
-    case Some(storedUser) if BCrypt.checkpw(password, storedUser.password) => user
-    case _ =>
-      println("Invalid credentials")
-      None
+  private def authenticate(credentials: Credentials): Option[User] = {
+    try {
+      val loggedUser = authenticating.authenticate(credentials)
+      Some(loggedUser)
+    }
+    catch {
+      case _: AuthenticationException => fail("Invalid credentials")
+      case _: Throwable => fail("Unknown error")
+    }
+  }
+
+  private def fail(message: String): Option[User] = {
+    println(message)
+    None
   }
 }

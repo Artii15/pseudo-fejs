@@ -3,7 +3,7 @@ package na.przypale.fitter
 import com.datastax.driver.core.Session
 import na.przypale.fitter.controls.{AnonymousUserControls, EventsControls, LoggedUserControls}
 import na.przypale.fitter.interactions._
-import na.przypale.fitter.logic.CreatingUser
+import na.przypale.fitter.logic.{Authenticating, CreatingUser}
 import na.przypale.fitter.repositories.cassandra._
 
 
@@ -21,9 +21,10 @@ object App {
     lazy val postsLikesJournalRepository = new CassandraPostsLikesJournalRepository(session)
 
     lazy val creatingUser = new CreatingUser(usersRepository, subscriptionsRepository)
+    lazy val authenticating = new Authenticating(usersRepository)
 
     lazy val creatingUserUsingConsole = new CreatingUserUsingConsole(creatingUser)
-    lazy val loggingIn = new LoggingIn(usersRepository)
+    lazy val loggingIn = new LoggingIn(authenticating)
     lazy val deletingUser = new DeletingUser(usersRepository)
     lazy val creatingPost = new CreatingPost(postsRepository)
     lazy val creatingComment = new CreatingComment(commentsRepository, commentsCountersRepository, postsCountersRepository)
