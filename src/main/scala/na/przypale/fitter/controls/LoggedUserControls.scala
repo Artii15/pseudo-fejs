@@ -5,7 +5,7 @@ import na.przypale.fitter.interactions._
 import na.przypale.fitter.menu.{Action, ActionIntId, Menu}
 
 class LoggedUserControls(val user: User,
-                         val creatingPost: CreatingPost,
+                         val creatingPost: CreatingPostUsingConsole,
                          val deletingUser: DeletingUser,
                          val subscribingUser: SubscribingUser,
                          val browsingPosts: BrowsingPosts,
@@ -53,7 +53,7 @@ class LoggedUserControls(val user: User,
 }
 
 object LoggedUserControls {
-  def factory(creatingPost: CreatingPost, deletingUser: DeletingUser, subscribingUser: SubscribingUser,
+  def factory(creatingPost: CreatingPostUsingConsole, deletingUser: DeletingUser, subscribingUser: SubscribingUser,
               browsingPosts: BrowsingPosts, searchingForUsers: SearchingForUsers,
               eventsControlsFactory: (User => EventsControls)): User => LoggedUserControls = {
     user: User => new LoggedUserControls(user, creatingPost, deletingUser, subscribingUser, browsingPosts,

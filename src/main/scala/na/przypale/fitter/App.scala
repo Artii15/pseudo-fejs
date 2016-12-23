@@ -3,7 +3,7 @@ package na.przypale.fitter
 import com.datastax.driver.core.Session
 import na.przypale.fitter.controls.{AnonymousUserControls, EventsControls, LoggedUserControls}
 import na.przypale.fitter.interactions._
-import na.przypale.fitter.logic.{Authenticating, CreatingUser}
+import na.przypale.fitter.logic.{Authenticating, CreatingPost, CreatingUser}
 import na.przypale.fitter.repositories.cassandra._
 
 
@@ -22,11 +22,12 @@ object App {
 
     lazy val creatingUser = new CreatingUser(usersRepository, subscriptionsRepository)
     lazy val authenticating = new Authenticating(usersRepository)
+    lazy val creatingPost = new CreatingPost(postsRepository)
 
     lazy val creatingUserUsingConsole = new CreatingUserUsingConsole(creatingUser)
     lazy val loggingIn = new LoggingIn(authenticating)
     lazy val deletingUser = new DeletingUser(usersRepository)
-    lazy val creatingPost = new CreatingPost(postsRepository)
+    lazy val creatingPostUsingConsole = new CreatingPostUsingConsole(creatingPost)
     lazy val creatingComment = new CreatingComment(commentsRepository, commentsCountersRepository, postsCountersRepository)
     lazy val likingUserContent = new LikingUserContent(commentsCountersRepository, postsCountersRepository, commentsLikesRepository, postsLikesJournalRepository)
     lazy val subscribingUser = new SubscribingUser(usersRepository, subscriptionsRepository)
@@ -40,7 +41,7 @@ object App {
     lazy val showingUserEvents = new ShowingUserEvents(eventsRepository)
 
     lazy val eventsControlsFactory = EventsControls.factory(creatingEvent, browsingEvents, showingUserEvents)
-    lazy val loggedUserControlsFactory = LoggedUserControls.factory(creatingPost, deletingUser, subscribingUser,
+    lazy val loggedUserControlsFactory = LoggedUserControls.factory(creatingPostUsingConsole, deletingUser, subscribingUser,
       browsingPosts, searchingForUsers, eventsControlsFactory)
 
     new AnonymousUserControls(creatingUserUsingConsole, loggingIn, loggedUserControlsFactory).interact()
