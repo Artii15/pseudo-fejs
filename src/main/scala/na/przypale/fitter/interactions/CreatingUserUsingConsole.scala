@@ -4,7 +4,6 @@ import na.przypale.fitter.CommandLineReader
 import na.przypale.fitter.entities.Credentials
 import na.przypale.fitter.logic.CreatingUser
 import na.przypale.fitter.repositories.exceptions.UserAlreadyExistsException
-import org.mindrot.jbcrypt.BCrypt
 
 class CreatingUserUsingConsole(creatingUser: CreatingUser) {
   def create(): Unit = {
@@ -12,7 +11,7 @@ class CreatingUserUsingConsole(creatingUser: CreatingUser) {
       print("Nick: ")
       val nick = CommandLineReader.readString()
       print("Password: ")
-      val password = BCrypt.hashpw(CommandLineReader.readString(), BCrypt.gensalt())
+      val password = CommandLineReader.readString()
 
       creatingUser.create(Credentials(nick, password))
       println("User successfully created")
