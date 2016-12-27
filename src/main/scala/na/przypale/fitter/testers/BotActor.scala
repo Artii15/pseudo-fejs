@@ -1,10 +1,10 @@
-package na.przypale.fitter.bots
+package na.przypale.fitter.testers
 
 import java.util.UUID
 
 import akka.actor.Actor
 import com.thedeanda.lorem.LoremIpsum
-import na.przypale.fitter.bots.commands.{PostsWritingCommand, Start}
+import na.przypale.fitter.bots.commands.{PostWritingCommand, Start}
 import na.przypale.fitter.entities.{Credentials, User}
 import na.przypale.fitter.logic.exceptions.AuthenticationException
 import na.przypale.fitter.logic.{Authenticating, CreatingPost, CreatingUser}
@@ -21,7 +21,7 @@ class BotActor(creatingUser: CreatingUser,
 
   override def receive: Receive = {
     case Start => gainAccessToSystem()
-    case PostsWritingCommand(loggedUser) => writeRandomPost(loggedUser)
+    case PostWritingCommand(loggedUser) => writeRandomPost(loggedUser)
   }
 
   @tailrec
@@ -29,7 +29,7 @@ class BotActor(creatingUser: CreatingUser,
     try {
       val registeredUserCredentials = register()
       val loggedUser = logIn(registeredUserCredentials)
-      self ! PostsWritingCommand(loggedUser)
+      self ! PostWritingCommand(loggedUser)
     }
     catch {
       case _: AuthenticationException => gainAccessToSystem()
@@ -50,8 +50,9 @@ class BotActor(creatingUser: CreatingUser,
 
   private def logIn(credentials: Credentials): User = authenticating.authenticate(credentials)
 
-  private def writeRandomPost(loggedUser: User): Unit ={
+  private def writeRandomPost(loggedUser: User): Unit = {
     val postContent = loremIpsum.getParagraphs(config.minParagraphsPerPost, config.maxParagraphsPerPost)
     creatingPost.create(postContent, loggedUser)
+    self ! PostWritingCommand(loggedUser)
   }
 }

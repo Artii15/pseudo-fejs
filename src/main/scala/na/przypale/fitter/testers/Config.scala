@@ -1,4 +1,4 @@
-package na.przypale.fitter.bots
+package na.przypale.fitter.testers
 
 trait Config {
   val minParagraphsPerPost: Int
