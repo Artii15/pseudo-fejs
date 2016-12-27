@@ -4,7 +4,6 @@ import java.util.UUID
 
 import akka.actor.{Actor, Props}
 import na.przypale.fitter.Dependencies
-import na.przypale.fitter.connectors.{ClusterConnector, SessionConnector}
 import na.przypale.fitter.testers.actors.bots.AccountCreator
 import na.przypale.fitter.testers.commands.{AccountCreateCommand, AccountCreatingStatus, AccountCreatingStatusRequest, Start}
 import na.przypale.fitter.testers.config.RegistrationTesterConfig
@@ -16,13 +15,17 @@ class RegistrationTester(config: RegistrationTesterConfig, dependencies: Depende
 
   override def preStart(): Unit = {
     generateNicks().take(config.numberOfProcesses).foreach(nick => {
+      println(nick)
       val accountCreator = context.actorOf(Props(classOf[AccountCreator], dependencies))
       accountCreator ! AccountCreateCommand(nick)
     })
   }
 
-  private def generateNicks(): Stream[String] = Stream.continually(Stream.from(1).take(config.numberOfUniqueNicks))
-    .flatten.map(_ => UUID.randomUUID().toString)
+  private def generateNicks(): Stream[String] = {
+    val nicks = Range.inclusive(1, config.numberOfUniqueNicks).map(_ => UUID.randomUUID().toString)
+    Stream.continually(nicks).flatten
+  }
+
 
   override def receive: Receive = {
     case Start => checkRegistrationResults()
