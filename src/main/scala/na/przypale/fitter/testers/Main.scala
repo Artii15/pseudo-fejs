@@ -11,9 +11,9 @@ object Main {
 
   private def start(dependencies: Dependencies): Unit = {
     val actorSystem = ActorSystem()
-    //val config = new RegistrationTesterConfig(100, 10)
+    val config = new RegistrationTesterConfig(100, 10)
 
-    //val registrationTester = actorSystem.actorOf(Props(new RegistrationTester(config, dependencies.creatingUser)))
-    //registrationTester ! Start
+    val registrationTester = actorSystem.actorOf(Props(new RegistrationTester(config, dependencies.creatingUser)))
+    registrationTester ! Start
   }
 }

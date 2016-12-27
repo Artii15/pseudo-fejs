@@ -4,6 +4,7 @@ import java.util.UUID
 
 import akka.actor.{Actor, Props}
 import na.przypale.fitter.logic.CreatingUser
+import na.przypale.fitter.testers.actors.bots.AccountCreator
 import na.przypale.fitter.testers.commands.{AccountCreateCommand, AccountCreatingStatus, AccountCreatingStatusRequest, Start}
 import na.przypale.fitter.testers.config.RegistrationTesterConfig
 
@@ -14,7 +15,7 @@ class RegistrationTester(config: RegistrationTesterConfig, creatingUser: Creatin
 
   override def preStart(): Unit = {
     generateNicks().take(config.numberOfProcesses).foreach(nick => {
-      val accountCreator = context.actorOf(Props(classOf[RegistrationTester], creatingUser))
+      val accountCreator = context.actorOf(Props(classOf[AccountCreator], creatingUser))
       accountCreator ! AccountCreateCommand(nick)
     })
   }
@@ -39,6 +40,7 @@ class RegistrationTester(config: RegistrationTesterConfig, creatingUser: Creatin
     if(numberOfReceivedStatusesReports == config.numberOfProcesses) {
       println(s"Number of created accounts: $numberOfCreatedAccounts")
       println(s"Number of unique nicks: ${config.numberOfUniqueNicks}")
+      context.system.terminate()
     }
   }
 }
