@@ -1,14 +1,19 @@
 package na.przypale.fitter
 
+import com.datastax.driver.core.Cluster
 import na.przypale.fitter.connectors.{ClusterConnector, SessionConnector}
 
 object Bootstrap {
 
   def start(appEntryPoint: (Dependencies => Unit)): Unit = {
-    ClusterConnector.connect("127.0.0.1")(cluster => {
+    connectToCluster(cluster => {
       SessionConnector.connect(cluster)("test")(session => {
         appEntryPoint(new Dependencies(session))
       })
     })
+  }
+
+  def connectToCluster(appEntryPoint: (Cluster => Unit)): Unit = {
+    ClusterConnector.connect("127.0.0.1")(cluster => appEntryPoint(cluster))
   }
 }
