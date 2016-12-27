@@ -9,21 +9,14 @@ import na.przypale.fitter.testers.actors.bots.AccountCreator
 import na.przypale.fitter.testers.commands.{AccountCreateCommand, AccountCreatingStatus, AccountCreatingStatusRequest, Start}
 import na.przypale.fitter.testers.config.RegistrationTesterConfig
 
-class RegistrationTester(config: RegistrationTesterConfig) extends Actor {
+class RegistrationTester(config: RegistrationTesterConfig, dependencies: Dependencies) extends Actor {
 
   private var numberOfReceivedStatusesReports = 0
   private var numberOfCreatedAccounts = 0
-  private val cluster = ClusterConnector.makeCluster()
-  private val session = SessionConnector.makeSession(cluster, "test")
-
-  override def postStop(): Unit = {
-    session.close()
-    cluster.close()
-  }
 
   override def preStart(): Unit = {
     generateNicks().take(config.numberOfProcesses).foreach(nick => {
-      val accountCreator = context.actorOf(Props(classOf[AccountCreator], new Dependencies(session)))
+      val accountCreator = context.actorOf(Props(classOf[AccountCreator], dependencies))
       accountCreator ! AccountCreateCommand(nick)
     })
   }
