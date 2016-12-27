@@ -3,19 +3,27 @@ package na.przypale.fitter.testers.actors.supervisors
 import java.util.UUID
 
 import akka.actor.{Actor, Props}
-import com.datastax.driver.core.Cluster
+import na.przypale.fitter.Dependencies
+import na.przypale.fitter.connectors.{ClusterConnector, SessionConnector}
 import na.przypale.fitter.testers.actors.bots.AccountCreator
 import na.przypale.fitter.testers.commands.{AccountCreateCommand, AccountCreatingStatus, AccountCreatingStatusRequest, Start}
 import na.przypale.fitter.testers.config.RegistrationTesterConfig
 
-class RegistrationTester(config: RegistrationTesterConfig, cluster: Cluster) extends Actor {
+class RegistrationTester(config: RegistrationTesterConfig) extends Actor {
 
   private var numberOfReceivedStatusesReports = 0
   private var numberOfCreatedAccounts = 0
+  private val cluster = ClusterConnector.makeCluster()
+  private val session = SessionConnector.makeSession(cluster, "test")
+
+  override def postStop(): Unit = {
+    session.close()
+    cluster.close()
+  }
 
   override def preStart(): Unit = {
     generateNicks().take(config.numberOfProcesses).foreach(nick => {
-      val accountCreator = context.actorOf(Props(classOf[AccountCreator], cluster))
+      val accountCreator = context.actorOf(Props(classOf[AccountCreator], new Dependencies(session)))
       accountCreator ! AccountCreateCommand(nick)
     })
   }

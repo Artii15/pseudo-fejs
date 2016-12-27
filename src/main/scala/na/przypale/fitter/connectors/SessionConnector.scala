@@ -4,7 +4,7 @@ import com.datastax.driver.core.{Cluster, Session}
 
 object SessionConnector {
 
-  def connect(cluster: Cluster) = (keyspace: String) => (operations: Session => Unit) => {
+  def connect(cluster: Cluster): (String) => ((Session) => Unit) => Unit = (keyspace: String) => (operations: Session => Unit) => {
     val session = makeSession(cluster, keyspace)
     operations(session)
     session.close()

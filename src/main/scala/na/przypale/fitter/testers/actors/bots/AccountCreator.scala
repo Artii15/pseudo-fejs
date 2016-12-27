@@ -3,19 +3,14 @@ package na.przypale.fitter.testers.actors.bots
 import java.util.UUID
 
 import akka.actor.Actor
-import com.datastax.driver.core.Cluster
 import na.przypale.fitter.Dependencies
 import na.przypale.fitter.entities.Credentials
 import na.przypale.fitter.repositories.exceptions.UserAlreadyExistsException
 import na.przypale.fitter.testers.commands.{AccountCreateCommand, AccountCreatingStatus, AccountCreatingStatusRequest}
 
-class AccountCreator(cluster: Cluster) extends Actor {
+class AccountCreator(dependencies: Dependencies) extends Actor {
   private var requestedNick: Option[String] = None
   private var accountCreated: Option[Boolean] = None
-  private val session = cluster.newSession()
-  private val dependencies = new Dependencies(session)
-
-  override def postStop(): Unit = session.close()
 
   override def receive: Receive = {
     case AccountCreateCommand(nick) => createAccount(nick)
