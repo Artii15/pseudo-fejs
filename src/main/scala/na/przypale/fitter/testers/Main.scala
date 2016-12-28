@@ -9,9 +9,9 @@ import na.przypale.fitter.testers.config.{SessionConfig, SystemConfig, UserActor
 object Main {
 
   def main(args: Array[String]): Unit = {
-    val systemConfig = new SystemConfig(ConfigFactory.load())
+    val config = ConfigFactory.load()
+    val systemConfig = new SystemConfig(config.getString("bots.systemName"), List("192.168.1.1"))
     val actorSystem = ActorSystem(systemConfig.actorSystemName)
-
 
     val sessionConfig = new SessionConfig("test")
     val userActorConfig = new UserActorConfig(sessionConfig, systemConfig)
