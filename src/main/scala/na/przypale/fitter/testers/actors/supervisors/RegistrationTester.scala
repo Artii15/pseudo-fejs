@@ -5,7 +5,7 @@ import java.util.UUID
 import akka.actor.{Actor, Props}
 import na.przypale.fitter.Dependencies
 import na.przypale.fitter.testers.actors.bots.AccountCreator
-import na.przypale.fitter.testers.commands.{AccountCreateCommand, AccountCreatingStatus, AccountCreatingStatusRequest, Start}
+import na.przypale.fitter.testers.commands._
 import na.przypale.fitter.testers.config.RegistrationTesterConfig
 
 class RegistrationTester(config: RegistrationTesterConfig, dependencies: Dependencies) extends Actor {
@@ -15,7 +15,6 @@ class RegistrationTester(config: RegistrationTesterConfig, dependencies: Depende
 
   override def preStart(): Unit = {
     generateNicks().take(config.numberOfProcesses).foreach(nick => {
-      println(nick)
       val accountCreator = context.actorOf(Props(classOf[AccountCreator], dependencies))
       accountCreator ! AccountCreateCommand(nick)
     })
@@ -25,7 +24,6 @@ class RegistrationTester(config: RegistrationTesterConfig, dependencies: Depende
     val nicks = Range.inclusive(1, config.numberOfUniqueNicks).map(_ => UUID.randomUUID().toString)
     Stream.continually(nicks).flatten
   }
-
 
   override def receive: Receive = {
     case Start => checkRegistrationResults()
@@ -40,11 +38,11 @@ class RegistrationTester(config: RegistrationTesterConfig, dependencies: Depende
 
   private def receiveCreationStatus(wasCreated: Boolean): Unit = {
     numberOfReceivedStatusesReports += 1
-    if(wasCreated)  numberOfCreatedAccounts += 1
+    if(wasCreated) numberOfCreatedAccounts += 1
     if(numberOfReceivedStatusesReports == config.numberOfProcesses) {
       println(s"Number of created accounts: $numberOfCreatedAccounts")
       println(s"Number of unique nicks: ${config.numberOfUniqueNicks}")
-      context.system.terminate()
+      context.parent ! End
     }
   }
 }
