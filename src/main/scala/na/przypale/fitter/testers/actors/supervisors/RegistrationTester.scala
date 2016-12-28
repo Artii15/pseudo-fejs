@@ -4,13 +4,11 @@ import java.util.UUID
 
 import akka.actor.{Actor, AddressFromURIString, Deploy, Props}
 import akka.remote.RemoteScope
-import na.przypale.fitter.Dependencies
-import na.przypale.fitter.testers.HostsDependencies
 import na.przypale.fitter.testers.actors.bots.AccountCreator
 import na.przypale.fitter.testers.commands._
 import na.przypale.fitter.testers.config.RegistrationTesterConfig
 
-class RegistrationTester(config: RegistrationTesterConfig, hostsDependencies: Iterable[HostsDependencies]) extends Actor {
+class RegistrationTester extends Actor {
 
   private var numberOfReceivedStatusesReports = 0
   private var numberOfCreatedAccounts = 0
@@ -46,7 +44,7 @@ class RegistrationTester(config: RegistrationTesterConfig, hostsDependencies: It
     if(numberOfReceivedStatusesReports == config.numberOfProcesses) {
       println(s"Number of created accounts: $numberOfCreatedAccounts")
       println(s"Number of unique nicks: ${config.numberOfUniqueNicks}")
-      context.parent ! End
+      context.parent ! TaskEnd
     }
   }
 }

@@ -1,3 +1,3 @@
 package na.przypale.fitter.testers.commands
 
-case object End
+case class TaskEnd(results: String)

@@ -1,20 +1,14 @@
 package na.przypale.fitter.testers.actors.supervisors
 
-import akka.actor.{Actor, ActorRef, Props}
-import na.przypale.fitter.testers.HostsDependencies
+import akka.actor.{Actor, Props}
 import na.przypale.fitter.testers.commands._
-import na.przypale.fitter.testers.config.RegistrationTesterConfig
 
 import scala.annotation.tailrec
 import scala.io.StdIn
 
-class UserActor(config: RegistrationTesterConfig, hostsDependencies: Iterable[HostsDependencies]) extends Actor {
+class UserActor extends Actor {
 
-  private var registrationTester: Option[ActorRef] = None
-
-  override def preStart(): Unit = {
-    registrationTester = Some(context.actorOf(Props(classOf[RegistrationTester], config, hostsDependencies)))
-  }
+  private val registrationTester = context.actorOf(Props[RegistrationTester])
 
   override def receive: Receive = {
     case Start => interact()
@@ -26,13 +20,19 @@ class UserActor(config: RegistrationTesterConfig, hostsDependencies: Iterable[Ho
     println("2 - exit")
 
     StdIn.readLine() match {
-      case "1" => registrationTester.foreach(_ ! Start); context.become(waiting)
+      case "1" => registrationTester ! Start; context.become(waitingForTaskToFinish)
       case "2" => context.system.terminate()
       case _ => interact()
     }
   }
 
-  def waiting: Receive = {
-    case End => context.become(receive); self ! Start
+  def waitingForTaskToFinish: Receive = {
+    case TaskEnd(results) => finishTask(results)
+  }
+
+  private def finishTask(results: String): Unit = {
+    println(results)
+    context.become(receive)
+    self ! Start
   }
 }
