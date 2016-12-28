@@ -1,10 +1,11 @@
 package na.przypale.fitter.testers.actors.supervisors
 
-import akka.actor.{Actor, AddressFromURIString, Deploy, Props}
-import akka.remote.RemoteScope
+import akka.actor.{Actor, Props}
+import na.przypale.fitter.{CommandLineReader, Dependencies}
 import na.przypale.fitter.testers.actors.DeployGenerator
 import na.przypale.fitter.testers.commands._
-import na.przypale.fitter.testers.config.UserActorConfig
+import na.przypale.fitter.testers.commands.nodes.Deployment
+import na.przypale.fitter.testers.config.{RegistrationTesterConfig, UserActorConfig}
 
 import scala.annotation.tailrec
 import scala.io.StdIn
@@ -14,7 +15,7 @@ class UserActor(config: UserActorConfig) extends Actor {
   override def preStart(): Unit = {
     val systemConfig = config.systemConfig
     systemConfig.nodesAddresses.foreach(address => {
-      val deploy = DeployGenerator.makeDeploy(systemConfig.actorSystemName, address, systemConfig.nodesPort)
+      val deploy = DeployGenerator.makeRemoteDeploy(systemConfig.actorSystemName, address, systemConfig.nodesPort)
       context.actorOf(Props(classOf[BootstrappingAgent], config.sessionConfig).withDeploy(deploy))
     })
   }
@@ -36,6 +37,17 @@ class UserActor(config: UserActorConfig) extends Actor {
   }
 
   private def runRegistrationTests(): Unit = {
+    print("Number of threads on each node: ")
+    val numberOfThreadsOnNode = CommandLineReader.readPositiveInt()
+    print("Number of unique nicks")
+    val numberOfUniqueNicks = CommandLineReader.readPositiveInt()
+
+    val testerConfig = new RegistrationTesterConfig(numberOfThreadsOnNode, numberOfUniqueNicks)
+    val testerPropsGenerator = (dependencies: Dependencies) => Props(classOf[RegistrationTester], testerConfig, dependencies)
+    context.children.foreach(agent => {
+      agent ! Deployment(UserActor.registrationDeploymentID, testerPropsGenerator)
+      agent ! TaskStart(UserActor.registrationDeploymentID)
+    })
     context.become(waitingForTaskToFinish)
   }
 
@@ -48,4 +60,8 @@ class UserActor(config: UserActorConfig) extends Actor {
     context.become(receive)
     self ! Start
   }
+}
+
+object UserActor {
+  private val registrationDeploymentID = "REGISTRATION"
 }

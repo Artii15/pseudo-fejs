@@ -9,7 +9,13 @@ import scala.io.StdIn
 object CommandLineReader {
 
   @tailrec
-  final def readInt(): Int = {
+  def readPositiveInt(): Int = {
+    val value = readInt()
+    if (value > 0) value else readPositiveInt()
+  }
+
+  @tailrec
+  def readInt(): Int = {
     try {
       StdIn.readLine().toInt
     }
