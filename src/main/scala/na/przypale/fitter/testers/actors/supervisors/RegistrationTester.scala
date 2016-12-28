@@ -2,22 +2,26 @@ package na.przypale.fitter.testers.actors.supervisors
 
 import java.util.UUID
 
-import akka.actor.{Actor, Props}
+import akka.actor.{Actor, AddressFromURIString, Deploy, Props}
+import akka.remote.RemoteScope
 import na.przypale.fitter.Dependencies
+import na.przypale.fitter.testers.HostsDependencies
 import na.przypale.fitter.testers.actors.bots.AccountCreator
 import na.przypale.fitter.testers.commands._
 import na.przypale.fitter.testers.config.RegistrationTesterConfig
 
-class RegistrationTester(config: RegistrationTesterConfig, dependencies: Dependencies) extends Actor {
+class RegistrationTester(config: RegistrationTesterConfig, hostsDependencies: Iterable[HostsDependencies]) extends Actor {
 
   private var numberOfReceivedStatusesReports = 0
   private var numberOfCreatedAccounts = 0
 
   override def preStart(): Unit = {
-    generateNicks().take(config.numberOfProcesses).foreach(nick => {
-      val accountCreator = context.actorOf(Props(classOf[AccountCreator], dependencies))
-      accountCreator ! AccountCreateCommand(nick)
-    })
+    Stream.continually(hostsDependencies).flatten.zip(generateNicks()).take(config.numberOfProcesses)
+      .foreach { case (HostsDependencies(hostAddress, dependencies), nick) =>
+        val accountCreator = context.actorOf(Props(classOf[AccountCreator], dependencies)
+          .withDeploy(Deploy(scope = RemoteScope(AddressFromURIString(hostAddress)))))
+        accountCreator ! AccountCreateCommand(nick)
+      }
   }
 
   private def generateNicks(): Stream[String] = {
