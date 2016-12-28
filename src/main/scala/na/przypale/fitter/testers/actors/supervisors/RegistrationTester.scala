@@ -6,7 +6,7 @@ import akka.actor.{Actor, AddressFromURIString, Deploy, Props}
 import akka.remote.RemoteScope
 import na.przypale.fitter.testers.actors.bots.AccountCreator
 import na.przypale.fitter.testers.commands._
-import na.przypale.fitter.testers.config.RegistrationTesterConfig
+import na.przypale.fitter.testers.commands.registration.{AccountCreateCommand, AccountCreatingStatusRequest}
 
 class RegistrationTester extends Actor {
 

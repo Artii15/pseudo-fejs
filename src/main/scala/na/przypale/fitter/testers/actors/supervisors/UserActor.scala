@@ -2,13 +2,12 @@ package na.przypale.fitter.testers.actors.supervisors
 
 import akka.actor.{Actor, Props}
 import na.przypale.fitter.testers.commands._
+import na.przypale.fitter.testers.config.{SessionConfig, UserActorConfig}
 
 import scala.annotation.tailrec
 import scala.io.StdIn
 
-class UserActor extends Actor {
-
-  private val registrationTester = context.actorOf(Props[RegistrationTester])
+class UserActor(config: UserActorConfig) extends Actor {
 
   override def receive: Receive = {
     case Start => interact()

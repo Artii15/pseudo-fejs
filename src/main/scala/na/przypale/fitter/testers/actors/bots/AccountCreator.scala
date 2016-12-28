@@ -6,7 +6,8 @@ import akka.actor.Actor
 import na.przypale.fitter.Dependencies
 import na.przypale.fitter.entities.Credentials
 import na.przypale.fitter.repositories.exceptions.UserAlreadyExistsException
-import na.przypale.fitter.testers.commands.{AccountCreateCommand, AccountCreatingStatus, AccountCreatingStatusRequest}
+import na.przypale.fitter.testers.commands.AccountCreatingStatusRequest
+import na.przypale.fitter.testers.commands.registration.{AccountCreatingStatus, AccountCreatingStatusRequest}
 
 class AccountCreator(dependencies: Dependencies) extends Actor {
   private var requestedNick: Option[String] = None
