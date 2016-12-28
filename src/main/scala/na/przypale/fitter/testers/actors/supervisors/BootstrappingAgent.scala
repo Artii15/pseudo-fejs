@@ -3,8 +3,7 @@ package na.przypale.fitter.testers.actors.supervisors
 import akka.actor.{Actor, ActorRef, PoisonPill}
 import na.przypale.fitter.Dependencies
 import na.przypale.fitter.connectors.{ClusterConnector, SessionConnector}
-import na.przypale.fitter.testers.commands.{TaskEnd, TaskStart}
-import na.przypale.fitter.testers.commands.nodes.{Deployment, Kill}
+import na.przypale.fitter.testers.commands.nodes.{Deployment, Kill, TaskEnd, TaskStart}
 import na.przypale.fitter.testers.config.SessionConfig
 
 import scala.collection.mutable

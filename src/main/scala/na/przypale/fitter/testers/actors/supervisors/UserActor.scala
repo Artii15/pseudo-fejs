@@ -4,7 +4,7 @@ import akka.actor.{Actor, Props}
 import na.przypale.fitter.{CommandLineReader, Dependencies}
 import na.przypale.fitter.testers.actors.DeployGenerator
 import na.przypale.fitter.testers.commands._
-import na.przypale.fitter.testers.commands.nodes.Deployment
+import na.przypale.fitter.testers.commands.nodes.{Deployment, Kill, TaskEnd, TaskStart}
 import na.przypale.fitter.testers.config.{RegistrationTesterConfig, UserActorConfig}
 
 import scala.annotation.tailrec
@@ -48,15 +48,16 @@ class UserActor(config: UserActorConfig) extends Actor {
       agent ! Deployment(UserActor.registrationDeploymentID, testerPropsGenerator)
       agent ! TaskStart(UserActor.registrationDeploymentID)
     })
-    context.become(waitingForTaskToFinish)
+    context.become(waitingForRegistrationToFinish)
   }
 
-  private def waitingForTaskToFinish: Receive = {
-    case TaskEnd(results) => finishTask(results)
+  private def waitingForRegistrationToFinish: Receive = {
+    case TaskEnd(results) => finishRegistration(results)
   }
 
-  private def finishTask(results: String): Unit = {
+  private def finishRegistration(results: String): Unit = {
     println(results)
+    context.children.foreach(_ ! Kill(UserActor.registrationDeploymentID))
     context.become(receive)
     self ! Start
   }

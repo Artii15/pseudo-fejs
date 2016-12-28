@@ -5,7 +5,7 @@ import java.util.UUID
 import akka.actor.{Actor, Props}
 import na.przypale.fitter.Dependencies
 import na.przypale.fitter.testers.actors.bots.AccountCreator
-import na.przypale.fitter.testers.commands._
+import na.przypale.fitter.testers.commands.nodes.{TaskEnd, TaskStart}
 import na.przypale.fitter.testers.commands.registration.{AccountCreateCommand, AccountCreatingStatus}
 import na.przypale.fitter.testers.config.RegistrationTesterConfig
 
@@ -34,7 +34,7 @@ class RegistrationTester(config: RegistrationTesterConfig, dependencies: Depende
   }
 
   private def waitingForCreatingStatuses: Receive = {
-    case AccountCreatingStatus(_, wasAccountCreated) => receiveCreationStatus(wasAccountCreated)
+    case AccountCreatingStatus(wasAccountCreated) => receiveCreationStatus(wasAccountCreated)
   }
 
   private def receiveCreationStatus(wasAccountCreated: Boolean): Unit = {
