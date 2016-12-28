@@ -2,15 +2,20 @@ package na.przypale.fitter.testers.actors.supervisors
 
 import akka.actor.{Actor, Props}
 import na.przypale.fitter.{CommandLineReader, Dependencies}
-import na.przypale.fitter.testers.actors.DeployGenerator
+import na.przypale.fitter.testers.actors.{DeployGenerator, RandomStringsGenerator}
 import na.przypale.fitter.testers.commands._
-import na.przypale.fitter.testers.commands.nodes.{Deployment, Kill, TaskEnd, TaskStart}
-import na.przypale.fitter.testers.config.{RegistrationTesterConfig, UserActorConfig}
+import na.przypale.fitter.testers.commands.nodes.Deployment
+import na.przypale.fitter.testers.commands.registration.{AccountsCreatingCommand, AccountsCreatingTaskEnd}
+import na.przypale.fitter.testers.config.UserActorConfig
 
 import scala.annotation.tailrec
 import scala.io.StdIn
 
 class UserActor(config: UserActorConfig) extends Actor {
+
+  private val numberOfNodes = config.systemConfig.nodesAddresses.size
+  private var workingNodes = 0
+  private var numberOfRegisteredAccounts = 0
 
   override def preStart(): Unit = {
     val systemConfig = config.systemConfig
@@ -42,27 +47,27 @@ class UserActor(config: UserActorConfig) extends Actor {
     print("Number of unique nicks: ")
     val numberOfUniqueNicks = CommandLineReader.readPositiveInt()
 
-    val testerConfig = new RegistrationTesterConfig(numberOfThreadsOnNode, numberOfUniqueNicks)
-    val testerPropsGenerator = (dependencies: Dependencies) => Props(classOf[RegistrationTester], testerConfig, dependencies)
+    val testerPropsGenerator = (dependencies: Dependencies) => Props(classOf[RegistrationTester], dependencies)
     context.children.foreach(agent => {
-      agent ! Deployment(UserActor.registrationDeploymentID, testerPropsGenerator)
-      agent ! TaskStart(UserActor.registrationDeploymentID)
+      agent ! Deployment(testerPropsGenerator)
+      agent ! AccountsCreatingCommand(numberOfThreadsOnNode, RandomStringsGenerator.generateCyclic(numberOfUniqueNicks))
     })
     context.become(waitingForRegistrationToFinish)
+    workingNodes = numberOfNodes
+    numberOfRegisteredAccounts = 0
   }
 
   private def waitingForRegistrationToFinish: Receive = {
-    case TaskEnd(results) => finishRegistration(results)
+    case AccountsCreatingTaskEnd(numberOfCreatedAccounts) => collectRegistrationStatus(numberOfCreatedAccounts)
   }
 
-  private def finishRegistration(results: String): Unit = {
-    println(results)
-    context.children.foreach(_ ! Kill(UserActor.registrationDeploymentID))
-    context.become(receive)
-    self ! Start
+  private def collectRegistrationStatus(numberOfCreatedAccounts: Int): Unit = {
+    workingNodes -= 1
+    numberOfRegisteredAccounts += numberOfCreatedAccounts
+    if(workingNodes == 0) {
+      println(s"Number of registered accounts: $numberOfRegisteredAccounts")
+      context.become(receive)
+      self ! Start
+    }
   }
-}
-
-object UserActor {
-  private val registrationDeploymentID = "REGISTRATION"
 }
