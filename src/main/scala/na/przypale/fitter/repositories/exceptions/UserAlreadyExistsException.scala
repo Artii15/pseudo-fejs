@@ -1,3 +1,3 @@
 package na.przypale.fitter.repositories.exceptions
 
-class UserAlreadyExistsException extends RuntimeException
+class UserAlreadyExistsException extends UserCreatingException
