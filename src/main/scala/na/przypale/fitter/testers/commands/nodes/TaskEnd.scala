@@ -1,3 +1,3 @@
 package na.przypale.fitter.testers.commands.nodes
 
-trait TaskEnd
+trait TaskEnd extends Serializable
