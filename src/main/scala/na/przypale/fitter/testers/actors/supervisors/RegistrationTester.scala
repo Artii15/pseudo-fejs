@@ -2,10 +2,11 @@ package na.przypale.fitter.testers.actors.supervisors
 
 import java.util.UUID
 
-import akka.actor.Actor
+import akka.actor.{Actor, Props}
 import na.przypale.fitter.Dependencies
+import na.przypale.fitter.testers.actors.bots.AccountCreator
 import na.przypale.fitter.testers.commands._
-import na.przypale.fitter.testers.commands.registration.AccountCreatingStatusRequest
+import na.przypale.fitter.testers.commands.registration.{AccountCreateCommand, AccountCreatingStatus}
 import na.przypale.fitter.testers.config.RegistrationTesterConfig
 
 class RegistrationTester(config: RegistrationTesterConfig, dependencies: Dependencies) extends Actor {
@@ -13,19 +14,37 @@ class RegistrationTester(config: RegistrationTesterConfig, dependencies: Depende
   private var numberOfReceivedStatusesReports = 0
   private var numberOfCreatedAccounts = 0
 
+  override def receive: Receive = {
+    case _: TaskStart => startRegistering()
+  }
+
+  private def startRegistering(): Unit = {
+    numberOfCreatedAccounts = 0
+    numberOfReceivedStatusesReports = 0
+
+    generateNicks().take(config.numberOfProcesses).foreach(nick => {
+      context.actorOf(Props(classOf[AccountCreator], dependencies)) ! AccountCreateCommand(nick)
+    })
+    context.become(waitingForCreatingStatuses)
+  }
+
   private def generateNicks(): Stream[String] = {
     val nicks = Range.inclusive(1, config.numberOfUniqueNicks).map(_ => UUID.randomUUID().toString)
     Stream.continually(nicks).flatten
   }
 
-  override def receive: Receive = {
-    case Start => checkRegistrationResults()
+  private def waitingForCreatingStatuses: Receive = {
     case AccountCreatingStatus(_, wasAccountCreated) => receiveCreationStatus(wasAccountCreated)
   }
 
-  private def checkRegistrationResults(): Unit = {
-    numberOfReceivedStatusesReports = 0
-    numberOfCreatedAccounts = 0
-    context.children.foreach(_ ! AccountCreatingStatusRequest)
+  private def receiveCreationStatus(wasAccountCreated: Boolean): Unit = {
+    if (wasAccountCreated) numberOfCreatedAccounts += 1
+    numberOfReceivedStatusesReports += 1
+    if (numberOfReceivedStatusesReports == config.numberOfProcesses) {
+      context.parent ! TaskEnd(printReport())
+      context.become(receive)
+    }
   }
+
+  private def printReport(): String = s"Number of created accounts $numberOfCreatedAccounts"
 }
