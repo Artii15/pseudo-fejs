@@ -39,7 +39,7 @@ class UserActor(config: UserActorConfig) extends Actor {
   private def runRegistrationTests(): Unit = {
     print("Number of threads on each node: ")
     val numberOfThreadsOnNode = CommandLineReader.readPositiveInt()
-    print("Number of unique nicks")
+    print("Number of unique nicks: ")
     val numberOfUniqueNicks = CommandLineReader.readPositiveInt()
 
     val testerConfig = new RegistrationTesterConfig(numberOfThreadsOnNode, numberOfUniqueNicks)
