@@ -40,9 +40,12 @@ class UserActor(systemConfig: SystemConfig, sessionConfig: SessionConfig) extend
   }
 
   private def listeningForTasksFinishingOnly: Receive = {
-    case Finish(report) =>
-      println(report)
-      sender() ! PoisonPill
-      interact()
+    case Finish(report) => finishTask(report)
+  }
+
+  private def finishTask(report: String): Unit = {
+    println(report)
+    sender() ! PoisonPill
+    interact()
   }
 }
