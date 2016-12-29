@@ -1,3 +1,3 @@
 package fitter.testers.commands
 
-case object Finish
+case class Finish(report: String)

@@ -1,53 +1,40 @@
 package fitter.testers.actors.supervisors
 
 import akka.actor.Props
-import fitter.{CommandLineReader, Dependencies}
+import fitter.Dependencies
 import fitter.entities.Credentials
 import fitter.testers.actors.RandomStringsGenerator
 import fitter.testers.actors.bots.registration.AccountsCreatorsSupervisor
-import fitter.testers.commands.Start
-import fitter.testers.commands.nodes.Deployment
+import fitter.testers.commands.nodes.{Deployment, TaskEnd, TaskStart}
 import fitter.testers.commands.registration.{AccountsCreatingCommand, AccountsCreatingTaskEnd}
-import fitter.testers.config.{SessionConfig, SystemConfig}
+import fitter.testers.config.{RegistrationTestConfig, SessionConfig, SystemConfig}
 
 import scala.collection.mutable.ArrayBuffer
 
-class RegistrationSupervisor(systemConfig: SystemConfig, sessionConfig: SessionConfig)
+class RegistrationSupervisor(systemConfig: SystemConfig, sessionConfig: SessionConfig, registrationConfig: RegistrationTestConfig)
   extends TestsSupervisor(systemConfig, sessionConfig) {
 
   private val registeredAccounts: ArrayBuffer[Iterable[Credentials]] = ArrayBuffer.empty
+  private val nicks = RandomStringsGenerator.generateRandomStrings(registrationConfig.numberOfUniqueNicks)
+  private val deployment = Deployment((dependencies: Dependencies) => {
+      Props(classOf[AccountsCreatorsSupervisor], dependencies)
+  })
 
-  protected def run(): Unit = {
-    print("Number of threads on each node: ")
-    val numberOfThreadsOnNode = CommandLineReader.readPositiveInt()
-    print("Number of unique nicks: ")
-    val numberOfUniqueNicks = CommandLineReader.readPositiveInt()
+  override protected def generateDeployment(): Deployment = deployment
 
-    val nicks = RandomStringsGenerator.generateRandomStrings(numberOfUniqueNicks)
-    val supervisorPropsGenerator = (dependencies: Dependencies) => Props(classOf[AccountsCreatorsSupervisor], dependencies)
-    context.children.foreach(agent => {
-      agent ! Deployment(supervisorPropsGenerator)
-      agent ! AccountsCreatingCommand(numberOfThreadsOnNode, nicks)
-    })
-    context.become(waitingForRegistrationToFinish)
-    workingNodes = numberOfNodes
-    registeredAccounts.clear()
+  override protected def generateTaskStart(): TaskStart =
+    AccountsCreatingCommand(registrationConfig.numberOfThreadsOnEachNode, nicks)
+
+  override protected def onTaskEndOnSingleNode(taskEnd: TaskEnd): Unit = taskEnd match {
+    case AccountsCreatingTaskEnd(createdAccounts) => registeredAccounts += createdAccounts
   }
 
-  private def waitingForRegistrationToFinish: Receive = {
-    case AccountsCreatingTaskEnd(createdAccounts) => collectRegistrationStatus(createdAccounts)
-  }
+  override protected def onTasksOnAllNodesFinish(): String = {
+    val registeredAccountsFlatList = registeredAccounts.flatten
+    val accountsCredentials = registeredAccountsFlatList.map { case Credentials(nick, password) => s"$nick\t$password" }
+    val credentialsReport = s"Registered accounts credentials:\n$accountsCredentials"
+    val numberOfCreatedAccountsReport = s"Number of registered accounts: ${registeredAccountsFlatList.size}"
 
-  private def collectRegistrationStatus(createdAccounts: Iterable[Credentials]): Unit = {
-    workingNodes -= 1
-    registeredAccounts += createdAccounts
-    if(workingNodes == 0) {
-      val registeredAccountsFlatList = registeredAccounts.flatten
-      println("Registered accounts credentials:")
-      registeredAccountsFlatList.foreach { case Credentials(nick, password) => println(s"$nick\t$password") }
-      println(s"Number of registered accounts: ${registeredAccountsFlatList.size}")
-      context.become(receive)
-      self ! Start
-    }
+    s"$credentialsReport\n$numberOfCreatedAccountsReport"
   }
 }

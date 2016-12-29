@@ -3,7 +3,7 @@ package fitter.testers.actors.supervisors
 import akka.actor.{Actor, Props}
 import fitter.testers.actors.DeployGenerator
 import fitter.testers.commands.{Finish, Start}
-import fitter.testers.commands.nodes.TaskEnd
+import fitter.testers.commands.nodes.{Deployment, TaskEnd, TaskStart}
 import fitter.testers.config.{SessionConfig, SystemConfig}
 
 abstract class TestsSupervisor(systemConfig: SystemConfig, sessionConfig: SessionConfig) extends Actor {
@@ -23,27 +23,32 @@ abstract class TestsSupervisor(systemConfig: SystemConfig, sessionConfig: Sessio
   }
 
   private def receiveStart(): Unit = {
-    run()
     workingNodes = numberOfNodes
+    context.children.foreach(agent => {
+      agent ! generateDeployment()
+      agent ! generateTaskStart()
+    })
     context.become(waitingForTasksFinish)
   }
 
-  protected def run(): Unit
+  protected def generateDeployment(): Deployment
+
+  protected def generateTaskStart(): TaskStart
 
   private def waitingForTasksFinish: Receive = {
     case taskEnd: TaskEnd => receiveTaskEnd(taskEnd)
   }
 
   private def receiveTaskEnd(taskEnd: TaskEnd) = {
-    handleTaskEnd(taskEnd)
+    onTaskEndOnSingleNode(taskEnd)
     workingNodes -= 1
     if(workingNodes == 0) {
-      onAllTasksFinish()
-      context.parent ! Finish
+      val report = onTasksOnAllNodesFinish()
+      context.parent ! Finish(report)
     }
   }
 
-  protected def handleTaskEnd(taskEnd: TaskEnd): Unit
+  protected def onTaskEndOnSingleNode(taskEnd: TaskEnd): Unit
 
-  protected def onAllTasksFinish(): Unit
+  protected def onTasksOnAllNodesFinish(): String
 }
