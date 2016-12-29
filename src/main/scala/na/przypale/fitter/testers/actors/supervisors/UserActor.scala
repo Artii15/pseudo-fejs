@@ -1,6 +1,7 @@
 package na.przypale.fitter.testers.actors.supervisors
 
 import akka.actor.{Actor, Props}
+import na.przypale.fitter.entities.Credentials
 import na.przypale.fitter.{CommandLineReader, Dependencies}
 import na.przypale.fitter.testers.actors.{DeployGenerator, RandomStringsGenerator}
 import na.przypale.fitter.testers.commands._
@@ -15,7 +16,7 @@ class UserActor(config: UserActorConfig) extends Actor {
 
   private val numberOfNodes = config.systemConfig.nodesAddresses.size
   private var workingNodes = 0
-  private var numberOfRegisteredAccounts = 0
+  private var registeredAccounts: Stream[Iterable[Credentials]] = Stream.empty
 
   override def preStart(): Unit = {
     val systemConfig = config.systemConfig
@@ -55,18 +56,21 @@ class UserActor(config: UserActorConfig) extends Actor {
     })
     context.become(waitingForRegistrationToFinish)
     workingNodes = numberOfNodes
-    numberOfRegisteredAccounts = 0
+    registeredAccounts = Stream.empty
   }
 
   private def waitingForRegistrationToFinish: Receive = {
-    case AccountsCreatingTaskEnd(numberOfCreatedAccounts) => collectRegistrationStatus(numberOfCreatedAccounts)
+    case AccountsCreatingTaskEnd(createdAccounts) => collectRegistrationStatus(createdAccounts)
   }
 
-  private def collectRegistrationStatus(numberOfCreatedAccounts: Int): Unit = {
+  private def collectRegistrationStatus(createdAccounts: Iterable[Credentials]): Unit = {
     workingNodes -= 1
-    numberOfRegisteredAccounts += numberOfCreatedAccounts
+    registeredAccounts = createdAccounts #:: registeredAccounts
     if(workingNodes == 0) {
-      println(s"Number of registered accounts: $numberOfRegisteredAccounts")
+      val registeredAccountsFlatList = registeredAccounts.flatten
+      println("Registered accounts credentials:")
+      registeredAccountsFlatList.foreach { case Credentials(nick, password) => println(s"$nick\t$password") }
+      println(s"Number of registered accounts: ${registeredAccountsFlatList.size}")
       context.become(receive)
       self ! Start
     }

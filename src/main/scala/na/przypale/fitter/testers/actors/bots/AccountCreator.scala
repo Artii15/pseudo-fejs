@@ -15,12 +15,14 @@ class AccountCreator(dependencies: Dependencies) extends Actor {
   }
 
   private def createAccount(nick: String): Unit = {
+    val credentials = Credentials(nick, UUID.randomUUID().toString)
     try {
-      dependencies.creatingUser.create(Credentials(nick, UUID.randomUUID().toString))
-      context.parent ! AccountCreatingStatus(true)
+      dependencies.creatingUser.create(credentials)
+      context.parent ! AccountCreatingStatus(wasAccountCreated = true, credentials)
     }
     catch {
-      case _: UserAlreadyExistsException | _: UserNotExistsException => context.parent ! AccountCreatingStatus(false)
+      case _: UserAlreadyExistsException | _: UserNotExistsException =>
+        context.parent ! AccountCreatingStatus(wasAccountCreated = false, credentials)
     }
   }
 }
