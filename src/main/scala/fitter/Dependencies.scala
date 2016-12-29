@@ -4,7 +4,7 @@ import com.datastax.driver.core.Session
 import fitter.controls.{EventsControls, LoggedUserControls}
 import fitter.entities.User
 import fitter.interactions._
-import fitter.logic.{Authenticating, CreatingPost, CreatingUser}
+import fitter.logic.{Authenticating, CreatingEvent, CreatingPost, CreatingUser}
 import fitter.repositories.cassandra._
 
 class Dependencies(val session: Session) {
@@ -21,6 +21,7 @@ class Dependencies(val session: Session) {
   lazy val creatingUser = new CreatingUser(usersRepository, subscriptionsRepository)
   lazy val authenticating = new Authenticating(usersRepository)
   lazy val creatingPost = new CreatingPost(postsRepository)
+  lazy val creatingEvent = new CreatingEvent(eventsRepository)
 
   lazy val creatingUserUsingConsole = new CreatingUserUsingConsole(creatingUser)
   lazy val loggingIn = new LoggingIn(authenticating)
@@ -34,12 +35,11 @@ class Dependencies(val session: Session) {
   lazy val searchingForUsers = new SearchingForUsers(usersRepository)
   lazy val joiningEvent = new JoiningEvent(eventsRepository)
 
-  lazy val creatingEvent = new CreatingEventUsingConsole(eventsRepository)
+  lazy val creatingEventUsingConsole = new CreatingEventUsingConsole(creatingEvent)
   lazy val browsingEvents = new BrowsingEvents(eventsRepository, joiningEvent)
   lazy val showingUserEvents = new ShowingUserEvents(eventsRepository)
 
-  lazy val eventsControlsFactory: (User) => EventsControls = EventsControls.factory(creatingEvent, browsingEvents, showingUserEvents)
+  lazy val eventsControlsFactory: (User) => EventsControls = EventsControls.factory(creatingEventUsingConsole, browsingEvents, showingUserEvents)
   lazy val loggedUserControlsFactory: (User) => LoggedUserControls = LoggedUserControls.factory(creatingPostUsingConsole, deletingUser, subscribingUser,
     browsingPosts, searchingForUsers, eventsControlsFactory)
-
 }
