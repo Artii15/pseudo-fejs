@@ -1,0 +1,3 @@
+package fitter.repositories.exceptions
+
+class UserNotExistsException extends RuntimeException
