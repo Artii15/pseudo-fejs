@@ -32,7 +32,7 @@ class RegistrationSupervisor(systemConfig: SystemConfig, sessionConfig: SessionC
   override protected def onTasksOnAllNodesFinish(): String = {
     val registeredAccountsFlatList = registeredAccounts.flatten
     val accountsCredentials = registeredAccountsFlatList.map { case Credentials(nick, password) => s"$nick\t$password" }
-    val credentialsReport = s"Registered accounts credentials:\n$accountsCredentials"
+    val credentialsReport = s"Registered accounts credentials:\n${accountsCredentials.mkString("\n")}"
     val numberOfCreatedAccountsReport = s"Number of registered accounts: ${registeredAccountsFlatList.size}"
 
     s"$credentialsReport\n$numberOfCreatedAccountsReport"

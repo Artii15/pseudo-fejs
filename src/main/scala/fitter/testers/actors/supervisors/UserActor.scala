@@ -1,6 +1,6 @@
 package fitter.testers.actors.supervisors
 
-import akka.actor.{Actor, Props}
+import akka.actor.{Actor, PoisonPill, Props}
 import fitter.CommandLineReader
 import fitter.testers.commands._
 import fitter.testers.config.{RegistrationTestConfig, SessionConfig, SystemConfig}
@@ -40,6 +40,9 @@ class UserActor(systemConfig: SystemConfig, sessionConfig: SessionConfig) extend
   }
 
   private def listeningForTasksFinishingOnly: Receive = {
-    case Finish(report) => println(report); interact()
+    case Finish(report) =>
+      println(report)
+      sender() ! PoisonPill
+      interact()
   }
 }
