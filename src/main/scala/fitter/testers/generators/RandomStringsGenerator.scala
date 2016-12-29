@@ -1,4 +1,4 @@
-package fitter.testers.actors
+package fitter.testers.generators
 
 import java.util.UUID
 
@@ -9,5 +9,7 @@ object RandomStringsGenerator {
   }
 
   def generateRandomStrings(stringsCount: Int): Iterable[String] =
-    Range.inclusive(1, stringsCount).map(_ => UUID.randomUUID().toString)
+    Range.inclusive(1, stringsCount).map(_ => generateRandomString())
+
+  def generateRandomString(): String = UUID.randomUUID().toString
 }

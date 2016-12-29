@@ -3,11 +3,11 @@ package fitter.testers.actors.supervisors
 import akka.actor.Props
 import fitter.Dependencies
 import fitter.entities.Credentials
-import fitter.testers.actors.RandomStringsGenerator
 import fitter.testers.actors.bots.registration.AccountsCreatorsSupervisor
 import fitter.testers.commands.nodes.{Deployment, TaskEnd, TaskStart}
 import fitter.testers.commands.registration.{AccountsCreatingCommand, AccountsCreatingTaskEnd}
 import fitter.testers.config.{RegistrationTestConfig, SessionConfig, SystemConfig}
+import fitter.testers.generators.RandomStringsGenerator
 
 import scala.collection.mutable.ArrayBuffer
 
