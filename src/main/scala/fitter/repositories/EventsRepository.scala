@@ -8,4 +8,5 @@ trait EventsRepository {
   def assignUserToEvent(event: Event, user: String): Unit
   def findUserIncomingEvents(user: String): Stream[Event]
   def leave(event: Event, user: String): Unit
+  def deleteUserEvents(user: String): Unit
 }

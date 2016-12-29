@@ -1,10 +1,11 @@
 package fitter.interactions
 
 import fitter.entities.User
-import fitter.repositories.UsersRepository
+import fitter.repositories.{EventsRepository, UsersRepository}
 
-class DeletingUser(usersRepository: UsersRepository) {
+class DeletingUser(usersRepository: UsersRepository, eventsRepository: EventsRepository) {
   def delete(user: User): Unit = {
     usersRepository.delete(user)
+    eventsRepository.deleteUserEvents(user.nick)
   }
 }

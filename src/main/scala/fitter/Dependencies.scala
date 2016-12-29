@@ -24,7 +24,7 @@ class Dependencies(val session: Session) {
 
   lazy val creatingUserUsingConsole = new CreatingUserUsingConsole(creatingUser)
   lazy val loggingIn = new LoggingIn(authenticating)
-  lazy val deletingUser = new DeletingUser(usersRepository)
+  lazy val deletingUser = new DeletingUser(usersRepository, eventsRepository)
   lazy val creatingPostUsingConsole = new CreatingPostUsingConsole(creatingPost)
   lazy val creatingComment = new CreatingComment(commentsRepository, commentsCountersRepository, postsCountersRepository)
   lazy val likingUserContent = new LikingUserContent(commentsCountersRepository, postsCountersRepository, commentsLikesRepository, postsLikesJournalRepository)

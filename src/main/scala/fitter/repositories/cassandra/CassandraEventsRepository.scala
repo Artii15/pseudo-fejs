@@ -196,4 +196,14 @@ class CassandraEventsRepository(session: Session) extends EventsRepository {
       .setUUID("id", event.id)
     session.execute(query)
   }
+
+  private lazy val removeAllUserEventsStatement = session.prepare(
+    "DELETE FROM users_events WHERE nick = :nick AND year IN :years"
+  )
+  override def deleteUserEvents(user: String): Unit = {
+    val query = removeAllUserEventsStatement.bind()
+      .setString("nick", user)
+      .setList("years", JavaConverters.seqAsJavaList(findEventsYears().toSeq))
+    session.execute(query)
+  }
 }
