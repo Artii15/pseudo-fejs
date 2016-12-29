@@ -2,7 +2,6 @@ package na.przypale.fitter.testers.actors.supervisors
 
 import akka.actor.{Actor, Props}
 import na.przypale.fitter.Dependencies
-import na.przypale.fitter.testers.actors.RandomStringsGenerator
 import na.przypale.fitter.testers.actors.bots.AccountCreator
 import na.przypale.fitter.testers.commands.registration.{AccountCreateCommand, AccountCreatingStatus, AccountsCreatingCommand, AccountsCreatingTaskEnd}
 
