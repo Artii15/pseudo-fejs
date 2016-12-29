@@ -8,6 +8,8 @@ import scala.io.StdIn
 object RemoteListener {
   def main(args: Array[String]): Unit = {
     val config = ConfigFactory.load()
-    ActorSystem(config.getString("bots.systemName"))
+    val actorSystem = ActorSystem(config.getString("bots.systemName"))
+    StdIn.readLine()
+    actorSystem.terminate()
   }
 }
