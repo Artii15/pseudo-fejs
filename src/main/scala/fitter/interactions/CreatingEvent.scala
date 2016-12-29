@@ -36,7 +36,7 @@ class CreatingEvent(eventsRepository: EventsRepository) {
   private def readEndDate(beginDate: Date): Date = {
     print(s"Event end date (${Config.DATES_FORMAT}): ")
     val endDate = CommandLineReader.readDate(Config.DATES_FORMAT)
-    if(endDate.after(beginDate)) endDate else readEndDate(beginDate)
+    if(endDate.after(beginDate) && endDate.after(new Date())) endDate else readEndDate(beginDate)
   }
 
   @tailrec
