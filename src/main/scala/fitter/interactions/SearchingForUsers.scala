@@ -20,7 +20,7 @@ class SearchingForUsers(usersRepository: UsersRepository) {
   private def findAndDisplay(term: String, lastDisplayedUser: Option[UsersSearchRow] = None): Unit = {
     val users = usersRepository.searchByNickTerm(term)
     display(users)
-    if(users.isEmpty || users.size < Config.DEFAULT_PAGE_SIZE) println("No more posts to display")
+    if(users.isEmpty || users.size < Config.DEFAULT_PAGE_SIZE) println("No more users to display")
     else {
       val Action(ActionIntId(actionId), _) = browserControls.interact()
       if(actionId == UsersBrowserControls.MORE_USERS_ACTION_ID) findAndDisplay(term, users.lastOption)
