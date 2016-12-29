@@ -15,9 +15,7 @@ import scala.collection.mutable.ArrayBuffer
 class RegistrationSupervisor(systemConfig: SystemConfig, sessionConfig: SessionConfig)
   extends TestsSupervisor(systemConfig, sessionConfig) {
 
-  private var workingNodes = 0
   private val registeredAccounts: ArrayBuffer[Iterable[Credentials]] = ArrayBuffer.empty
-  private val numberOfNodes = systemConfig.nodesAddresses.size
 
   protected def run(): Unit = {
     print("Number of threads on each node: ")
@@ -26,9 +24,9 @@ class RegistrationSupervisor(systemConfig: SystemConfig, sessionConfig: SessionC
     val numberOfUniqueNicks = CommandLineReader.readPositiveInt()
 
     val nicks = RandomStringsGenerator.generateRandomStrings(numberOfUniqueNicks)
-    val testerPropsGenerator = (dependencies: Dependencies) => Props(classOf[AccountsCreatorsSupervisor], dependencies)
+    val supervisorPropsGenerator = (dependencies: Dependencies) => Props(classOf[AccountsCreatorsSupervisor], dependencies)
     context.children.foreach(agent => {
-      agent ! Deployment(testerPropsGenerator)
+      agent ! Deployment(supervisorPropsGenerator)
       agent ! AccountsCreatingCommand(numberOfThreadsOnNode, nicks)
     })
     context.become(waitingForRegistrationToFinish)
