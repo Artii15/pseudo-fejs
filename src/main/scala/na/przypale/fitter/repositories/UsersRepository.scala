@@ -1,7 +1,7 @@
 package na.przypale.fitter.repositories
 
 import na.przypale.fitter.entities.{User, UsersSearchRow}
-import na.przypale.fitter.repositories.exceptions.{UserAlreadyExistsException, UserCreatingException}
+import na.przypale.fitter.repositories.exceptions.{UserAlreadyExistsException, UserNotExistsException}
 
 trait UsersRepository {
 
@@ -10,7 +10,7 @@ trait UsersRepository {
   def delete(user: User): Unit
 
   @throws(classOf[UserAlreadyExistsException])
-  @throws(classOf[UserCreatingException])
+  @throws(classOf[UserNotExistsException])
   def insertUnique(user: User): Unit
 
   def getByNick(nick: String): Option[User]

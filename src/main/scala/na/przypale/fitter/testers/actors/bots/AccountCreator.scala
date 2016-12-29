@@ -5,7 +5,7 @@ import java.util.UUID
 import akka.actor.Actor
 import na.przypale.fitter.Dependencies
 import na.przypale.fitter.entities.Credentials
-import na.przypale.fitter.repositories.exceptions.UserCreatingException
+import na.przypale.fitter.repositories.exceptions.{UserAlreadyExistsException, UserNotExistsException}
 import na.przypale.fitter.testers.commands.registration.{AccountCreateCommand, AccountCreatingStatus}
 
 class AccountCreator(dependencies: Dependencies) extends Actor {
@@ -20,7 +20,7 @@ class AccountCreator(dependencies: Dependencies) extends Actor {
       context.parent ! AccountCreatingStatus(true)
     }
     catch {
-      case _: UserCreatingException => context.parent ! AccountCreatingStatus(false)
+      case _: UserAlreadyExistsException | _: UserNotExistsException => context.parent ! AccountCreatingStatus(false)
     }
   }
 }
