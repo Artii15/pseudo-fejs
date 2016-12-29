@@ -4,7 +4,7 @@ import fitter.interactions._
 import fitter.menu.{Action, ActionIntId, Menu}
 
 class EventsControls(loggedUser: User,
-                     creatingEvent: CreatingEvent,
+                     creatingEvent: CreatingEventUsingConsole,
                      browsingEvents: BrowsingEvents,
                      showingUserEvents: ShowingUserEvents) extends Controls {
   override protected def getMenu: Menu = EventsControls.menu
@@ -35,7 +35,7 @@ object EventsControls {
     Action(ActionIntId(EXIT_ACTION_ID), s"$EXIT_ACTION_ID - Exit")
   ))
 
-  def factory(creatingEvent: CreatingEvent, browsingEvents: BrowsingEvents,
+  def factory(creatingEvent: CreatingEventUsingConsole, browsingEvents: BrowsingEvents,
               showingUserEvents: ShowingUserEvents): (User => EventsControls) = {
     user => new EventsControls(user, creatingEvent, browsingEvents, showingUserEvents)
   }

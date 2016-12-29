@@ -34,7 +34,7 @@ class Dependencies(val session: Session) {
   lazy val searchingForUsers = new SearchingForUsers(usersRepository)
   lazy val joiningEvent = new JoiningEvent(eventsRepository)
 
-  lazy val creatingEvent = new CreatingEvent(eventsRepository)
+  lazy val creatingEvent = new CreatingEventUsingConsole(eventsRepository)
   lazy val browsingEvents = new BrowsingEvents(eventsRepository, joiningEvent)
   lazy val showingUserEvents = new ShowingUserEvents(eventsRepository)
 

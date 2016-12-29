@@ -5,12 +5,25 @@ import java.util.Date
 import com.datastax.driver.core.utils.UUIDs
 import fitter.{CommandLineReader, Config}
 import fitter.entities.Event
-import fitter.repositories.EventsRepository
+import fitter.logic.CreatingEvent
+import fitter.logic.exceptions.InvalidEventData
 
 import scala.annotation.tailrec
 
-class CreatingEvent(eventsRepository: EventsRepository) {
-  def create(creator: String): Unit = {
+class CreatingEventUsingConsole(creatingEvent: CreatingEvent) {
+
+  @tailrec
+  final def create(creator: String): Unit = {
+    val event = gatherEventData(creator)
+    try {
+      creatingEvent.create(event)
+    }
+    catch {
+      case error: InvalidEventData => println(error.reason); create(creator)
+    }
+  }
+
+  private def gatherEventData(creator: String): Event = {
     print("Event name: ")
     val name = CommandLineReader.readString()
 
@@ -21,32 +34,21 @@ class CreatingEvent(eventsRepository: EventsRepository) {
     val endDate = readEndDate(beginDate)
     val maxParticipantsCount = readMaxParticipantsCount()
 
-    val event = Event(UUIDs.random(), beginDate, endDate, maxParticipantsCount, name, description, creator)
-    eventsRepository.create(event)
+    Event(UUIDs.random(), beginDate, endDate, maxParticipantsCount, name, description, creator)
   }
 
-  @tailrec
   private def readBeginDate(): Date = {
     print(s"Event begin date (${Config.DATES_FORMAT}): ")
-    val beginDate = CommandLineReader.readDate(Config.DATES_FORMAT)
-    if (beginDate.after(new Date())) beginDate else readBeginDate()
+    CommandLineReader.readDate(Config.DATES_FORMAT)
   }
 
-  @tailrec
   private def readEndDate(beginDate: Date): Date = {
     print(s"Event end date (${Config.DATES_FORMAT}): ")
-    val endDate = CommandLineReader.readDate(Config.DATES_FORMAT)
-    if(endDate.after(beginDate) && endDate.after(new Date())) endDate else readEndDate(beginDate)
+    CommandLineReader.readDate(Config.DATES_FORMAT)
   }
 
-  @tailrec
   private def readMaxParticipantsCount(): Int = {
     print(s"Max participants count (not more than ${Config.EVENTS_MAX_PARTICIPANTS_COUNT}): ")
-    val maxParticipantsCount = CommandLineReader.readInt()
-
-    if (maxParticipantsCount > 0 && maxParticipantsCount <= Config.EVENTS_MAX_PARTICIPANTS_COUNT)
-      maxParticipantsCount
-    else
-      readMaxParticipantsCount()
+    CommandLineReader.readInt()
   }
 }
