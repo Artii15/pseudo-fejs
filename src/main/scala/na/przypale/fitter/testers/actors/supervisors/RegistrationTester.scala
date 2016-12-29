@@ -1,11 +1,9 @@
 package na.przypale.fitter.testers.actors.supervisors
 
-import java.util.UUID
-
 import akka.actor.{Actor, Props}
 import na.przypale.fitter.Dependencies
+import na.przypale.fitter.testers.actors.RandomStringsGenerator
 import na.przypale.fitter.testers.actors.bots.AccountCreator
-import na.przypale.fitter.testers.commands.nodes.TaskEnd
 import na.przypale.fitter.testers.commands.registration.{AccountCreateCommand, AccountCreatingStatus, AccountsCreatingCommand, AccountsCreatingTaskEnd}
 
 class RegistrationTester(dependencies: Dependencies) extends Actor {
@@ -21,7 +19,7 @@ class RegistrationTester(dependencies: Dependencies) extends Actor {
     numberOfCreatedAccounts = 0
     numberOfStatusesReportsToReceive = command.numberOfProcesses
 
-    command.nicks.take(command.numberOfProcesses).foreach(nick => {
+    Stream.continually(command.nicks).flatten.take(command.numberOfProcesses).foreach(nick => {
       context.actorOf(Props(classOf[AccountCreator], dependencies)) ! AccountCreateCommand(nick)
     })
     context.become(waitingForCreatingStatuses)

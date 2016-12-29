@@ -50,7 +50,7 @@ class UserActor(config: UserActorConfig) extends Actor {
     val testerPropsGenerator = (dependencies: Dependencies) => Props(classOf[RegistrationTester], dependencies)
     context.children.foreach(agent => {
       agent ! Deployment(testerPropsGenerator)
-      agent ! AccountsCreatingCommand(numberOfThreadsOnNode, RandomStringsGenerator.generateCyclic(numberOfUniqueNicks))
+      agent ! AccountsCreatingCommand(numberOfThreadsOnNode, RandomStringsGenerator.generateRandomStrings(numberOfUniqueNicks))
     })
     context.become(waitingForRegistrationToFinish)
     workingNodes = numberOfNodes
