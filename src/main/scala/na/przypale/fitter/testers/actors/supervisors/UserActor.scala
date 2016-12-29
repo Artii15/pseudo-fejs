@@ -47,10 +47,11 @@ class UserActor(config: UserActorConfig) extends Actor {
     print("Number of unique nicks: ")
     val numberOfUniqueNicks = CommandLineReader.readPositiveInt()
 
+    val nicks = RandomStringsGenerator.generateRandomStrings(numberOfUniqueNicks)
     val testerPropsGenerator = (dependencies: Dependencies) => Props(classOf[RegistrationTester], dependencies)
     context.children.foreach(agent => {
       agent ! Deployment(testerPropsGenerator)
-      agent ! AccountsCreatingCommand(numberOfThreadsOnNode, RandomStringsGenerator.generateRandomStrings(numberOfUniqueNicks))
+      agent ! AccountsCreatingCommand(numberOfThreadsOnNode, nicks)
     })
     context.become(waitingForRegistrationToFinish)
     workingNodes = numberOfNodes

@@ -8,6 +8,6 @@ object RandomStringsGenerator {
     Stream.continually(nicksToRepeat).flatten
   }
 
-  def generateRandomStrings(stringsCount: Int): Seq[String] =
+  def generateRandomStrings(stringsCount: Int): Iterable[String] =
     Range.inclusive(1, stringsCount).map(_ => UUID.randomUUID().toString)
 }
