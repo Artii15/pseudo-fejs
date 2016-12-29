@@ -1,4 +1,4 @@
-package fitter.testers.actors.bots
+package fitter.testers.actors.bots.registration
 
 import java.util.UUID
 

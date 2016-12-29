@@ -8,9 +8,9 @@ import fitter.repositories.exceptions.{EventParticipantAlreadyAssigned, EventPar
 import scala.annotation.tailrec
 
 class JoiningEvent(eventsRepository: EventsRepository) {
+
   def join(loggedUser: String, availableEvents: Iterable[(Event, Int)]): Unit = {
     val selectedEvent = letUserSelectEvent(availableEvents)
-
     try {
       eventsRepository.assignUserToEvent(selectedEvent, loggedUser)
       println("You have successfully joined this event")

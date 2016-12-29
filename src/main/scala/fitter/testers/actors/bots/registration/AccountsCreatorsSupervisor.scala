@@ -1,14 +1,13 @@
-package fitter.testers.actors.supervisors
+package fitter.testers.actors.bots.registration
 
 import akka.actor.{Actor, Props}
 import fitter.Dependencies
 import fitter.entities.Credentials
-import fitter.testers.actors.bots.AccountCreator
 import fitter.testers.commands.registration.{AccountCreateCommand, AccountCreatingStatus, AccountsCreatingCommand, AccountsCreatingTaskEnd}
 
 import scala.collection.mutable.ArrayBuffer
 
-class RegistrationTester(dependencies: Dependencies) extends Actor {
+class AccountsCreatorsSupervisor(dependencies: Dependencies) extends Actor {
 
   private var createdAccounts: ArrayBuffer[Credentials] = ArrayBuffer.empty
   private var numberOfStatusesReportsToReceive = 0
