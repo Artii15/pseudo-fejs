@@ -4,17 +4,18 @@ import akka.actor.{Actor, Props}
 import fitter.testers.actors.DeployGenerator
 import fitter.testers.commands.{Finish, Start}
 import fitter.testers.commands.nodes.{Deployment, TaskEnd, TaskStart}
-import fitter.testers.config.{SessionConfig, SystemConfig}
+import fitter.testers.config.TestsSupervisorConfig
 
-abstract class TestsSupervisor(systemConfig: SystemConfig, sessionConfig: SessionConfig) extends Actor {
+abstract class TestsSupervisor(config: TestsSupervisorConfig) extends Actor {
 
   private var workingNodes = 0
-  private val numberOfNodes = systemConfig.nodesAddresses.size
+  private val numberOfNodes = config.systemConfig.nodesAddresses.size
 
   override def preStart(): Unit = {
+    val systemConfig = config.systemConfig
     systemConfig.nodesAddresses.foreach(address => {
       val deploy = DeployGenerator.makeRemoteDeploy(systemConfig.actorSystemName, address, systemConfig.nodesPort)
-      context.actorOf(Props(classOf[BootstrappingAgent], sessionConfig).withDeploy(deploy))
+      context.actorOf(Props(classOf[BootstrappingAgent], config.sessionConfig).withDeploy(deploy))
     })
   }
 

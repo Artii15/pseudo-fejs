@@ -1,5 +1,8 @@
 package fitter.testers.actors.supervisors
 
-class EventsJoiningSupervisor extends TestsSupervisor {
+import fitter.testers.config.TestsSupervisorConfig
+
+class EventsJoiningSupervisor(testsSupervisorConfig: TestsSupervisorConfig)
+  extends TestsSupervisor(testsSupervisorConfig) {
 
 }

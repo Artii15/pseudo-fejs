@@ -4,7 +4,7 @@ import akka.actor.{ActorSystem, Props}
 import com.typesafe.config.ConfigFactory
 import fitter.testers.actors.supervisors.UserActor
 import fitter.testers.commands.Start
-import fitter.testers.config.{SessionConfig, SystemConfig}
+import fitter.testers.config.{SessionConfig, SystemConfig, TestsSupervisorConfig}
 
 import scala.collection.JavaConverters
 
@@ -19,7 +19,9 @@ object Main {
     val sessionConfig = new SessionConfig("test")
 
     val actorSystem = ActorSystem(systemConfig.actorSystemName)
-    val userActor = actorSystem.actorOf(Props(new UserActor(systemConfig, sessionConfig)))
+
+    val testsSupervisorConfig = new TestsSupervisorConfig(sessionConfig, systemConfig)
+    val userActor = actorSystem.actorOf(Props(new UserActor(testsSupervisorConfig)))
     userActor ! Start
   }
 }

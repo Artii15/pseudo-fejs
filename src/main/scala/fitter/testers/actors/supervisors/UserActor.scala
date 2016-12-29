@@ -3,12 +3,12 @@ package fitter.testers.actors.supervisors
 import akka.actor.{Actor, PoisonPill, Props}
 import fitter.CommandLineReader
 import fitter.testers.commands._
-import fitter.testers.config.{EventsJoiningConfig, RegistrationTestConfig, SessionConfig, SystemConfig}
+import fitter.testers.config._
 
 import scala.annotation.tailrec
 import scala.io.StdIn
 
-class UserActor(systemConfig: SystemConfig, sessionConfig: SessionConfig) extends Actor {
+class UserActor(config: TestsSupervisorConfig) extends Actor {
 
   override def receive: Receive = {
     case Start => context.become(listeningForTasksFinishingOnly); interact()
@@ -35,7 +35,7 @@ class UserActor(systemConfig: SystemConfig, sessionConfig: SessionConfig) extend
     val numberOfThreadsOnEachNode = CommandLineReader.readPositiveInt()
 
     val registrationConfig = new RegistrationTestConfig(numberOfUniqueNicks, numberOfThreadsOnEachNode)
-    val supervisorProps = Props(classOf[RegistrationSupervisor], systemConfig, sessionConfig, registrationConfig)
+    val supervisorProps = Props(classOf[RegistrationSupervisor], config, registrationConfig)
     context.actorOf(supervisorProps) ! Start
   }
 
@@ -46,7 +46,7 @@ class UserActor(systemConfig: SystemConfig, sessionConfig: SessionConfig) extend
     val numberOfThreadsOnEachNode = CommandLineReader.readPositiveInt()
 
     val eventsJoiningConfig = new EventsJoiningConfig(numberOfThreadsOnEachNode, numberOfParticipants)
-    val supervisorProps = Props(classOf[EventsJoiningSupervisor], systemConfig, sessionConfig, eventsJoiningConfig)
+    val supervisorProps = Props(classOf[EventsJoiningSupervisor], config, eventsJoiningConfig)
     context.actorOf(supervisorProps) ! Start
   }
 

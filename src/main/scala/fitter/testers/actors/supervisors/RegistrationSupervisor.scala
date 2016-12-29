@@ -6,13 +6,13 @@ import fitter.entities.Credentials
 import fitter.testers.actors.bots.registration.AccountsCreatorsSupervisor
 import fitter.testers.commands.nodes.{Deployment, TaskEnd, TaskStart}
 import fitter.testers.commands.registration.{AccountsCreatingCommand, AccountsCreatingTaskEnd}
-import fitter.testers.config.{RegistrationTestConfig, SessionConfig, SystemConfig}
+import fitter.testers.config.{RegistrationTestConfig, TestsSupervisorConfig}
 import fitter.testers.generators.RandomStringsGenerator
 
 import scala.collection.mutable.ArrayBuffer
 
-class RegistrationSupervisor(systemConfig: SystemConfig, sessionConfig: SessionConfig, registrationConfig: RegistrationTestConfig)
-  extends TestsSupervisor(systemConfig, sessionConfig) {
+class RegistrationSupervisor(testsSupervisorConfig: TestsSupervisorConfig, registrationConfig: RegistrationTestConfig)
+  extends TestsSupervisor(testsSupervisorConfig) {
 
   private val registeredAccounts: ArrayBuffer[Iterable[Credentials]] = ArrayBuffer.empty
   private val nicks = RandomStringsGenerator.generateRandomStrings(registrationConfig.numberOfUniqueNicks)
