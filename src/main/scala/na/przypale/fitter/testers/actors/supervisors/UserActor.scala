@@ -10,13 +10,14 @@ import na.przypale.fitter.testers.commands.registration.{AccountsCreatingCommand
 import na.przypale.fitter.testers.config.UserActorConfig
 
 import scala.annotation.tailrec
+import scala.collection.mutable.ArrayBuffer
 import scala.io.StdIn
 
 class UserActor(config: UserActorConfig) extends Actor {
 
   private val numberOfNodes = config.systemConfig.nodesAddresses.size
   private var workingNodes = 0
-  private var registeredAccounts: Stream[Iterable[Credentials]] = Stream.empty
+  private val registeredAccounts: ArrayBuffer[Iterable[Credentials]] = ArrayBuffer.empty
 
   override def preStart(): Unit = {
     val systemConfig = config.systemConfig
@@ -56,7 +57,7 @@ class UserActor(config: UserActorConfig) extends Actor {
     })
     context.become(waitingForRegistrationToFinish)
     workingNodes = numberOfNodes
-    registeredAccounts = Stream.empty
+    registeredAccounts.clear()
   }
 
   private def waitingForRegistrationToFinish: Receive = {
@@ -65,7 +66,7 @@ class UserActor(config: UserActorConfig) extends Actor {
 
   private def collectRegistrationStatus(createdAccounts: Iterable[Credentials]): Unit = {
     workingNodes -= 1
-    registeredAccounts = createdAccounts #:: registeredAccounts
+    registeredAccounts += createdAccounts
     if(workingNodes == 0) {
       val registeredAccountsFlatList = registeredAccounts.flatten
       println("Registered accounts credentials:")

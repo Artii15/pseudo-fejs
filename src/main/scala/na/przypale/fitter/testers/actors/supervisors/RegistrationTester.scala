@@ -6,9 +6,11 @@ import na.przypale.fitter.entities.Credentials
 import na.przypale.fitter.testers.actors.bots.AccountCreator
 import na.przypale.fitter.testers.commands.registration.{AccountCreateCommand, AccountCreatingStatus, AccountsCreatingCommand, AccountsCreatingTaskEnd}
 
+import scala.collection.mutable.ArrayBuffer
+
 class RegistrationTester(dependencies: Dependencies) extends Actor {
 
-  private var createdAccounts: List[Credentials] = Nil
+  private var createdAccounts: ArrayBuffer[Credentials] = ArrayBuffer.empty
   private var numberOfStatusesReportsToReceive = 0
 
   override def receive: Receive = {
@@ -16,7 +18,7 @@ class RegistrationTester(dependencies: Dependencies) extends Actor {
   }
 
   private def startRegistering(command: AccountsCreatingCommand): Unit = {
-    createdAccounts = Nil
+    createdAccounts.clear()
     numberOfStatusesReportsToReceive = command.numberOfProcesses
 
     Stream.continually(command.nicks).flatten.take(command.numberOfProcesses).foreach(nick => {
@@ -30,7 +32,7 @@ class RegistrationTester(dependencies: Dependencies) extends Actor {
   }
 
   private def receiveCreationStatus(creatingStatus: AccountCreatingStatus): Unit = {
-    if (creatingStatus.wasAccountCreated) createdAccounts = creatingStatus.credentials :: createdAccounts
+    if (creatingStatus.wasAccountCreated) createdAccounts += creatingStatus.credentials
     numberOfStatusesReportsToReceive -= 1
     if (numberOfStatusesReportsToReceive == 0) {
       context.parent ! AccountsCreatingTaskEnd(createdAccounts)
