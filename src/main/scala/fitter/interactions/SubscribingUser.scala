@@ -7,9 +7,17 @@ import fitter.repositories.{SubscriptionsRepository, UsersRepository}
 class SubscribingUser(usersRepository: UsersRepository, subscriptionsRepository: SubscriptionsRepository) {
   def createSubscription(subscriber: User): Unit = {
     print("Nickname of user you want to subscribe: ")
-    val personToSubscribeNick = CommandLineReader.readString()
+    val subscribedUserNick = CommandLineReader.readString()
 
-    usersRepository.getByNick(personToSubscribeNick) match {
+    if (subscribedUserNick.isEmpty)
+      println("Nick must not be empty")
+    else
+      makeSubscription(subscriber, subscribedUserNick)
+
+  }
+
+  private def makeSubscription(subscriber: User, subscribedUserNick: String): Unit = {
+    usersRepository.getByNick(subscribedUserNick) match {
       case Some(personToSubscribe) =>
         subscriptionsRepository.create(Subscription(subscriber.nick, personToSubscribe.nick))
         println("Subscription created")

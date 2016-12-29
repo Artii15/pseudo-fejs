@@ -11,7 +11,8 @@ import scala.annotation.tailrec
 class SearchingForUsers(usersRepository: UsersRepository) {
   def search(): Unit = {
     println("Searched term: ")
-    findAndDisplay(CommandLineReader.readString())
+    val searchedTerm = CommandLineReader.readString()
+    if (searchedTerm.isEmpty) println("Searched term must not be empty") else findAndDisplay(searchedTerm)
   }
 
   private val browserControls = new UsersBrowserControls()
