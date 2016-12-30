@@ -1,6 +1,6 @@
 package fitter.testers.actors.leaders.local
 
-import akka.actor.{Address, Props}
+import akka.actor.{Deploy, Props}
 import fitter.testers.actors.leaders.Leader
 import fitter.testers.actors.leaders.remote.RegistrationRemoteLeader
 import fitter.testers.commands.nodes.TaskStart
@@ -12,10 +12,9 @@ import fitter.testers.results.registration.{CreatedAccounts, RegistrationReport}
 
 import scala.collection.mutable.ListBuffer
 
-class RegistrationLocalLeader(nodes: Iterable[Address], sessionConfig: SessionConfig)
+class RegistrationLocalLeader(deploys: Iterator[Deploy], sessionConfig: SessionConfig)
   extends Leader[StartRegistration, CreatedAccounts] {
 
-  private val deploys = DeploysMaker.make(nodes)
   private val accountsNicks: ListBuffer[String] = ListBuffer.empty
   private var numberOfWorkersPerNode = 0
 
