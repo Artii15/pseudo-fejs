@@ -6,13 +6,13 @@ import fitter.entities.Credentials
 import fitter.logic.CreatingUser
 import fitter.repositories.exceptions.{UserAlreadyExistsException, UserNotExistsException}
 import fitter.testers.commands.registration.CreateAccount
-import fitter.testers.results.registration.AccountCreatingResult
+import fitter.testers.results.registration.CreatedAccount
 
-class RegistrationWorker(creatingUser: CreatingUser) extends Worker[CreateAccount, AccountCreatingResult] {
+class RegistrationWorker(creatingUser: CreatingUser) extends Worker[CreateAccount, CreatedAccount] {
 
-  override protected def executeTask(task: CreateAccount): AccountCreatingResult = {
+  override protected def executeTask(task: CreateAccount): CreatedAccount = {
     val credentials = createAccount(task.nick)
-    AccountCreatingResult(credentials)
+    CreatedAccount(credentials)
   }
 
   private def createAccount(nick: String): Option[Credentials] = {

@@ -1,7 +1,7 @@
 package fitter.testers.actors.leaders
 
 import akka.actor.{Actor, PoisonPill, Props}
-import fitter.testers.commands.nodes.{EmptyResults, GroupTaskStart, PartialResults}
+import fitter.testers.commands.nodes.GroupTaskStart
 
 import scala.reflect.{ClassTag, classTag}
 
@@ -9,7 +9,7 @@ abstract class Leader[TaskStartMsg <: GroupTaskStart: ClassTag, Results: ClassTa
   extends Actor {
 
   private var numberOfRunningWorkers = 0
-  private var results: PartialResults[Results] = EmptyResults[Results]
+  private var results: AggregatedResults[Results] = EmptyResults[Results]
 
   def receive: Receive = {
     case taskStart if classTag[TaskStartMsg].runtimeClass.isInstance(taskStart) =>
@@ -29,11 +29,11 @@ abstract class Leader[TaskStartMsg <: GroupTaskStart: ClassTag, Results: ClassTa
   protected def makeWorker(workerId: Int): Props
 
   protected def collectingWorkersResults: Receive = {
-    case partialResults if classTag[PartialResults[Results]].runtimeClass.isInstance(partialResults) =>
-      receivePartialResults(partialResults.asInstanceOf[PartialResults[Results]])
+    case partialResults if classTag[Results].runtimeClass.isInstance(partialResults) =>
+      receivePartialResults(partialResults.asInstanceOf[Results])
   }
 
-  private def receivePartialResults(partialResults: PartialResults[Results]): Unit = {
+  private def receivePartialResults(partialResults: Results): Unit = {
     results = results.combine(partialResults)
     numberOfRunningWorkers -= 1
     if(numberOfRunningWorkers == 0) {

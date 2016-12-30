@@ -1,7 +1,7 @@
 package fitter.testers.actors.workers
 
 import akka.actor.Actor
-import fitter.testers.commands.nodes.{PartialResults, TaskStart}
+import fitter.testers.commands.nodes.TaskStart
 
 import scala.reflect.{ClassTag, classTag}
 
@@ -17,5 +17,5 @@ abstract class Worker[TaskStartMsg <: TaskStart: ClassTag, Results] extends Acto
     context.parent ! results
   }
 
-  protected def executeTask(taskStart: TaskStartMsg): PartialResults[Results]
+  protected def executeTask(taskStart: TaskStartMsg): Results
 }
