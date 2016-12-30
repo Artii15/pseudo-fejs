@@ -1,6 +1,6 @@
 package fitter.testers.actors.bots.events
 
-import akka.actor.{Actor, Props}
+import akka.actor.{Actor, PoisonPill, Props}
 import fitter.Dependencies
 import fitter.testers.commands.events.{JoinEvent, JoiningEventTaskEnd, JoiningStatus, RunParticipants}
 import fitter.testers.generators.RandomStringsGenerator
@@ -36,6 +36,7 @@ class ParticipantsLeader(dependencies: Dependencies) extends Actor {
     numberOfStatusesReportsToReceive -= 1
     if (numberOfStatusesReportsToReceive == 0) {
       context.parent ! JoiningEventTaskEnd(joinedParticipants)
+      context.children.foreach(_ ! PoisonPill)
       context.become(receive)
     }
   }
