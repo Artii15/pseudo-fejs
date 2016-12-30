@@ -3,7 +3,7 @@ package fitter.testers.actors.leaders.remote
 import akka.actor.Props
 import fitter.testers.actors.leaders.SessionOwner
 import fitter.testers.actors.workers.RegistrationWorker
-import fitter.testers.commands.nodes.TaskStart
+import fitter.testers.commands.TaskStart
 import fitter.testers.commands.registration.{CreateAccount, CreateAccounts}
 import fitter.testers.config.SessionConfig
 import fitter.testers.results.AggregatedResults

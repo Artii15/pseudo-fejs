@@ -1,6 +1,6 @@
 package fitter.testers.commands.events
 
-import fitter.testers.commands.nodes.GroupTaskStart
+import fitter.testers.commands.GroupTaskStart
 
 class StartEvent(val groupSize: Int,
                  val numberOfWorkersPerNode: Int,

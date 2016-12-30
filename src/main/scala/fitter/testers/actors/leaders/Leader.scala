@@ -1,7 +1,7 @@
 package fitter.testers.actors.leaders
 
 import akka.actor.{Actor, PoisonPill, Props}
-import fitter.testers.commands.nodes.{GroupTaskStart, TaskStart}
+import fitter.testers.commands.{GroupTaskStart, TaskStart}
 import fitter.testers.results.AggregatedResults
 
 import scala.reflect.{ClassTag, classTag}

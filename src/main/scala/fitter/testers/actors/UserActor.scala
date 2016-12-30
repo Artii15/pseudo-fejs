@@ -1,10 +1,10 @@
-package fitter.testers.actors.supervisors
+package fitter.testers.actors
 
 import akka.actor.{Actor, PoisonPill, Props}
-import fitter.{CommandLineReader, Dependencies}
 import fitter.connectors.{ClusterConnector, SessionConnector}
 import fitter.testers.commands._
 import fitter.testers.config._
+import fitter.{CommandLineReader, Dependencies}
 
 import scala.annotation.tailrec
 import scala.io.StdIn

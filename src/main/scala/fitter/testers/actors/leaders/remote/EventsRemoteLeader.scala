@@ -4,8 +4,8 @@ import akka.actor.Props
 import fitter.entities.Event
 import fitter.testers.actors.leaders.SessionOwner
 import fitter.testers.actors.workers.EventWorker
+import fitter.testers.commands.TaskStart
 import fitter.testers.commands.events.{JoinEvent, MakeParticipants}
-import fitter.testers.commands.nodes.TaskStart
 import fitter.testers.config.SessionConfig
 import fitter.testers.results.AggregatedResults
 import fitter.testers.results.events.{JoinedParticipant, JoinedParticipants}

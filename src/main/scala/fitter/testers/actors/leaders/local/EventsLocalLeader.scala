@@ -4,8 +4,8 @@ import akka.actor.{Deploy, Props}
 import fitter.entities.Event
 import fitter.testers.actors.leaders.SessionOwner
 import fitter.testers.actors.leaders.remote.EventsRemoteLeader
+import fitter.testers.commands.TaskStart
 import fitter.testers.commands.events.{MakeParticipants, StartEvent}
-import fitter.testers.commands.nodes.TaskStart
 import fitter.testers.config.SessionConfig
 import fitter.testers.generators.EventsGenerator
 import fitter.testers.results.AggregatedResults

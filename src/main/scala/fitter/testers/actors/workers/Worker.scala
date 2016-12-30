@@ -1,7 +1,7 @@
 package fitter.testers.actors.workers
 
 import akka.actor.Actor
-import fitter.testers.commands.nodes.TaskStart
+import fitter.testers.commands.TaskStart
 
 import scala.reflect.{ClassTag, classTag}
 

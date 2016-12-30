@@ -1,6 +1,6 @@
 package fitter.testers.commands.registration
 
-import fitter.testers.commands.nodes.GroupTaskStart
+import fitter.testers.commands.GroupTaskStart
 
 class StartRegistration(val groupSize: Int,
                         val numberOfUniqueNicks: Int,
