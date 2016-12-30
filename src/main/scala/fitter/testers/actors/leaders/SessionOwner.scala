@@ -5,7 +5,7 @@ import fitter.Dependencies
 import fitter.connectors.{ClusterConnector, SessionConnector}
 import fitter.testers.config.SessionConfig
 
-abstract class SessionOwner(sessionConfig: SessionConfig) extends Leader {
+abstract class SessionOwner[T, U](sessionConfig: SessionConfig) extends Leader[T, U] {
 
   private val cluster: Cluster = ClusterConnector.makeConnection(sessionConfig.contactPoint)
   private val session: Session = SessionConnector.makeSession(cluster, sessionConfig.keyspace)
