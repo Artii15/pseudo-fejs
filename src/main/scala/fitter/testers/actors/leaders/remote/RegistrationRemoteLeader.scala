@@ -18,7 +18,7 @@ class RegistrationRemoteLeader(sessionConfig: SessionConfig)
     nicksForWorkers = Stream.continually(task.nicks).flatten.iterator
 
   override protected def makeWorker(workerId: Int): Props =
-    Props(new RegistrationWorker(dependencies.creatingUser))
+    Props(classOf[RegistrationWorker], dependencies.creatingUser)
 
   override protected def makeTaskForWorker(workerId: Int): TaskStart = new CreateAccount(nicksForWorkers.next())
 

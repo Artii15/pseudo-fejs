@@ -5,13 +5,16 @@ import fitter.controls.{EventsControls, LoggedUserControls}
 import fitter.entities.User
 import fitter.interactions._
 import fitter.logic.{Authenticating, CreatingEvent, CreatingPost, CreatingUser}
+import fitter.repositories.EventsRepository
 import fitter.repositories.cassandra._
 
 class Dependencies(val session: Session) {
+  lazy val cassandraEventsRepository = new CassandraEventsRepository(session)
+
   lazy val usersRepository = new CassandraUsersRepository(session)
   lazy val postsRepository = new CassandraPostsRepository(session)
   lazy val subscriptionsRepository = new CassandraSubscriptionsRepository(session)
-  lazy val eventsRepository = new CassandraEventsRepository(session)
+  lazy val eventsRepository: EventsRepository = cassandraEventsRepository
   lazy val commentsRepository = new CassandraCommentsRepository(session)
   lazy val commentsCountersRepository = new CassandraCommentsCountersRepository(session)
   lazy val postsCountersRepository = new CassandraPostsCountersRepository(session)
