@@ -14,9 +14,8 @@ class RegistrationRemoteLeader(sessionConfig: SessionConfig)
 
   var nicksForWorkers: Iterator[String] = Iterator.empty
 
-  override protected def readTask(task: CreateAccounts): Unit = {
+  override protected def readTask(task: CreateAccounts): Unit =
     nicksForWorkers = Stream.continually(task.nicks).flatten.iterator
-  }
 
   override protected def makeWorker(workerId: Int): Props =
     Props(new RegistrationWorker(dependencies.creatingUser))
