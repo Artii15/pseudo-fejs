@@ -5,13 +5,11 @@ import fitter.testers.results.AggregatedResults
 
 import scala.collection.mutable.ListBuffer
 
-class CreatedAccounts extends AggregatedResults[CreatedAccount] {
+class RegistrationReport extends AggregatedResults[CreatedAccounts] {
+
   val accounts: ListBuffer[Credentials] = ListBuffer.empty
 
-  override def combine(account: CreatedAccount): Unit = {
-    val CreatedAccount(credentials) = account
-    if(credentials.isDefined) accounts += credentials.get
-  }
+  override def combine(createdAccounts: CreatedAccounts): Unit = accounts ++= createdAccounts.accounts
 
   override def clear(): Unit = accounts.clear()
 }
