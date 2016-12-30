@@ -3,7 +3,7 @@ package fitter.repositories.cassandra
 import java.util.{Date, UUID}
 
 import com.datastax.driver.core.utils.UUIDs
-import com.datastax.driver.core.{Row, Session, SimpleStatement}
+import com.datastax.driver.core.{ConsistencyLevel, Row, Session, SimpleStatement}
 import fitter.Dates
 import fitter.entities.Event
 import fitter.repositories.exceptions.{EventParticipantAlreadyAssigned, EventParticipantLimitExceedException}
@@ -17,8 +17,16 @@ class CassandraEventsRepository(session: Session) extends EventsRepository {
     "INSERT INTO events(year, start_date, end_date, id, description, author, name, max_users_count) " +
       "VALUES(:year, :startDate, :endDate, :id, :description, :author, :name, :maxUsersCount)")
   override def create(event: Event): Unit = {
+    val createEventQuery = makeCreateEventQuery(event)
+    session.execute(createEventQuery)
+  }
 
-    val createEventQuery = createEventStatement.bind()
+  def createConsistently(event: Event): Unit = {
+    val createEventQuery = makeCreateEventQuery(event).setConsistencyLevel(ConsistencyLevel.ALL)
+    session.execute(createEventQuery)
+  }
+
+  private def makeCreateEventQuery(event: Event) = createEventStatement.bind()
       .setInt("year", Dates.extractYear(event.startDate))
       .setTimestamp("startDate", event.startDate)
       .setTimestamp("endDate", event.endDate)
@@ -27,8 +35,6 @@ class CassandraEventsRepository(session: Session) extends EventsRepository {
       .setString("author", event.author)
       .setString("name", event.name)
       .setInt("maxUsersCount", event.maxParticipantsCount)
-    session.execute(createEventQuery)
-  }
 
   private lazy val findIncomingStatement = session.prepare(
     "SELECT year, start_date, end_date, id, description, author, name, max_users_count " +
