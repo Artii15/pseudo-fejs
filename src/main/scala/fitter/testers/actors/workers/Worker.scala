@@ -3,10 +3,13 @@ package fitter.testers.actors.workers
 import akka.actor.Actor
 import fitter.testers.commands.nodes.{PartialResults, TaskStart}
 
-abstract class Worker[TaskStartMsg <: TaskStart, PartialResultsMsg <: PartialResults] extends Actor {
+import scala.reflect.{ClassTag, classTag}
+
+abstract class Worker[TaskStartMsg <: TaskStart: ClassTag, PartialResultsMsg <: PartialResults] extends Actor {
 
   override def receive: Receive = {
-    case taskStart: TaskStartMsg => receiveTaskStart(taskStart)
+    case taskStart if classTag[TaskStartMsg].runtimeClass.isInstance(taskStart) =>
+      receiveTaskStart(taskStart.asInstanceOf[TaskStartMsg])
   }
 
   private def receiveTaskStart(taskStart: TaskStartMsg): Unit = {

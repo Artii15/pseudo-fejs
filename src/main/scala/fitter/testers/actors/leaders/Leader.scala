@@ -1,24 +1,27 @@
 package fitter.testers.actors.leaders
 
 import akka.actor.{Actor, PoisonPill, Props}
-import fitter.testers.commands.nodes.{EmptyResults, PartialResults, TaskStart}
+import fitter.testers.commands.nodes.{EmptyResults, GroupTaskStart, PartialResults}
 
-abstract class Leader[TaskStartMsg <: TaskStart, PartialResultsMsg <: PartialResults]
+import scala.reflect.{ClassTag, classTag}
+
+abstract class Leader[TaskStartMsg <: GroupTaskStart: ClassTag, PartialResultsMsg <: PartialResults: ClassTag]
   extends Actor {
 
   private var numberOfRunningWorkers = 0
   private var results: PartialResults = EmptyResults
 
   def receive: Receive = {
-    case taskStart: TaskStartMsg => beginTask(taskStart)
+    case taskStart if classTag[TaskStartMsg].runtimeClass.isInstance(taskStart) =>
+      beginTask(taskStart.asInstanceOf[TaskStartMsg])
   }
 
   private def beginTask(taskStart: TaskStartMsg): Unit = {
-    Stream.from(0).take(taskStart.workersGroupSize).foreach(workerId => {
+    Stream.from(0).take(taskStart.groupSize).foreach(workerId => {
       val props = makeWorker(workerId)
       context.actorOf(props)
     })
-    numberOfRunningWorkers = taskStart.workersGroupSize
+    numberOfRunningWorkers = taskStart.groupSize
     results = EmptyResults
     context.become(collectingWorkersResults)
   }
@@ -26,7 +29,8 @@ abstract class Leader[TaskStartMsg <: TaskStart, PartialResultsMsg <: PartialRes
   protected def makeWorker(workerId: Int): Props
 
   protected def collectingWorkersResults: Receive = {
-    case partialResults: PartialResultsMsg => receivePartialResults(partialResults)
+    case partialResults if classTag[PartialResultsMsg].runtimeClass.isInstance(partialResults) =>
+      receivePartialResults(partialResults.asInstanceOf[PartialResultsMsg])
   }
 
   private def receivePartialResults(partialResults: PartialResultsMsg): Unit = {
