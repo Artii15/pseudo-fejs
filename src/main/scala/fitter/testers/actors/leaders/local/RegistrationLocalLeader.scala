@@ -7,7 +7,7 @@ import fitter.testers.commands.nodes.TaskStart
 import fitter.testers.commands.registration.{CreateAccounts, StartRegistration}
 import fitter.testers.generators.RandomStringsGenerator
 import fitter.testers.results.AggregatedResults
-import fitter.testers.results.registration.CreatedAccounts
+import fitter.testers.results.registration.{CreatedAccounts, RegistrationReport}
 
 import scala.collection.mutable.ListBuffer
 
@@ -20,7 +20,7 @@ class RegistrationLocalLeader(nodes: Iterable[Address]) extends Leader[StartRegi
   override protected def makeWorker(workerId: Int): Props =
     Props(classOf[RegistrationRemoteLeader]).withDeploy(deploys.next())
 
-  override protected val results: AggregatedResults[CreatedAccounts] =
+  override protected val results: AggregatedResults[CreatedAccounts] = new RegistrationReport()
 
   override protected def readTask(task: StartRegistration): Unit = {
     accountsNicks.clear()
