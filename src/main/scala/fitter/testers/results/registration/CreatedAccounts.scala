@@ -12,4 +12,6 @@ class CreatedAccounts extends AggregatedResults[CreatedAccount] {
     val CreatedAccount(credentials) = account
     if(credentials.isDefined) createdAccounts += credentials.get
   }
+
+  override def clear(): Unit = createdAccounts.clear()
 }
