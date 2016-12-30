@@ -1,3 +1,3 @@
-package fitter.testers.commands.events
+package fitter.testers.commands.eventsOld
 
 case class JoiningStatus(participant: String, joined: Boolean)

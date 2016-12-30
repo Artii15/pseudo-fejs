@@ -1,5 +1,6 @@
 package fitter.testers.commands.events
 
 import fitter.entities.Event
+import fitter.testers.commands.nodes.TaskStart
 
-case class JoinEvent(participantNick: String, event: Event)
+case class JoinEvent(event: Event) extends TaskStart

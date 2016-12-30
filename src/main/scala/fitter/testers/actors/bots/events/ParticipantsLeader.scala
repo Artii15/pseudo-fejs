@@ -2,7 +2,7 @@ package fitter.testers.actors.bots.events
 
 import akka.actor.{Actor, PoisonPill, Props}
 import fitter.Dependencies
-import fitter.testers.commands.events.{JoinEvent, JoiningEventTaskEnd, JoiningStatus, RunParticipants}
+import fitter.testers.commands.eventsOld.{JoinEvent, JoiningEventTaskEnd, JoiningStatus, RunParticipants}
 import fitter.testers.generators.RandomStringsGenerator
 
 import scala.collection.mutable.ArrayBuffer

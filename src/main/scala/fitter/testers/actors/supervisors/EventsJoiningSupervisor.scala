@@ -3,7 +3,7 @@ package fitter.testers.actors.supervisors
 import akka.actor.Props
 import fitter.Dependencies
 import fitter.testers.actors.bots.events.ParticipantsLeader
-import fitter.testers.commands.events.{JoiningEventTaskEnd, RunParticipants}
+import fitter.testers.commands.eventsOld.{JoiningEventTaskEnd, RunParticipants}
 import fitter.testers.commands.nodes.{Deployment, TaskEnd, TaskStart}
 import fitter.testers.config.EventsJoiningConfig
 import fitter.testers.generators.EventsGenerator

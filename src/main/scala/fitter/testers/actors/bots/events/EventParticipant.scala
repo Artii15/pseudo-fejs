@@ -4,7 +4,7 @@ import akka.actor.Actor
 import fitter.Dependencies
 import fitter.entities.Event
 import fitter.repositories.exceptions.EventParticipantLimitExceedException
-import fitter.testers.commands.events.{JoinEvent, JoiningStatus}
+import fitter.testers.commands.eventsOld.{JoinEvent, JoiningStatus}
 
 class EventParticipant(dependencies: Dependencies) extends Actor {
   override def receive: Receive = {
