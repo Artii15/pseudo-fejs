@@ -4,7 +4,7 @@ import akka.actor.{ActorSystem, Props}
 import com.typesafe.config.ConfigFactory
 import fitter.testers.actors.supervisors.UserActor
 import fitter.testers.commands.Start
-import fitter.testers.config.{SessionConfig, SystemConfig, TestsSupervisorConfig}
+import fitter.testers.config.{SessionConfig, SystemConfig}
 
 import scala.collection.JavaConverters
 

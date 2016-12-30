@@ -5,7 +5,7 @@ import fitter.Dependencies
 import fitter.testers.actors.bots.events.ParticipantsLeader
 import fitter.testers.commands.events.{JoiningEventTaskEnd, RunParticipants}
 import fitter.testers.commands.nodes.{Deployment, TaskEnd, TaskStart}
-import fitter.testers.config.{EventsJoiningConfig, TestsSupervisorConfig}
+import fitter.testers.config.EventsJoiningConfig
 import fitter.testers.generators.EventsGenerator
 
 import scala.collection.mutable.ArrayBuffer
