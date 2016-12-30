@@ -1,9 +1,9 @@
 package fitter.testers.actors.leaders
 
 import akka.actor.{Actor, PoisonPill, Props}
-import fitter.testers.commands.nodes.{EmptyResults, PartialResults, TaskEnd, TaskStart}
+import fitter.testers.commands.nodes.{EmptyResults, PartialResults, TaskStart}
 
-abstract class Leader[TaskStartMsg <: TaskStart, TaskEndMsg <: TaskEnd, PartialResultsMsg <: PartialResults]
+abstract class Leader[TaskStartMsg <: TaskStart, PartialResultsMsg <: PartialResults]
   extends Actor {
 
   private var numberOfRunningWorkers = 0
@@ -35,6 +35,7 @@ abstract class Leader[TaskStartMsg <: TaskStart, TaskEndMsg <: TaskEnd, PartialR
     if(numberOfRunningWorkers == 0) {
       context.parent ! results
       context.children.foreach(_ ! PoisonPill)
+      context.become(receive)
     }
   }
 }
