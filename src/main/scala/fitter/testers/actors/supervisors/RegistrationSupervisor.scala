@@ -5,7 +5,7 @@ import fitter.Dependencies
 import fitter.entities.Credentials
 import fitter.testers.actors.bots.registration.AccountsCreatorsLeader
 import fitter.testers.commands.nodes.{Deployment, TaskEnd, TaskStart}
-import fitter.testers.commands.registration.{AccountsCreatingCommand, AccountsCreatingTaskEnd}
+import fitter.testers.commands.registrationOld.{AccountsCreatingCommand, AccountsCreatingTaskEnd}
 import fitter.testers.config.{RegistrationTestConfig, TestsSupervisorConfig}
 import fitter.testers.generators.RandomStringsGenerator
 

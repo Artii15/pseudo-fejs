@@ -5,7 +5,7 @@ import fitter.testers.commands.nodes.{PartialResults, TaskStart}
 
 import scala.reflect.{ClassTag, classTag}
 
-abstract class Worker[TaskStartMsg <: TaskStart: ClassTag, PartialResultsMsg <: PartialResults] extends Actor {
+abstract class Worker[TaskStartMsg <: TaskStart: ClassTag, Results] extends Actor {
 
   override def receive: Receive = {
     case taskStart if classTag[TaskStartMsg].runtimeClass.isInstance(taskStart) =>
@@ -17,5 +17,5 @@ abstract class Worker[TaskStartMsg <: TaskStart: ClassTag, PartialResultsMsg <: 
     context.parent ! results
   }
 
-  protected def executeTask(taskStart: TaskStartMsg): PartialResultsMsg
+  protected def executeTask(taskStart: TaskStartMsg): PartialResults[Results]
 }

@@ -1,9 +1,13 @@
 package fitter.testers.commands.nodes
 
-trait PartialResults extends Serializable {
-  def combine(partialResults: PartialResults): PartialResults
+trait PartialResults[T] extends Serializable {
+  def combine(partialResults: PartialResults[T]): PartialResults[T]
 }
 
-object EmptyResults extends PartialResults {
-  override def combine(partialResults: PartialResults): PartialResults = partialResults
+class EmptyResults[T] extends PartialResults[T] {
+  override def combine(partialResults: PartialResults[T]): PartialResults[T] = partialResults
+}
+
+object EmptyResults {
+  def apply[T]: EmptyResults[T] = new EmptyResults()
 }

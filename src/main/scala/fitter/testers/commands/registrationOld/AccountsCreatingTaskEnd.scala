@@ -1,4 +1,4 @@
-package fitter.testers.commands.registration
+package fitter.testers.commands.registrationOld
 
 import fitter.entities.Credentials
 import fitter.testers.commands.nodes.TaskEnd

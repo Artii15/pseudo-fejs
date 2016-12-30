@@ -1,7 +1,9 @@
 package fitter.testers.actors.leaders.remote
 
-import fitter.testers.actors.leaders.Leader
+import akka.actor.Props
+import fitter.testers.actors.leaders.SessionOwner
+import fitter.testers.config.SessionConfig
 
-class RegistrationRemoteLeader extends Leader {
-
+class RegistrationRemoteLeader(sessionConfig: SessionConfig) extends SessionOwner(sessionConfig) {
+  override protected def makeWorker(workerId: Int): Props = Props
 }

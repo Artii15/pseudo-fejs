@@ -5,11 +5,11 @@ import fitter.testers.commands.nodes.{EmptyResults, GroupTaskStart, PartialResul
 
 import scala.reflect.{ClassTag, classTag}
 
-abstract class Leader[TaskStartMsg <: GroupTaskStart: ClassTag, PartialResultsMsg <: PartialResults: ClassTag]
+abstract class Leader[TaskStartMsg <: GroupTaskStart: ClassTag, Results: ClassTag]
   extends Actor {
 
   private var numberOfRunningWorkers = 0
-  private var results: PartialResults = EmptyResults
+  private var results: PartialResults[Results] = EmptyResults[Results]
 
   def receive: Receive = {
     case taskStart if classTag[TaskStartMsg].runtimeClass.isInstance(taskStart) =>
@@ -22,18 +22,18 @@ abstract class Leader[TaskStartMsg <: GroupTaskStart: ClassTag, PartialResultsMs
       context.actorOf(props)
     })
     numberOfRunningWorkers = taskStart.groupSize
-    results = EmptyResults
+    results = EmptyResults[Results]
     context.become(collectingWorkersResults)
   }
 
   protected def makeWorker(workerId: Int): Props
 
   protected def collectingWorkersResults: Receive = {
-    case partialResults if classTag[PartialResultsMsg].runtimeClass.isInstance(partialResults) =>
-      receivePartialResults(partialResults.asInstanceOf[PartialResultsMsg])
+    case partialResults if classTag[PartialResults[Results]].runtimeClass.isInstance(partialResults) =>
+      receivePartialResults(partialResults.asInstanceOf[PartialResults[Results]])
   }
 
-  private def receivePartialResults(partialResults: PartialResultsMsg): Unit = {
+  private def receivePartialResults(partialResults: PartialResults[Results]): Unit = {
     results = results.combine(partialResults)
     numberOfRunningWorkers -= 1
     if(numberOfRunningWorkers == 0) {

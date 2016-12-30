@@ -6,7 +6,7 @@ import akka.actor.Actor
 import fitter.Dependencies
 import fitter.entities.Credentials
 import fitter.repositories.exceptions.{UserAlreadyExistsException, UserNotExistsException}
-import fitter.testers.commands.registration.{AccountCreateCommand, AccountCreatingStatus}
+import fitter.testers.commands.registrationOld.{AccountCreateCommand, AccountCreatingStatus}
 
 class AccountCreator(dependencies: Dependencies) extends Actor {
 

@@ -3,7 +3,7 @@ package fitter.testers.actors.bots.registration
 import akka.actor.{Actor, PoisonPill, Props}
 import fitter.Dependencies
 import fitter.entities.Credentials
-import fitter.testers.commands.registration.{AccountCreateCommand, AccountCreatingStatus, AccountsCreatingCommand, AccountsCreatingTaskEnd}
+import fitter.testers.commands.registrationOld.{AccountCreateCommand, AccountCreatingStatus, AccountsCreatingCommand, AccountsCreatingTaskEnd}
 
 import scala.collection.mutable.ArrayBuffer
 
