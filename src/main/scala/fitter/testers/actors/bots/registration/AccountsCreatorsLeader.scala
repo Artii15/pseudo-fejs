@@ -1,6 +1,6 @@
 package fitter.testers.actors.bots.registration
 
-import akka.actor.{Actor, Props}
+import akka.actor.{Actor, PoisonPill, Props}
 import fitter.Dependencies
 import fitter.entities.Credentials
 import fitter.testers.commands.registration.{AccountCreateCommand, AccountCreatingStatus, AccountsCreatingCommand, AccountsCreatingTaskEnd}
@@ -35,6 +35,7 @@ class AccountsCreatorsLeader(dependencies: Dependencies) extends Actor {
     numberOfStatusesReportsToReceive -= 1
     if (numberOfStatusesReportsToReceive == 0) {
       context.parent ! AccountsCreatingTaskEnd(createdAccounts)
+      context.children.foreach(_ ! PoisonPill)
       context.become(receive)
     }
   }

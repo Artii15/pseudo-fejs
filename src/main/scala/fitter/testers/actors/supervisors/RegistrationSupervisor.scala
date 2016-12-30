@@ -16,9 +16,7 @@ class RegistrationSupervisor(testsSupervisorConfig: TestsSupervisorConfig, regis
 
   private val registeredAccounts: ArrayBuffer[Iterable[Credentials]] = ArrayBuffer.empty
   private val nicks = RandomStringsGenerator.generateRandomStrings(registrationConfig.numberOfUniqueNicks)
-  private val deployment = Deployment((dependencies: Dependencies) => {
-      Props(classOf[AccountsCreatorsLeader], dependencies)
-  })
+  private val deployment = Deployment((dependencies: Dependencies) => Props(classOf[AccountsCreatorsLeader], dependencies))
 
   override protected def generateDeployment(): Deployment = deployment
 
