@@ -9,15 +9,20 @@ import fitter.testers.commands.registration.CreateAccount
 import fitter.testers.results.registration.AccountCreatingResult
 
 class RegistrationWorker(creatingUser: CreatingUser) extends Worker[CreateAccount, AccountCreatingResult] {
+
   override protected def executeTask(task: CreateAccount): AccountCreatingResult = {
-    val credentials = Credentials(task.nick, UUID.randomUUID().toString)
+    val credentials = createAccount(task.nick)
+    AccountCreatingResult(credentials)
+  }
+
+  private def createAccount(nick: String): Option[Credentials] = {
     try {
+      val credentials = Credentials(nick, UUID.randomUUID().toString)
       creatingUser.create(credentials)
-      AccountCreatingResult(Some(credentials))
+      Some(credentials)
     }
     catch {
-      case _: UserAlreadyExistsException | _: UserNotExistsException => AccountCreatingResult(None)
+      case _: UserAlreadyExistsException | _: UserNotExistsException => None
     }
-
   }
 }
