@@ -3,7 +3,7 @@ package fitter.testers.actors.supervisors
 import akka.actor.Props
 import fitter.Dependencies
 import fitter.entities.Credentials
-import fitter.testers.actors.bots.registration.AccountsCreatorsSupervisor
+import fitter.testers.actors.bots.registration.AccountsCreatorsLeader
 import fitter.testers.commands.nodes.{Deployment, TaskEnd, TaskStart}
 import fitter.testers.commands.registration.{AccountsCreatingCommand, AccountsCreatingTaskEnd}
 import fitter.testers.config.{RegistrationTestConfig, TestsSupervisorConfig}
@@ -17,7 +17,7 @@ class RegistrationSupervisor(testsSupervisorConfig: TestsSupervisorConfig, regis
   private val registeredAccounts: ArrayBuffer[Iterable[Credentials]] = ArrayBuffer.empty
   private val nicks = RandomStringsGenerator.generateRandomStrings(registrationConfig.numberOfUniqueNicks)
   private val deployment = Deployment((dependencies: Dependencies) => {
-      Props(classOf[AccountsCreatorsSupervisor], dependencies)
+      Props(classOf[AccountsCreatorsLeader], dependencies)
   })
 
   override protected def generateDeployment(): Deployment = deployment

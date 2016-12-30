@@ -7,7 +7,7 @@ import fitter.testers.commands.registration.{AccountCreateCommand, AccountCreati
 
 import scala.collection.mutable.ArrayBuffer
 
-class AccountsCreatorsSupervisor(dependencies: Dependencies) extends Actor {
+class AccountsCreatorsLeader(dependencies: Dependencies) extends Actor {
 
   private var createdAccounts: ArrayBuffer[Credentials] = ArrayBuffer.empty
   private var numberOfStatusesReportsToReceive = 0
