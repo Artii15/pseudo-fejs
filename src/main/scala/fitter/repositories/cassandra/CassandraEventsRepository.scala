@@ -208,11 +208,11 @@ class CassandraEventsRepository(session: Session) extends EventsRepository {
     removeFromUserLog(user)
   }
 
-  private lazy val removeFromUserLog = session.prepare(
+  private lazy val removeFromUserLogStatement = session.prepare(
     "DELETE FROM users_events WHERE nick = :nick AND year IN :years"
   )
   private def removeFromUserLog(user: String) = {
-    val query = removeFromUserLog.bind()
+    val query = removeFromUserLogStatement.bind()
       .setString("nick", user)
       .setList("years", JavaConverters.seqAsJavaList(findEventsYears().toSeq))
     session.execute(query)
