@@ -20,7 +20,7 @@ class EventsLocalLeader(deploys: Iterator[Deploy], sessionConfig: SessionConfig)
 
   override protected def readTask(task: StartEvent): Unit = {
     event = Some(EventsGenerator.generateNextYearEvent(task.eventAuthor, task.maxNumberOfEventParticipants))
-    dependencies.cassandraEventsRepository.createConsistently(event.get)
+    dependencies.cassandraEventsRepository.create(event.get)
     numberOfWorkersPerNode = task.numberOfWorkersPerNode
   }
 
