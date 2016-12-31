@@ -20,8 +20,7 @@ object Main {
 
     val actorSystem = ActorSystem(systemConfig.actorSystemName)
 
-    val testsSupervisorConfig = new TestsSupervisorConfig(sessionConfig, systemConfig)
-    val userActor = actorSystem.actorOf(Props(new UserActor(testsSupervisorConfig)))
+    val userActor = actorSystem.actorOf(Props(new UserActor(systemConfig, sessionConfig)))
     userActor ! Start
   }
 }
