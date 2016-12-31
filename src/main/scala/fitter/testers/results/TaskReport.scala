@@ -1,3 +1,3 @@
 package fitter.testers.results
 
-trait TaskReport
+trait TaskReport extends Serializable
