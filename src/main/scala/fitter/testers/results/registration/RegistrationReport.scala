@@ -1,11 +1,11 @@
 package fitter.testers.results.registration
 
 import fitter.entities.Credentials
-import fitter.testers.results.AggregatedResults
+import fitter.testers.results.{AggregatedResults, TaskReport}
 
 import scala.collection.mutable.ListBuffer
 
-class RegistrationReport extends AggregatedResults[CreatedAccounts] {
+class RegistrationReport extends AggregatedResults[CreatedAccounts] with TaskReport {
 
   val accounts: ListBuffer[Credentials] = ListBuffer.empty
 

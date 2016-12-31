@@ -1,11 +1,11 @@
 package fitter.testers.results.events
 
 import fitter.entities.Credentials
-import fitter.testers.results.AggregatedResults
+import fitter.testers.results.{AggregatedResults, TaskReport}
 
 import scala.collection.mutable.ListBuffer
 
-class ParticipantsReport extends AggregatedResults[JoinedParticipants] {
+class ParticipantsReport extends AggregatedResults[JoinedParticipants] with TaskReport {
 
   val participants: ListBuffer[Credentials] = ListBuffer.empty
 

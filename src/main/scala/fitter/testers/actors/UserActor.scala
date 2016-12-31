@@ -7,6 +7,10 @@ import fitter.testers.actors.leaders.local.{DeploysMaker, EventsLocalLeader, Reg
 import fitter.testers.commands.events.StartEvent
 import fitter.testers.commands.registration.StartRegistration
 import fitter.testers.config.{SessionConfig, SystemConfig}
+import fitter.testers.reporters.Reporter
+import fitter.testers.results.TaskReport
+import fitter.testers.results.events.ParticipantsReport
+import fitter.testers.results.registration.RegistrationReport
 
 import scala.annotation.tailrec
 import scala.io.StdIn
@@ -57,11 +61,11 @@ class UserActor(systemConfig: SystemConfig, sessionConfig: SessionConfig) extend
   }
 
   private def listeningForTasksFinishingOnly: Receive = {
-    case Finish(report) => finishTask(report)
+    case taskReport: TaskReport => finishTask(taskReport)
   }
 
-  private def finishTask(report: String): Unit = {
-    println(report)
+  private def finishTask(taskReport: TaskReport): Unit = {
+    Reporter.showReport(taskReport)
     sender() ! PoisonPill
     interact()
   }
