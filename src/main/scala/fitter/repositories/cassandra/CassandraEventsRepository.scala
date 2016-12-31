@@ -203,13 +203,28 @@ class CassandraEventsRepository(session: Session) extends EventsRepository {
     session.execute(query)
   }
 
-  private lazy val removeAllUserEventsStatement = session.prepare(
+  override def deleteUserEvents(user: String): Unit = {
+    findAllUserEvents(user).foreach(event => leave(event, user))
+    removeFromUserLog(user)
+  }
+
+  private lazy val removeFromUserLog = session.prepare(
     "DELETE FROM users_events WHERE nick = :nick AND year IN :years"
   )
-  override def deleteUserEvents(user: String): Unit = {
-    val query = removeAllUserEventsStatement.bind()
+  private def removeFromUserLog(user: String) = {
+    val query = removeFromUserLog.bind()
       .setString("nick", user)
       .setList("years", JavaConverters.seqAsJavaList(findEventsYears().toSeq))
     session.execute(query)
+  }
+
+  private lazy val findAllUserEventsStatement = session.prepare(
+    "SELECT * FROM users_events WHERE nick = :nick AND year IN :years"
+  )
+  private def findAllUserEvents(user: String) = {
+    val query = findAllUserEventsStatement.bind()
+      .setString("nick", user)
+      .setList("years", JavaConverters.seqAsJavaList(findEventsYears().toSeq))
+    JavaConverters.asScalaIterator(session.execute(query).iterator()).toStream.map(rowToEvent)
   }
 }
