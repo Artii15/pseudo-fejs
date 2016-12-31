@@ -1,19 +1,20 @@
 package fitter.testers.actors
 
 import akka.actor.{Actor, PoisonPill, Props}
-import fitter.connectors.{ClusterConnector, SessionConnector}
 import fitter.testers.commands._
-import fitter.testers.config._
-import fitter.{CommandLineReader, Dependencies}
+import fitter.CommandLineReader
+import fitter.testers.actors.leaders.local.{DeploysMaker, EventsLocalLeader, RegistrationLocalLeader}
+import fitter.testers.commands.events.StartEvent
+import fitter.testers.commands.registration.StartRegistration
+import fitter.testers.config.{SessionConfig, SystemConfig}
 
 import scala.annotation.tailrec
 import scala.io.StdIn
 
-class UserActor(config: TestsSupervisorConfig) extends Actor {
+class UserActor(systemConfig: SystemConfig, sessionConfig: SessionConfig) extends Actor {
 
-  private val cluster = ClusterConnector.makeConnection(config.sessionConfig.contactPoint)
-  private val session = SessionConnector.makeSession(cluster, config.sessionConfig.keyspace)
-  private val dependencies = new Dependencies(session)
+  private val deploys = DeploysMaker.make(systemConfig.nodesAddresses, systemConfig.actorSystemName, systemConfig.nodesPort)
+  private val numberOfNodes = systemConfig.nodesAddresses.size
 
   override def receive: Receive = {
     case Start => context.become(listeningForTasksFinishingOnly); interact()
@@ -39,20 +40,20 @@ class UserActor(config: TestsSupervisorConfig) extends Actor {
     print("Number of threads on each node: ")
     val numberOfThreadsOnEachNode = CommandLineReader.readPositiveInt()
 
-    val registrationConfig = new RegistrationTestConfig(numberOfUniqueNicks, numberOfThreadsOnEachNode)
-    val supervisorProps = Props(classOf[RegistrationSupervisor], config, registrationConfig)
-    context.actorOf(supervisorProps) ! Start
+    val registrationLeader = Props(classOf[RegistrationLocalLeader], deploys, sessionConfig)
+    context.actorOf(registrationLeader) ! new StartRegistration(numberOfNodes, numberOfUniqueNicks, numberOfThreadsOnEachNode)
   }
 
   private def runEventsJoiningTests(): Unit = {
-    print("Number of participants: ")
+    print("Max number of event participants: ")
     val numberOfParticipants = CommandLineReader.readPositiveInt()
+    print("Event author: ")
+    val author = CommandLineReader.readString()
     print("Number of threads on each node: ")
     val numberOfThreadsOnEachNode = CommandLineReader.readPositiveInt()
 
-    val eventsJoiningConfig = new EventsJoiningConfig(numberOfThreadsOnEachNode, numberOfParticipants)
-    val supervisorProps = Props(classOf[EventsJoiningSupervisor], config, eventsJoiningConfig, dependencies)
-    context.actorOf(supervisorProps) ! Start
+    val eventsLeader = Props(classOf[EventsLocalLeader], deploys, sessionConfig)
+    context.actorOf(eventsLeader) ! new StartEvent(numberOfNodes, numberOfThreadsOnEachNode, author, numberOfParticipants)
   }
 
   private def listeningForTasksFinishingOnly: Receive = {
