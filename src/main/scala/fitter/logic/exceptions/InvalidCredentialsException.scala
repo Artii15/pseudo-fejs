@@ -1,0 +1,3 @@
+package fitter.logic.exceptions
+
+class InvalidCredentialsException extends IllegalArgumentException

@@ -1,0 +1,3 @@
+package fitter.repositories.exceptions
+
+class EventParticipantLimitExceedException extends RuntimeException

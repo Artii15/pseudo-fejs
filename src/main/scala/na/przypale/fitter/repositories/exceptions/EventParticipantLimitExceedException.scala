@@ -1,3 +1,0 @@
-package na.przypale.fitter.repositories.exceptions
-
-class EventParticipantLimitExceedException extends RuntimeException

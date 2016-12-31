@@ -1,0 +1,3 @@
+package fitter.repositories.exceptions
+
+class EventParticipantAlreadyAssigned extends RuntimeException
