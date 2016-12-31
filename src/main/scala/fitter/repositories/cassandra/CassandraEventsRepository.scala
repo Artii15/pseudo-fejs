@@ -43,10 +43,10 @@ class CassandraEventsRepository(session: Session) extends EventsRepository {
 
   override def findAllIncoming(): Stream[Event] = {
     val currentYear = Dates.currentYear()
-    val eventsYearsToSearch = findEventsYears().filter(year => year >= currentYear)
+    val eventsYearsToSearch = findEventsYears().filter(_ >= currentYear)
 
     val query = findIncomingStatement.bind()
-      .setList("years", JavaConverters.seqAsJavaList(eventsYearsToSearch.toSeq))
+      .setList("years", JavaConverters.seqAsJavaList(eventsYearsToSearch))
       .setTimestamp("minimalDate", new Date())
     JavaConverters.asScalaIterator(session.execute(query).iterator()).toStream.map(rowToEvent)
   }
@@ -62,8 +62,8 @@ class CassandraEventsRepository(session: Session) extends EventsRepository {
   )
 
   private lazy val findEventsYearsStatement = new SimpleStatement("SELECT year FROM events")
-  def findEventsYears(): Iterable[Int] = JavaConverters
-    .collectionAsScalaIterable(session.execute(findEventsYearsStatement).all())
+  def findEventsYears(): Stream[Int] = JavaConverters
+    .asScalaIterator(session.execute(findEventsYearsStatement).iterator()).toStream
     .map(row => row.getInt("year"))
 
   override def assignUserToEvent(event: Event, user: String): Unit = {
@@ -146,13 +146,13 @@ class CassandraEventsRepository(session: Session) extends EventsRepository {
     "SELECT * FROM users_events WHERE nick = :nick AND year = :year ORDER BY start_date")
   override def findUserIncomingEvents(user: String): Stream[Event] = {
     val currentYear = Dates.currentYear()
-    val query = findUserIncomingEventsStatement.bind()
-      .setString("nick", user)
-      .setInt("year", currentYear)
 
-    JavaConverters.asScalaIterator(session.execute(query).iterator()).toStream
-      .map(rowToEvent)
-      .filter(event => belongsToEvent(event, user))
+    findEventsYears().filter(_ >= currentYear).sorted.flatMap(year => {
+      val query = findUserIncomingEventsStatement.bind().setString("nick", user).setInt("year", year)
+      JavaConverters.asScalaIterator(session.execute(query).iterator()).toStream
+        .map(rowToEvent)
+        .filter(event => belongsToEvent(event, user))
+    })
   }
 
   override def leave(event: Event, user: String): Unit = {
@@ -214,7 +214,7 @@ class CassandraEventsRepository(session: Session) extends EventsRepository {
   private def removeFromUserLog(user: String) = {
     val query = removeFromUserLogStatement.bind()
       .setString("nick", user)
-      .setList("years", JavaConverters.seqAsJavaList(findEventsYears().toSeq))
+      .setList("years", JavaConverters.seqAsJavaList(findEventsYears()))
     session.execute(query)
   }
 
@@ -224,7 +224,7 @@ class CassandraEventsRepository(session: Session) extends EventsRepository {
   private def findAllUserEvents(user: String) = {
     val query = findAllUserEventsStatement.bind()
       .setString("nick", user)
-      .setList("years", JavaConverters.seqAsJavaList(findEventsYears().toSeq))
+      .setList("years", JavaConverters.seqAsJavaList(findEventsYears()))
     JavaConverters.asScalaIterator(session.execute(query).iterator()).toStream.map(rowToEvent)
   }
 }
