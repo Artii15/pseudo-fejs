@@ -3,8 +3,9 @@ package fitter.testers.actors
 import akka.actor.{Actor, PoisonPill, Props}
 import fitter.testers.commands._
 import fitter.CommandLineReader
-import fitter.testers.actors.leaders.local.{DeploysMaker, EventsLocalLeader, RegistrationLocalLeader}
+import fitter.testers.actors.leaders.local.{DeploysMaker, EventsLocalLeader, PostsLocalLeader, RegistrationLocalLeader}
 import fitter.testers.commands.events.StartEvent
+import fitter.testers.commands.posts.StartPostLikes
 import fitter.testers.commands.registration.StartRegistration
 import fitter.testers.config.{SessionConfig, SystemConfig}
 import fitter.testers.reporters.Reporter
@@ -28,12 +29,14 @@ class UserActor(systemConfig: SystemConfig, sessionConfig: SessionConfig) extend
   private def interact(): Unit = {
     println("1 - Registration tests")
     println("2 - Events joining tests")
-    println("3 - Exit")
+    println("3 - Post liking tests")
+    println("4 - Exit")
 
     StdIn.readLine() match {
       case "1" => runRegistrationTests()
       case "2" => runEventsJoiningTests()
-      case "3" => context.system.terminate()
+      case "3" => runPostLikingTests()
+      case "4" => context.system.terminate()
       case _ => interact()
     }
   }
@@ -58,6 +61,18 @@ class UserActor(systemConfig: SystemConfig, sessionConfig: SessionConfig) extend
 
     val eventsLeader = Props(classOf[EventsLocalLeader], deploys, sessionConfig)
     context.actorOf(eventsLeader) ! new StartEvent(numberOfNodes, numberOfThreadsOnEachNode, author, numberOfParticipants)
+  }
+
+  private def runPostLikingTests(): Unit = {
+    print("Number of unique users: ")
+    val numberOfUniqueUsers = CommandLineReader.readPositiveInt()
+    print("Post author: ")
+    val author = CommandLineReader.readString()
+    print("Number of threads on each node: ")
+    val numberOfThreadsOnEachNode = CommandLineReader.readPositiveInt()
+
+    val postsLeader = Props(classOf[PostsLocalLeader], deploys, sessionConfig)
+    context.actorOf(postsLeader) ! new StartPostLikes(numberOfNodes, numberOfThreadsOnEachNode, author, numberOfUniqueUsers)
   }
 
   private def listeningForTasksFinishingOnly: Receive = {
