@@ -2,7 +2,7 @@ package fitter.testers.reporters
 
 import fitter.testers.results.TaskReport
 import fitter.testers.results.events.ParticipantsReport
-import fitter.testers.results.posts.PostLikesReport
+import fitter.testers.results.posts.{PostCommentsReport, PostLikesReport}
 import fitter.testers.results.registration.RegistrationReport
 
 object Reporter {
@@ -10,6 +10,7 @@ object Reporter {
     case registrationReport: RegistrationReport => showRegistrationReport(registrationReport)
     case participantsReport: ParticipantsReport => showParticipantsReport(participantsReport)
     case postLikesReport: PostLikesReport => showPostLikesReport(postLikesReport)
+    case postCommentsReport: PostCommentsReport => showPostCommentsReport(postCommentsReport)
   }
 
   private def showRegistrationReport(registrationReport: RegistrationReport): Unit = {
@@ -28,5 +29,9 @@ object Reporter {
     println(s"Post likers: ")
     postLikesReport.accounts.distinct.foreach(account => println(s"${account}"))
     println(s"Number of likes: ${postLikesReport.accounts.distinct.size}")
+  }
+
+  private def showPostCommentsReport(postCommentsReport: PostCommentsReport): Unit = {
+    println(s"Number of comments: ${postCommentsReport.accounts.size}")
   }
 }

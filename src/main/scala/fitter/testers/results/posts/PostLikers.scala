@@ -1,6 +1,5 @@
 package fitter.testers.results.posts
 
-import fitter.entities.Credentials
 import fitter.testers.results.AggregatedResults
 
 import scala.collection.mutable.ListBuffer

@@ -4,11 +4,11 @@ import fitter.testers.results.{AggregatedResults, TaskReport}
 
 import scala.collection.mutable.ListBuffer
 
-class PostLikesReport extends AggregatedResults[PostLikers] with TaskReport{
+class PostCommentsReport extends AggregatedResults[PostCommenters] with TaskReport {
 
   val accounts: ListBuffer[String] = ListBuffer.empty
 
-  override def combine(postLikers: PostLikers): Unit = accounts ++= postLikers.likers
+  override def combine(postCommenters: PostCommenters): Unit = accounts ++= postCommenters.commenters
 
   override def clear(): Unit = accounts.clear()
 }
