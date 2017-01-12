@@ -4,12 +4,15 @@ import com.datastax.driver.core.utils.UUIDs
 import fitter.entities.{Comment, Post, UserContent}
 import fitter.repositories.{CommentsCountersRepository, CommentsLikesRepository, PostsCountersRepository, PostsLikesJournalRepository}
 
+import scala.util.Random
+
 class LikingUserContent(commentsCountersRepository: CommentsCountersRepository,
                         postsCountersRepository: PostsCountersRepository,
                         commentsLikesRepository: CommentsLikesRepository,
                         postsLikesJournalRepository: PostsLikesJournalRepository) {
 
   def like(userContent: UserContent, userName: String): Unit = {
+    Thread.sleep(Random.nextInt(1000))
     if(!checkIfAlreadyLiked(userContent, userName))
       userContent match {
         case comment: Comment =>
