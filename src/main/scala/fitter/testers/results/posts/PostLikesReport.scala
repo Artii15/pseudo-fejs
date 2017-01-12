@@ -7,7 +7,7 @@ import scala.collection.mutable.ListBuffer
 
 class PostLikesReport extends AggregatedResults[PostLikers] with TaskReport{
 
-  val accounts: ListBuffer[Credentials] = ListBuffer.empty
+  val accounts: ListBuffer[String] = ListBuffer.empty
 
   override def combine(postLikers: PostLikers): Unit = accounts ++= postLikers.likers
 

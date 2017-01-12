@@ -26,7 +26,7 @@ object Reporter {
 
   private def showPostLikesReport(postLikesReport: PostLikesReport): Unit = {
     println(s"Post likers: ")
-    postLikesReport.accounts.foreach(account => println(s"${account.nick}\t${account.password}"))
-    println(s"Number of likes: ${postLikesReport.accounts.size}")
+    postLikesReport.accounts.distinct.foreach(account => println(s"${account}"))
+    println(s"Number of likes: ${postLikesReport.accounts.distinct.size}")
   }
 }

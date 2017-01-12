@@ -10,7 +10,7 @@ import fitter.testers.config.SessionConfig
 import fitter.testers.results.AggregatedResults
 import fitter.testers.results.posts.{PostLiker, PostLikers}
 
-class PostsRemoteLeader(sessionConfig: SessionConfig) extends SessionOwner[CreateUsers, PostLiker](sessionConfig) {
+class PostLikesRemoteLeader(sessionConfig: SessionConfig) extends SessionOwner[CreateUsers, PostLiker](sessionConfig) {
 
   var nicksForWorkers: Iterator[String] = Iterator.empty
   private var postToLike: Option[Post] = None

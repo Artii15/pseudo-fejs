@@ -3,7 +3,7 @@ package fitter.testers.actors
 import akka.actor.{Actor, PoisonPill, Props}
 import fitter.testers.commands._
 import fitter.CommandLineReader
-import fitter.testers.actors.leaders.local.{DeploysMaker, EventsLocalLeader, PostsLocalLeader, RegistrationLocalLeader}
+import fitter.testers.actors.leaders.local.{DeploysMaker, EventsLocalLeader, PostLikesLocalLeader, RegistrationLocalLeader}
 import fitter.testers.commands.events.StartEvent
 import fitter.testers.commands.posts.StartPostLikes
 import fitter.testers.commands.registration.StartRegistration
@@ -71,7 +71,7 @@ class UserActor(systemConfig: SystemConfig, sessionConfig: SessionConfig) extend
     print("Number of threads on each node: ")
     val numberOfThreadsOnEachNode = CommandLineReader.readPositiveInt()
 
-    val postsLeader = Props(classOf[PostsLocalLeader], deploys, sessionConfig)
+    val postsLeader = Props(classOf[PostLikesLocalLeader], deploys, sessionConfig)
     context.actorOf(postsLeader) ! new StartPostLikes(numberOfNodes, numberOfThreadsOnEachNode, author, numberOfUniqueUsers)
   }
 
