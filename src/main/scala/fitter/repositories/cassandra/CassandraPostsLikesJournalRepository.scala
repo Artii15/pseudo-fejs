@@ -12,14 +12,35 @@ import scala.collection.JavaConverters
 
 class CassandraPostsLikesJournalRepository(session: Session) extends PostsLikesJournalRepository{
 
+  override def create(post: Post, userName: String, timeId: UUID): Unit = {
+    createPostLike(post, userName, timeId)
+    createUserLike(post, userName, timeId)
+  }
+
   private lazy val insertPostLikeStatement = session.prepare(
     "INSERT INTO posts_likes_journal(post_author, post_time_id, author, time_id) " +
       "VALUES(:postAuthor, :postTimeId, :author, :timeId)"
   )
-  override def create(post: Post, userName: String, timeId: UUID): Unit = {
+  def createPostLike(post: Post, userName: String, timeId: UUID): Unit = {
     val Post(postAuthor, postTimeId, _) = post
 
     val insertPostLikeQuery = insertPostLikeStatement.bind()
+      .setString("postAuthor", postAuthor)
+      .setUUID("postTimeId", postTimeId)
+      .setString("author", userName)
+      .setUUID("timeId", timeId)
+
+    session.execute(insertPostLikeQuery)
+  }
+
+  private lazy val insertUserLikeStatement = session.prepare(
+    "INSERT INTO users_likes_journal(author, time_id, post_author, post_time_id) " +
+      "VALUES(:author, :timeId, :postAuthor, :postTimeId)"
+  )
+  private def createUserLike(post: Post, userName: String, timeId: UUID): Unit = {
+    val Post(postAuthor, postTimeId, _) = post
+
+    val insertPostLikeQuery = insertUserLikeStatement.bind()
       .setString("postAuthor", postAuthor)
       .setUUID("postTimeId", postTimeId)
       .setString("author", userName)
@@ -50,12 +71,11 @@ class CassandraPostsLikesJournalRepository(session: Session) extends PostsLikesJ
   }
 
   private lazy val findUserLikedPostsStatement = session.prepare(
-    "SELECT post_author, post_time_id, author, time_id " +
-      "FROM posts_likes_journal " +
-      "WHERE author = :author AND time_id < :timeId " +
-      s"LIMIT ${Config.DEFAULT_PAGE_SIZE} " +
-      "ALLOW FILTERING"
-  )
+  "SELECT author, time_id, post_author, post_time_id " +
+    "FROM users_likes_journal " +
+    "WHERE author = :author AND time_id < :timeId " +
+    s"LIMIT ${Config.DEFAULT_PAGE_SIZE}"
+)
 
   override def getUserLikedPosts(username: String, lastPostToSkip: Option[LikedPost] = None): Iterable[LikedPost] = {
     val timeId = getTimeId(lastPostToSkip)

@@ -52,6 +52,15 @@ CREATE TABLE posts_likes_journal (
     PRIMARY KEY((post_author, post_time_id), author)
 );
 
+DROP TABLE IF EXISTS users_likes_journal;
+CREATE TABLE users_likes_journal (
+    author varchar,
+    time_id timeuuid,
+    post_author varchar,
+    post_time_id timeuuid,
+    PRIMARY KEY(author, time_id)
+);
+
 DROP TABLE IF EXISTS comments;
 CREATE TABLE comments (
      post_author varchar,
