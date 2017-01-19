@@ -1,7 +1,6 @@
 package fitter.repositories.cassandra
 
 import com.datastax.driver.core.Session
-import fitter.Config
 import fitter.entities.{Comment, Post}
 import fitter.repositories.CommentsRepository
 
@@ -25,9 +24,9 @@ class CassandraCommentsRepository(session: Session) extends CommentsRepository {
       .setUUID("id", id)
 
     val test = parentId match {
-        case null => insertCommentQuery
-        case _ => insertCommentQuery.setString("parentId", parentId)
-      }
+      case null => insertCommentQuery
+      case _ => insertCommentQuery.setString("parentId", parentId)
+    }
 
     session.execute(test)
   }
@@ -35,9 +34,7 @@ class CassandraCommentsRepository(session: Session) extends CommentsRepository {
   private lazy val findByPostStatement = session.prepare(
     "SELECT post_author, post_time_id, comment_time_id, comment_author, content, id, parent_id " +
       "FROM comments " +
-      "WHERE post_author = :postAuthor AND post_time_id = :postTimeId AND comment_time_id >= :timeId AND parent_id = ''" +
-      s"LIMIT ${Config.DEFAULT_PAGE_SIZE} " +
-      "ALLOW FILTERING"
+      "WHERE post_author = :postAuthor AND post_time_id = :postTimeId AND comment_time_id >= :timeId "
   )
 
   override def findByPost(post: Post, lastCommentToSkip: Option[Comment]): Iterable[Comment] = {
@@ -52,15 +49,14 @@ class CassandraCommentsRepository(session: Session) extends CommentsRepository {
     JavaConverters.collectionAsScalaIterable(session.execute(query).all()).toVector
       .map(row => Comment(row.getString("post_author"), row.getUUID("post_time_id"), row.getUUID("comment_time_id"),
         row.getString("comment_author"), row.getString("content"), row.getUUID("id"), row.getString("parent_id")))
+      .filter(comment => comment.parentId == "")
+      .take(10)
   }
-
 
   private lazy val findByCommentStatement = session.prepare(
     "SELECT post_author, post_time_id, comment_time_id, comment_author, content, id, parent_id " +
       "FROM comments " +
-      "WHERE post_author = :postAuthor AND post_time_id = :postTimeId AND comment_time_id >= :timeId AND parent_id = :id " +
-      s"LIMIT ${Config.DEFAULT_PAGE_SIZE} " +
-      "ALLOW FILTERING"
+      "WHERE post_author = :postAuthor AND post_time_id = :postTimeId AND comment_time_id >= :timeId"
   )
 
   override def findByParentComment(comment: Comment, lastCommentToSkip: Option[Comment]): Iterable[Comment] = {
@@ -70,12 +66,13 @@ class CassandraCommentsRepository(session: Session) extends CommentsRepository {
       .setString("postAuthor", comment.postAuthor)
       .setUUID("postTimeId", comment.postTimeId)
       .setUUID("timeId", timeId)
-      .setString("id", comment.id.toString)
     query.setFetchSize(Integer.MAX_VALUE)
 
     JavaConverters.collectionAsScalaIterable(session.execute(query).all()).toVector
       .map(row => Comment(row.getString("post_author"), row.getUUID("post_time_id"), row.getUUID("comment_time_id"),
         row.getString("comment_author"), row.getString("content"), row.getUUID("id"), row.getString("parent_id")))
+      .filter(c => c.parentId == comment.id.toString)
+      .take(10)
   }
 
   def getTimeId(comment: Option[Comment]) = {
