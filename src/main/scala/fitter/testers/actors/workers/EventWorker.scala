@@ -1,5 +1,6 @@
 package fitter.testers.actors.workers
 
+import com.datastax.driver.core.exceptions.NoHostAvailableException
 import fitter.entities.Credentials
 import fitter.logic.CreatingUser
 import fitter.repositories.cassandra.CassandraEventsRepository
@@ -19,8 +20,10 @@ class EventWorker(eventsRepository: CassandraEventsRepository, creatingUser: Cre
       JoinedParticipant(Some(credentials))
     }
     catch {
-      case _: EventParticipantLimitExceedException | _: UserNotExistsException | _: UserAlreadyExistsException =>
-        JoinedParticipant(None)
+      case _: EventParticipantLimitExceedException
+           | _: UserNotExistsException
+           | _: UserAlreadyExistsException
+           | _: NoHostAvailableException => JoinedParticipant(None)
     }
   }
 }

@@ -12,8 +12,7 @@ CREATE TABLE users (
     password varchar,
     time_id timeuuid,
     PRIMARY KEY (nick, time_id)
-)
-WITH CLUSTERING ORDER BY (time_id DESC);
+);
 
 DROP INDEX IF EXISTS user_nick_prefix;
 CREATE CUSTOM INDEX user_nick_prefix ON users(searchable_nick)

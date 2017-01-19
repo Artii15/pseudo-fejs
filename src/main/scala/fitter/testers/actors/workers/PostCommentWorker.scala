@@ -1,5 +1,6 @@
 package fitter.testers.actors.workers
 
+import com.datastax.driver.core.exceptions.NoHostAvailableException
 import com.datastax.driver.core.utils.UUIDs
 import fitter.entities.Comment
 import fitter.repositories.{CommentsRepository, PostsCountersRepository}
@@ -11,9 +12,14 @@ class PostCommentWorker(commentsRepository: CommentsRepository, postsCountersRep
   extends Worker[CommentPost, PostCommenter]{
 
   override protected def executeTask(task: CommentPost): PostCommenter = {
-    val comment = Comment(task.post.author, task.post.timeId, UUIDs.timeBased(), task.nick, RandomStringsGenerator.generateRandomString(), UUIDs.random(), "")
-    commentsRepository.create(comment)
-    postsCountersRepository.increaseCommentsCounter(task.post)
-    PostCommenter(Some(task.nick))
+    try {
+      val comment = Comment(task.post.author, task.post.timeId, UUIDs.timeBased(), task.nick, RandomStringsGenerator.generateRandomString(), UUIDs.random(), "")
+      commentsRepository.create(comment)
+      postsCountersRepository.increaseCommentsCounter(task.post)
+      PostCommenter(Some(task.nick))
+    }
+    catch {
+      case _: NoHostAvailableException => PostCommenter(None)
+    }
   }
 }

@@ -2,6 +2,7 @@ package fitter.testers.actors.workers
 
 import java.util.UUID
 
+import com.datastax.driver.core.exceptions.NoHostAvailableException
 import fitter.entities.Credentials
 import fitter.logic.CreatingUser
 import fitter.repositories.exceptions.{UserAlreadyExistsException, UserNotExistsException}
@@ -22,7 +23,7 @@ class RegistrationWorker(creatingUser: CreatingUser) extends Worker[CreateAccoun
       Some(credentials)
     }
     catch {
-      case _: UserAlreadyExistsException | _: UserNotExistsException => None
+      case _: UserAlreadyExistsException | _: UserNotExistsException | _: NoHostAvailableException => None
     }
   }
 }
