@@ -1,4 +1,4 @@
-package fitter.interactions
+package fitter.logic
 
 import fitter.entities.User
 import fitter.repositories.{EventsRepository, UsersRepository}

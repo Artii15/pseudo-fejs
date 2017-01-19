@@ -2,6 +2,7 @@ package fitter.controls
 
 import fitter.entities.User
 import fitter.interactions._
+import fitter.logic.DeletingUser
 import fitter.menu.{Action, ActionIntId, Menu}
 
 class LoggedUserControls(val user: User,

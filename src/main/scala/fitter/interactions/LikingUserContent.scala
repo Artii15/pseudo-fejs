@@ -12,7 +12,6 @@ class LikingUserContent(commentsCountersRepository: CommentsCountersRepository,
                         postsLikesJournalRepository: PostsLikesJournalRepository) {
 
   def like(userContent: UserContent, userName: String): Unit = {
-    Thread.sleep(Random.nextInt(1000))
     if(!checkIfAlreadyLiked(userContent, userName))
       userContent match {
         case comment: Comment =>

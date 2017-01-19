@@ -4,7 +4,7 @@ import com.datastax.driver.core.Session
 import fitter.controls.{EventsControls, LoggedUserControls}
 import fitter.entities.User
 import fitter.interactions._
-import fitter.logic.{Authenticating, CreatingEvent, CreatingPost, CreatingUser}
+import fitter.logic._
 import fitter.repositories.EventsRepository
 import fitter.repositories.cassandra._
 

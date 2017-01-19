@@ -16,7 +16,7 @@ object Main {
       config.getString("bots.systemName"),
       JavaConverters.collectionAsScalaIterable(config.getStringList("bots.hosts")),
       config.getInt("akka.remote.netty.tcp.port"))
-    val sessionConfig = new SessionConfig("test", "192.168.1.169")
+    val sessionConfig = new SessionConfig("test")
 
     val actorSystem = ActorSystem(systemConfig.actorSystemName)
 

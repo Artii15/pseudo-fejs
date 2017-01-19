@@ -14,6 +14,6 @@ object Bootstrap {
   }
 
   def connectToCluster(appEntryPoint: (Cluster => Unit)): Unit = {
-    ClusterConnector.connect("192.168.1.169")(cluster => appEntryPoint(cluster)) //127.0.0.1
+    ClusterConnector.connect()(cluster => appEntryPoint(cluster)) //127.0.0.1
   }
 }
