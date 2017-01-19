@@ -1,5 +1,7 @@
 package fitter.repositories.cassandra
 
+import java.util.UUID
+
 import com.datastax.driver.core.Session
 import fitter.entities.{Comment, Post}
 import fitter.repositories.CommentsRepository
@@ -75,7 +77,7 @@ class CassandraCommentsRepository(session: Session) extends CommentsRepository {
       .take(10)
   }
 
-  def getTimeId(comment: Option[Comment]) = {
+  def getTimeId(comment: Option[Comment]): UUID = {
     comment match {
       case Some(com) => com.commentTimeId
       case None => null

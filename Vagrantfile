@@ -8,10 +8,6 @@ NODE_COUNT = 2
 
 Vagrant.configure("2") do |config|
 
-    config.vm.provider "virtualbox" do |vb|
-        vb.memory = "768"
-    end
-
     (1..NODE_COUNT).each do |nodeId|
         config.vm.define "cassandra#{nodeId}" do |subconfig|
             subconfig.vm.box = BOX_IMAGE

@@ -12,10 +12,9 @@ abstract class Controls {
     menu.display()
     val selectedAction = menu.read
     selectedAction match {
-      case Some(action) => {
+      case Some(action) =>
         handle(action)
         if (closesControls(action)) action else interact()
-      }
       case None => interact()
     }
   }

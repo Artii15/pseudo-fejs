@@ -4,8 +4,6 @@ import com.datastax.driver.core.utils.UUIDs
 import fitter.entities.{Comment, Post, UserContent}
 import fitter.repositories.{CommentsCountersRepository, CommentsLikesRepository, PostsCountersRepository, PostsLikesJournalRepository}
 
-import scala.util.Random
-
 class LikingUserContent(commentsCountersRepository: CommentsCountersRepository,
                         postsCountersRepository: PostsCountersRepository,
                         commentsLikesRepository: CommentsLikesRepository,

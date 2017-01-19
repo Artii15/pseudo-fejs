@@ -91,7 +91,7 @@ class CassandraPostsLikesJournalRepository(session: Session) extends PostsLikesJ
       .reverse
   }
 
-  def getTimeId(likedPost: Option[LikedPost]) = {
+  def getTimeId(likedPost: Option[LikedPost]): UUID = {
     likedPost match {
       case Some(post) => post.likeTimeId
       case None =>  UUIDs.endOf(System.currentTimeMillis())

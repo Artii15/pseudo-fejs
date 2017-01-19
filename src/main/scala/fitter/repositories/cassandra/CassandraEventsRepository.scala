@@ -3,7 +3,7 @@ package fitter.repositories.cassandra
 import java.util.{Date, UUID}
 
 import com.datastax.driver.core.utils.UUIDs
-import com.datastax.driver.core.{ConsistencyLevel, Row, Session, SimpleStatement}
+import com.datastax.driver.core.{Row, Session, SimpleStatement}
 import fitter.Dates
 import fitter.entities.Event
 import fitter.repositories.exceptions.{EventParticipantAlreadyAssigned, EventParticipantLimitExceedException}
@@ -18,11 +18,6 @@ class CassandraEventsRepository(session: Session) extends EventsRepository {
       "VALUES(:year, :startDate, :endDate, :id, :description, :author, :name, :maxUsersCount)")
   override def create(event: Event): Unit = {
     val createEventQuery = makeCreateEventQuery(event)
-    session.execute(createEventQuery)
-  }
-
-  def createConsistently(event: Event): Unit = {
-    val createEventQuery = makeCreateEventQuery(event).setConsistencyLevel(ConsistencyLevel.ALL)
     session.execute(createEventQuery)
   }
 
